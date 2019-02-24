@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="FUSProjectUsageTrigger">
+    <session id="-2088208498">
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="Dockerfile" value="896" />
+          <entry key="Jenkinsfile" value="39" />
+          <entry key="go" value="34" />
+          <entry key="sh" value="494" />
+          <entry key="test" value="27" />
+          <entry key="yaml" value="120" />
+          <entry key="yml" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="Bash" value="494" />
+          <entry key="Dockerfile" value="896" />
+          <entry key="Go" value="34" />
+          <entry key="PLAIN_TEXT" value="66" />
+          <entry key="YAML" value="122" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="Dockerfile" value="11" />
+          <entry key="Jenkinsfile" value="2" />
+          <entry key="R" value="2" />
+          <entry key="bootstrap" value="2" />
+          <entry key="go" value="3" />
+          <entry key="md" value="1" />
+          <entry key="sh" value="8" />
+          <entry key="test" value="3" />
+          <entry key="xml" value="1" />
+          <entry key="yaml" value="5" />
+          <entry key="yamllintrc" value="1" />
+          <entry key="yml" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="Bash" value="8" />
+          <entry key="Dockerfile" value="11" />
+          <entry key="Go" value="3" />
+          <entry key="PLAIN_TEXT" value="11" />
+          <entry key="XML" value="1" />
+          <entry key="YAML" value="8" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+</project>

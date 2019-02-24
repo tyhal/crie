@@ -1,0 +1,41 @@
+#!/bin/sh
+set -e
+
+cd "$(dirname "${0}")/.."
+
+export DOCKER_BUILDKIT=1
+
+docker build -t tyhal/crie:latest .
+
+# shellcheck source=./script/util/version.sh
+. ./script/util/version.sh
+
+# Explicitly set Vars sourced from the version script
+MAJOR="$STD_MAJOR"
+MINOR="$STD_MINOR"
+PATCH="$TEST_PATCH"
+CRIE_VERSION="$MAJOR.$MINOR.$PATCH"
+
+docker tag tyhal/crie:latest "tyhal/crie:$CRIE_VERSION"
+
+# TESTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set -x
+script/crie --help
+script/crie chk
+script/crie ls
+script/crie fmt
+script/crie chk --git-diff
+script/crie chk --lang golang
+script/crie non
+set +x
+
+verify/script/test
+
+echo "! PASS !"
+
+# PUSH ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if git diff --exit-code; then
+	docker push tyhal/crie
+else
+	echo "Uncommitted changes not pushing"
+fi

@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="stats" type="BashConfigurationType" factoryName="Bash">
+    <module name="standards" />
+    <option name="INTERPRETER_OPTIONS" value="bash" />
+    <option name="INTERPRETER_PATH" value="/usr/bin/env" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/script" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/script/stats" />
+    <option name="PARAMETERS" value="" />
+    <method v="2" />
+  </configuration>
+</component>
