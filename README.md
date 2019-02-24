@@ -7,6 +7,10 @@ Crie is an effective way to format and lint code for a variety of languages
 -   Extendable for more languages
 -   Portable for installation as the run command will download it
 
+```bash
+    sudo ./script/crie install
+```
+
 ### Crie Status
 
 Required

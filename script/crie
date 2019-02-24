@@ -10,16 +10,18 @@ if [ -n "$HOST_ARCH" ]; then
 fi
 
 IMAGE="tyhal/crie$HOST_ARCH:$CRIE_VERSION"
+D_RUN="run --user $(id -u):$(id -g) --rm -t"
+COMMAND="docker $D_RUN $IMAGE $*"
 
 if [ "$1" = "update" ]; then
 	docker pull "$IMAGE"
 	exit 0
 fi
-
-D_RUN="run --user $(id -u):$(id -g) --rm -t"
-
-COMMAND="docker $D_RUN $IMAGE $*"
-
+if [ "$1" = "install" ]; then
+    cp "$0" /usr/local/bin
+    echo " ✔️   Installed"
+    exit 0
+fi
 if [ "$1" = "all" ] || [ "$1" = "chk" ] || [ "$1" = "fmt" ] || [ "$1" = "non" ]; then
 	COMMAND="docker $D_RUN -v $PWD:/check $IMAGE $*"
 fi
