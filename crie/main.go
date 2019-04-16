@@ -15,19 +15,23 @@ func Execute() error {
 var rootCmd = &cobra.Command{
 	Use:   "crie",
 	Short: "crie is a formatter for many languages.",
-	Long: `crie brings together a vast collection of formatters and linters
-to create a handy tool that can prettify any codebase.
+	Long: `
+	
+	crie brings together a vast collection of formatters and linters
+	to create a handy tool that can prettify any codebase.
 
-	crie: the act of crying and dying at the same time
+	|> crie: the act of crying and dying at the same time
 
-	"this unformated code makes me want to crie"
+	|> "this unformated code makes me want to crie"
 
-	Its more important about picking a standard than it is to pick any certain one.
+	|> Its more important about picking a standard than it is to pick any certain one.
 
-	Does a good farmer neglect a crop he has planted?
-	Does a good teacher overlook even the most humble student?
-	Does a good father allow a single child to starve?
-	Does a good programmer refuse to maintain his code? `,
+	>>-
+		Does a good farmer neglect a crop he has planted?
+		Does a good teacher overlook even the most humble student?
+		Does a good father allow a single child to starve?
+		Does a good programmer refuse to maintain his code? 
+	>>-`,
 }
 
 func init() {
