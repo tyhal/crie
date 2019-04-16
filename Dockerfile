@@ -18,11 +18,11 @@ RUN $STACK_DIR/stack update
 RUN $STACK_DIR/stack --system-ghc install
 RUN $STACK_DIR/stack --system-ghc install ShellCheck
 
-FROM alpine:3.9 as apkdeps
-RUN apk add --no-cache clang
-
 FROM golang:1.11-alpine3.8 as godeps
 RUN apk --no-cache add git wget
+RUN apk --no-cache add clang clang-dev musl-dev git gcc
+ENV CXX=clang++
+ENV CC=clang
 ARG GOARCH=amd64
 ENV GOARCH=$GOARCH
 RUN go get -u github.com/golang/lint/golint
@@ -93,7 +93,7 @@ RUN apk add --no-cache nodejs-npm \
 
 # [ CPP ]
 RUN apk add --no-cache cppcheck
-COPY --from=apkdeps /usr/bin/clang-format /bin/clang-format
+COPY --from=godeps /usr/bin/clang-format /bin/clang-format
 
 # [ Doxygen ]
 RUN apk add --no-cache doxygen

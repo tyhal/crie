@@ -23,7 +23,7 @@ func all() {
 
 var allCmd = &cobra.Command{
 	Use:   "all",
-	Short: "fmt -> chk -> chk",
+	Short: "fmt -> chk",
 	Long:  `Runs format then lint and finally check`,
 	Run: func(cmd *cobra.Command, args []string) {
 		all()

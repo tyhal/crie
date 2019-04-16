@@ -40,7 +40,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&api.SingleLang, "lang", "", "run with only one language (see list for available options)")
 
 	rootCmd.AddCommand(chkCmd)
-	rootCmd.AddCommand(chkCmd)
 	rootCmd.AddCommand(fmtCmd)
 	rootCmd.AddCommand(allCmd)
 	rootCmd.AddCommand(versionCmd)
