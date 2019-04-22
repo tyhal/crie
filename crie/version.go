@@ -8,8 +8,8 @@ import (
 )
 
 var majorNum = "0"
-var patchNum = "0"
-var minorOffset = 2
+var minorOffset = 0
+var patchNum = "4"
 
 var major bool
 var minor bool

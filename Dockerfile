@@ -3,7 +3,7 @@
 
 # ~~~ Languages ~~~
 
-FROM alpine:3.9 as haskelldeps
+FROM alpine:3.9 as haskell_layer
 RUN apk add --no-cache git ghc=8.4.3-r0 xz wget build-base make ca-certificates \
         && update-ca-certificates
 ENV HADOVER=tags/v1.15.0
@@ -18,26 +18,33 @@ RUN $STACK_DIR/stack update
 RUN $STACK_DIR/stack --system-ghc install
 RUN $STACK_DIR/stack --system-ghc install ShellCheck
 
-FROM golang:1.11-alpine3.8 as godeps
+FROM golang:1.11-alpine3.9 as go_layer
 RUN apk --no-cache add git wget
-RUN apk --no-cache add clang clang-dev musl-dev git gcc
-ENV CXX=clang++
-ENV CC=clang
-ARG GOARCH=amd64
-ENV GOARCH=$GOARCH
+ENV CGO_ENABLED=0
+
+FROM go_layer as golint_layer
 RUN go get -u github.com/golang/lint/golint
+
+FROM go_layer as vale_layer
 RUN go get -u github.com/errata-ai/vale
+
+FROM go_layer as shfmt_layer
 RUN go get -u mvdan.cc/sh/cmd/shfmt
 #RUN go get -u github.com/jessfraz/dockfmt
+
+FROM go_layer as crie_layer
 ENV CRIE github.com/tyhal/crie
 COPY crie /go/src/$CRIE/crie
 COPY api /go/src/$CRIE/api
 RUN go get $CRIE/crie
 RUN go build $CRIE/crie
 
-FROM alpine:3.9 as zipdeps
+FROM alpine:3.9 as clang_layer
+RUN apk --no-cache add clang
+
+FROM alpine:3.9 as terraform_layer
 RUN apk --no-cache add git wget zip
-ENV TERRA_VER 0.11.8
+ENV TERRA_VER 0.11.13
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 RUN unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 RUN pwd
@@ -57,21 +64,21 @@ RUN adduser -D standards
 
 # [ Python ]
 RUN apk add --no-cache python3 python3-dev build-base \
-    && pip3 install pylint==2.2.2 autopep8==1.4.3 \
+    && pip3 install pylint==2.3.1 autopep8==1.4.4 \
     && apk del --no-cache python3-dev build-base
 
 # [ Docker ]
 RUN apk --no-cache add gmp
-COPY --from=haskelldeps /root/.local/bin/hadolint /bin/hadolint
-#COPY --from=godeps /go/bin/dockfmt /bin/dockfmt
+COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
+#COPY --from=go_layer /go/bin/dockfmt /bin/dockfmt
 
 # [ Bash ]
-COPY --from=godeps /go/bin/shfmt /bin/shfmt
-COPY --from=haskelldeps /root/.local/bin/shellcheck /bin/shellcheck
+COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
+COPY --from=haskell_layer /root/.local/bin/shellcheck /bin/shellcheck
 
 # [ YML ]
 RUN apk add --no-cache python3 python3-dev build-base \
-    && pip3 install yamllint==1.13.0 \
+    && pip3 install yamllint==1.15.0 \
     && apk del --no-cache python3-dev build-base
 
 # [ Javascript ]
@@ -79,13 +86,13 @@ RUN apk add --no-cache nodejs-npm \
     && npm install -g standard
 
 # [ Golang ]
-COPY --from=godeps /usr/local/go/bin/gofmt /bin/gofmt
-COPY --from=godeps /go/bin/golint /bin/golint
+COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
+COPY --from=golint_layer /go/bin/golint /bin/golint
 
 # [ Markdown + AsciiDoctor ]
 RUN apk add --no-cache nodejs-npm asciidoctor \
     && npm install -g remark-cli remark-preset-lint-recommended
-COPY --from=godeps /go/bin/vale /bin/vale
+COPY --from=vale_layer /go/bin/vale /bin/vale
 
 # [ JSON ]
 RUN apk add --no-cache nodejs-npm \
@@ -93,7 +100,7 @@ RUN apk add --no-cache nodejs-npm \
 
 # [ CPP ]
 RUN apk add --no-cache cppcheck
-COPY --from=godeps /usr/bin/clang-format /bin/clang-format
+COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 
 # [ Doxygen ]
 RUN apk add --no-cache doxygen
@@ -102,16 +109,14 @@ RUN apk add --no-cache doxygen
 RUN pip3 install cmakelint==1.3.4.1
 
 
-
-
 # [ Docker Compose ]
 RUN pip3 install docker-compose==1.23.2
 
 # [ Terraform ]
-COPY --from=zipdeps /terraform /bin/terraform
+COPY --from=terraform_layer /terraform /bin/terraform
 
 # [ Run Scripts ]
-COPY --from=godeps /go/bin/crie /bin/crie
+COPY --from=crie_layer /go/bin/crie /bin/crie
 
 # [ Conf ]
 COPY conf /conf/
@@ -119,9 +124,8 @@ RUN chown -R standards:standards /conf
 ENV PATH /node_modules/.bin:$PATH
 WORKDIR /check
 
-# BUG https://priapus.atlassian.net/browse/BUG-337
-RUN mkdir /.standard-v12-cache
-RUN chmod -R o+rw /.standard-v12-cache
+#RUN mkdir /.standard-v12-cache
+#RUN chmod -R o+rw /.standard-v12-cache
 
 ENTRYPOINT ["crie"]
 

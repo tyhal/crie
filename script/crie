@@ -18,9 +18,9 @@ if [ "$1" = "update" ]; then
 	exit 0
 fi
 if [ "$1" = "install" ]; then
-    cp "$0" /usr/local/bin
-    echo " ✔️   Installed"
-    exit 0
+	cp "$0" /usr/local/bin
+	echo " ✔️   Installed"
+	exit 0
 fi
 if [ "$1" = "all" ] || [ "$1" = "chk" ] || [ "$1" = "fmt" ] || [ "$1" = "non" ]; then
 	COMMAND="docker $D_RUN -v $PWD:/check $IMAGE $*"

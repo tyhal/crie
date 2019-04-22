@@ -14,12 +14,12 @@ var lPython = language{
 var lBash = language{name: `bash`,
 	match: regexp.MustCompile(`\.bash$`),
 	fmt:   execCmd{`shfmt`, par{`-w`, `-ln`, `bash`}, par{}},
-	chk:   execCmd{`shellcheck`, par{`-x`, `--shell=bash`}, par{}}}
+	chk:   execCmd{`shellcheck`, par{`-x`, `--shell=bash`, `-Calways`}, par{}}}
 
 var lSh = language{name: `sh`,
 	match: regexp.MustCompile(`\.sh$|/script/[^.]*$`),
 	fmt:   execCmd{`shfmt`, par{`-w`, `-ln`, `posix`}, par{}},
-	chk:   execCmd{`shellcheck`, par{`-x`, `--shell=sh`}, par{}}}
+	chk:   execCmd{`shellcheck`, par{`-x`, `--shell=sh`, `-Calways`}, par{}}}
 
 // https://github.com/lukasmartinelli/hadolint
 var lDocker = language{name: `docker`,
