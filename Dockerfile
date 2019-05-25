@@ -18,7 +18,7 @@ RUN $STACK_DIR/stack update
 RUN $STACK_DIR/stack --system-ghc install
 RUN $STACK_DIR/stack --system-ghc install ShellCheck
 
-FROM golang:1.11-alpine3.9 as go_layer
+FROM golang:1.12.5-alpine3.9 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
