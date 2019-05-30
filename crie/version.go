@@ -9,7 +9,7 @@ import (
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "4"
+var patchNum = "6"
 
 var major bool
 var minor bool

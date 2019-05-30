@@ -22,7 +22,6 @@ var standards = []language{
 	lTerraform,
 	lYML,
 	lDockerCompose,
-	lDoxygen,
 }
 
 // Version to print the current version of standards within crie

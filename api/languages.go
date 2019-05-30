@@ -23,7 +23,7 @@ var lSh = language{name: `sh`,
 
 // https://github.com/lukasmartinelli/hadolint
 var lDocker = language{name: `docker`,
-	match: regexp.MustCompile(`Dockerfile`),
+	match: regexp.MustCompile(`Dockerfile$`),
 	chk:   execCmd{`hadolint`, par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`}, par{}}}
 
 //	fmt:   execCmd{`dockfmt`, par{`fmt`, `-w`}, par{}}}
@@ -81,10 +81,6 @@ var lC = language{name: `c`,
 	match: regexp.MustCompile(`\.c$`),
 	fmt:   execCmd{`clang-format`, par{`-style=file`, `-i`}, par{}},
 	chk:   execCmd{`cppcheck`, par{`--enable=all`, `--language=c`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`}, par{}}}
-
-var lDoxygen = language{name: `doxygen`,
-	match: regexp.MustCompile(`Doxyfile.in$|Doxyfile$`),
-	chk:   execCmd{`doxygen`, par{}, par{}}}
 
 var lCmake = language{name: `cmake`,
 	match: regexp.MustCompile(`CMakeLists.txt$|\.cmake$`),

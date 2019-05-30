@@ -3,7 +3,7 @@
 
 # ~~~ Languages ~~~
 
-FROM alpine:3.9 as haskell_layer
+FROM alpine:3.9.4 as haskell_layer
 RUN apk add --no-cache git ghc=8.4.3-r0 xz wget build-base make ca-certificates \
         && update-ca-certificates
 ENV HADOVER=tags/v1.15.0
@@ -23,7 +23,7 @@ RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
 FROM go_layer as golint_layer
-RUN go get -u github.com/golang/lint/golint
+RUN go get -u golang.org/x/lint/golint
 
 FROM go_layer as vale_layer
 RUN go get -u github.com/errata-ai/vale
@@ -39,10 +39,10 @@ COPY api /go/src/$CRIE/api
 RUN go get $CRIE/crie
 RUN go build $CRIE/crie
 
-FROM alpine:3.9 as clang_layer
+FROM alpine:3.9.4 as clang_layer
 RUN apk --no-cache add clang
 
-FROM alpine:3.9 as terraform_layer
+FROM alpine:3.9.4 as terraform_layer
 RUN apk --no-cache add git wget zip
 ENV TERRA_VER 0.11.13
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
@@ -54,7 +54,7 @@ RUN pwd
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 
 # Alpine :ok_hand:
-FROM alpine:3.9
+FROM alpine:3.9.4
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
@@ -101,9 +101,6 @@ RUN apk add --no-cache nodejs-npm \
 # [ CPP ]
 RUN apk add --no-cache cppcheck
 COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
-
-# [ Doxygen ]
-RUN apk add --no-cache doxygen
 
 # [ Cmake ]
 RUN pip3 install cmakelint==1.3.4.1
