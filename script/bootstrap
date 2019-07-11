@@ -1,23 +1,18 @@
 #!/bin/sh
-set -e
-
-. /etc/os-release
+set -xe
 
 : "${GOROOT:=/usr/local/go}"
 
 docker_inst() {
-	add-apt-repository \
-		"deb https://download.docker.com/linux/ubuntu \
-       $UBUNTU_CODENAME \
-       stable"
-
-	apt-get update
+	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+	echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
+	apt-get update -y
 	apt-get install -y docker-ce docker-ce-cli containerd.io
 }
 
 go_inst() {
 	version=1.12.5
-	file="go$version.$(uname -s)-amd64.tar.gz "
+	file="go$version.$(uname -s)-amd64.tar.gz"
 	curl "https://dl.google.com/go/$file" -o "/tmp/$file"
 	tar -C "$(dirname "$GOROOT")" -xzf "/tmp/$file"
 }
