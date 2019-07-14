@@ -3,7 +3,7 @@
 
 # ~~~ Languages ~~~
 
-FROM alpine:3.10.1 as haskell_layer
+FROM alpine:3.9.4 as haskell_layer
 RUN apk add --no-cache git ghc=8.4.3-r0 xz wget build-base make ca-certificates \
         && update-ca-certificates
 ENV HADOVER=tags/v1.15.0
@@ -39,10 +39,10 @@ COPY api /go/src/$CRIE/api
 RUN go get $CRIE/crie
 RUN go build $CRIE/crie
 
-FROM alpine:3.10.1 as clang_layer
+FROM alpine:3.9.4 as clang_layer
 RUN apk --no-cache add clang
 
-FROM alpine:3.10.1 as terraform_layer
+FROM alpine:3.9.4 as terraform_layer
 RUN apk --no-cache add git wget zip
 ENV TERRA_VER 0.11.13
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
@@ -54,7 +54,7 @@ RUN pwd
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 
 # Alpine :ok_hand:
-FROM alpine:3.10.1
+FROM alpine:3.9.4
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
@@ -62,10 +62,12 @@ RUN adduser -D standards
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# [ Python ]
-RUN apk add --no-cache python3 python3-dev build-base \
-    && pip3 install pylint==2.3.1 autopep8==1.4.4 \
-    && apk del --no-cache python3-dev build-base
+# [ Pips ]
+COPY requirements.txt /requirements.txt
+ENV BUILD_LIBS="python3-dev build-base libffi-dev libressl-dev"
+RUN apk add --no-cache python3 $BUILD_LIBS \
+    && pip3 install -r requirements.txt \
+    && apk del --no-cache $BUILD_LIBS
 
 # [ Docker ]
 RUN apk --no-cache add gmp
@@ -75,11 +77,6 @@ COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
 # [ Bash ]
 COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
 COPY --from=haskell_layer /root/.local/bin/shellcheck /bin/shellcheck
-
-# [ YML ]
-RUN apk add --no-cache python3 python3-dev build-base \
-    && pip3 install yamllint==1.15.0 \
-    && apk del --no-cache python3-dev build-base
 
 # [ Javascript ]
 RUN apk add --no-cache nodejs-npm \
@@ -102,13 +99,6 @@ RUN apk add --no-cache nodejs-npm \
 RUN apk add --no-cache cppcheck
 COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 
-# [ Cmake ]
-RUN pip3 install cmakelint==1.3.4.1
-
-
-# [ Docker Compose ]
-RUN pip3 install docker-compose==1.23.2
-
 # [ Terraform ]
 COPY --from=terraform_layer /terraform /bin/terraform
 
@@ -124,6 +114,6 @@ WORKDIR /check
 #RUN mkdir /.standard-v12-cache
 #RUN chmod -R o+rw /.standard-v12-cache
 
-ENTRYPOINT ["crie"]
+ENTRYPOINT ["/bin/crie"]
 
 USER standards

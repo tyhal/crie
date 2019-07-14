@@ -9,6 +9,12 @@ var lPython = language{
 	chk:   execCmd{`pylint`, par{`--rcfile=/conf/python/.pylintrc`}, par{}},
 }
 
+var lPythonDeps = language{
+	name:  `pythondeps`,
+	match: regexp.MustCompile(`requirements.txt$`),
+	fmt:   execCmd{`pur`, par{`-r`}, par{}},
+}
+
 // https://github.com/mvdan/sh/releases/download/v1.3.0/shfmt_v1.3.0_linux_amd64
 // https://github.com/koalaman/shellcheck
 var lBash = language{name: `bash`,

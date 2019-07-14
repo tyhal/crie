@@ -32,10 +32,3 @@ set +x
 verify/script/test
 
 echo "! PASS !"
-
-# PUSH ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if git diff --exit-code; then
-	docker push tyhal/crie
-else
-	echo "Uncommitted changes not pushing"
-fi

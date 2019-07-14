@@ -2,7 +2,7 @@
 set -e
 
 # TODO Put into build process of standards
-PATCHOFFSET=0
+PATCHOFFSET=13
 
 STD_MAJOR="$(script/crie version --major | tr -d "[:space:]")"
 STD_MINOR="$(script/crie version --minor | tr -d "[:space:]")"

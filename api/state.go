@@ -17,6 +17,7 @@ var standards = []language{
 	lJavascript,
 	lJSON,
 	lPython,
+	lPythonDeps,
 	lMarkdown,
 	lASCIIDoctor,
 	lTerraform,

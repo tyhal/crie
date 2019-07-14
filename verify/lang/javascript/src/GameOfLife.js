@@ -4,8 +4,8 @@ const cols = 10
 const iterations = 20
 
 // not [x][y] [y][x]
-let arra = []
-let arrb = []
+const arra = []
+const arrb = []
 for (let i = 0; i < rows; i++) {
   arra[i] = []
   arrb[i] = []
@@ -40,10 +40,10 @@ function cell (y, x) {
   // Get the amount of cells around this one
   for (let i = -1; i <= 1; i++) {
     for (let j = -1; j <= 1; j++) {
-      let xj = x + j + cols
-      let cx = xj % cols
-      let yi = y + i + rows
-      let cy = yi % rows
+      const xj = x + j + cols
+      const cx = xj % cols
+      const yi = y + i + rows
+      const cy = yi % rows
       c += arrb[cy][cx]
     }
   }

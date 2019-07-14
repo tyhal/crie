@@ -1,5 +1,7 @@
 # Crie enforcement
 
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/tyhal/crie.svg)](https://hub.docker.com/r/tyhal/crie)
+
 Crie is an effective way to format and lint code for a variety of languages
 
 -   No dependencies ( except docker which all build machines have )
