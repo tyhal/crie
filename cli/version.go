@@ -1,4 +1,4 @@
-package main
+package github.com/tyhal/crie/cli
 
 import (
 	"fmt"

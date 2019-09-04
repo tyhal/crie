@@ -15,7 +15,7 @@ func flintRun(path string) {
 	flags := flint.Flags{
 		RunReadme:        true,
 		RunContributing:  true,
-		RunLicense:       false,
+		RunLicense:       true,
 		RunBootstrap:     true,
 		RunTestScript:    true,
 		RunChangelog:     false,

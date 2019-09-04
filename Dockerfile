@@ -33,11 +33,13 @@ RUN go get -u mvdan.cc/sh/cmd/shfmt
 #RUN go get -u github.com/jessfraz/dockfmt
 
 FROM go_layer as crie_layer
-ENV CRIE github.com/tyhal/crie
-COPY crie /go/src/$CRIE/crie
-COPY api /go/src/$CRIE/api
-RUN go get $CRIE/crie
-RUN go build $CRIE/crie
+COPY crie.go /crie/crie.go
+COPY go.mod /crie/go.mod
+COPY go.sum /crie/go.sum
+COPY cli /crie/cli
+COPY api /crie/api
+WORKDIR /crie
+RUN go build 
 
 FROM alpine:3.9.4 as clang_layer
 RUN apk --no-cache add clang

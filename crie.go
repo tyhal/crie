@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/tyhal/crie/cli"
 	"github.com/tyhal/crie/api"
 	"os"
 )
@@ -39,7 +40,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&api.Quiet, "quiet", "q", false, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().BoolVarP(&api.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
 	rootCmd.PersistentFlags().BoolVarP(&api.GitDiff, "git-diff", "g", false, "Use the last 10 commits to check files")
-	rootCmd.PersistentFlags().BoolVarP(&api.CheckIgnores, "ignores", "i", false, "find files in crie.yml which don't need to be there")
 	rootCmd.PersistentFlags().StringVar(&api.GlobalState.ConfName, "config", "crie.yml", "config file")
 	rootCmd.PersistentFlags().StringVar(&api.SingleLang, "lang", "", "run with only one language (see list for available options)")
 
