@@ -92,6 +92,10 @@ var lCmake = language{name: `cmake`,
 	match: regexp.MustCompile(`CMakeLists.txt$|\.cmake$`),
 	chk:   execCmd{`cmakelint`, par{`--config=/conf/cmake/.cmakelintrc`}, par{}}}
 
+var lAnsible = language{name: `ansible`,
+	match: regexp.MustCompile(`playbook.yml$`),
+	chk:   execCmd{`ansible-lint`, par{}, par{}}}
+
 var lDockerCompose = language{name: `dockercompose`,
 	match: regexp.MustCompile(`docker-compose.yml$|docker-compose.yaml$`),
 	chk:   execCmd{`docker-compose`, par{`-f`}, par{`config`, `-q`}}}

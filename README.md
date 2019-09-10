@@ -36,7 +36,7 @@ Required
 | CMake             | :white_check_mark: | :x:                |
 | Compose           | :white_check_mark: | :x:                |
 | **Configuration** |                    |                    |
-| Ansible           | :x:                |                    |
+| Ansible           | :white_check_mark: |                    |
 | Terraform         |                    | :white_check_mark: |
 | **Documentation** |                    |                    |
 | Markdown          | :white_check_mark: | :white_check_mark: |

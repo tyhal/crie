@@ -1,4 +1,4 @@
-package github.com/tyhal/crie/cli
+package cli
 
 import (
 	"fmt"
@@ -9,13 +9,14 @@ import (
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "0"
+var patchNum = "2"
 
 var major bool
 var minor bool
 var patch bool
 
-var versionCmd = &cobra.Command{
+// VersionCmd Print the current version for the crie command line
+var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the current version for the crie command line",
 	Long:  `Print the current version for the crie command line`,
@@ -33,7 +34,7 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
-	versionCmd.Flags().BoolVar(&major, "major", false, "Get major number")
-	versionCmd.Flags().BoolVar(&minor, "minor", false, "Get minor number")
-	versionCmd.Flags().BoolVar(&patch, "patch", false, "Get patch number")
+	VersionCmd.Flags().BoolVar(&major, "major", false, "Get major number")
+	VersionCmd.Flags().BoolVar(&minor, "minor", false, "Get minor number")
+	VersionCmd.Flags().BoolVar(&patch, "patch", false, "Get patch number")
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/cli"
 	"github.com/tyhal/crie/api"
+	"github.com/tyhal/crie/cli"
 	"os"
 )
 
@@ -43,12 +43,12 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&api.GlobalState.ConfName, "config", "crie.yml", "config file")
 	rootCmd.PersistentFlags().StringVar(&api.SingleLang, "lang", "", "run with only one language (see list for available options)")
 
-	rootCmd.AddCommand(chkCmd)
-	rootCmd.AddCommand(fmtCmd)
-	rootCmd.AddCommand(allCmd)
-	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(lsCmd)
-	rootCmd.AddCommand(non)
+	rootCmd.AddCommand(cli.ChkCmd)
+	rootCmd.AddCommand(cli.FmtCmd)
+	rootCmd.AddCommand(cli.AllCmd)
+	rootCmd.AddCommand(cli.VersionCmd)
+	rootCmd.AddCommand(cli.LsCmd)
+	rootCmd.AddCommand(cli.NonCmd)
 
 	cobra.OnInitialize(api.Initialise)
 }

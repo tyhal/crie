@@ -33,12 +33,13 @@ RUN go get -u mvdan.cc/sh/cmd/shfmt
 #RUN go get -u github.com/jessfraz/dockfmt
 
 FROM go_layer as crie_layer
-COPY crie.go /crie/crie.go
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum
+WORKDIR /crie
+RUN go mod download
 COPY cli /crie/cli
 COPY api /crie/api
-WORKDIR /crie
+COPY crie.go /crie/crie.go
 RUN go build 
 
 FROM alpine:3.9.4 as clang_layer
@@ -105,7 +106,7 @@ COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 COPY --from=terraform_layer /terraform /bin/terraform
 
 # [ Run Scripts ]
-COPY --from=crie_layer /go/bin/crie /bin/crie
+COPY --from=crie_layer /crie/crie /bin/crie
 
 # [ Conf ]
 COPY conf /conf/
@@ -113,8 +114,9 @@ RUN chown -R standards:standards /conf
 ENV PATH /node_modules/.bin:$PATH
 WORKDIR /check
 
-#RUN mkdir /.standard-v12-cache
-#RUN chmod -R o+rw /.standard-v12-cache
+# Give permission to non root to cache dirs
+RUN mkdir /.standard-v14-cache /.ansible
+RUN chmod -R o+rw /.standard-v14-cache /.ansible
 
 ENTRYPOINT ["/bin/crie"]
 

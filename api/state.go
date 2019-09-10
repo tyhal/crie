@@ -22,6 +22,7 @@ var standards = []language{
 	lASCIIDoctor,
 	lTerraform,
 	lYML,
+	lAnsible,
 	lDockerCompose,
 }
 
