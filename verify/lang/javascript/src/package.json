@@ -1,0 +1,17 @@
+{
+  "author": "Tyler Hale",
+  "dependencies": {},
+  "description": "Game Of Life in Javascript",
+  "license": "",
+  "main": "GameOfLife.js",
+  "name": "GameOfLife",
+  "repository": {
+    "type": "git",
+    "url": "git@git.aetheris.co:tyler/standards.git"
+  },
+  "scripts": {
+    "start": "node --harmony GameOfLife.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}
