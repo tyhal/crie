@@ -1,0 +1,40 @@
+---
+version: '3.2'
+services:
+  bash:
+    image: gol-bash
+    build: bash
+  cpp:
+    image: gol-cpp
+    build: cpp
+  go:
+    image: gol-go
+    build: go
+    command: ""
+  groovy:
+    image: gol-groovy
+    build: groovy
+    command: ""
+  haskell:
+    image: gol-haskell
+    build: haskell
+    command: ""
+  java:
+    image: gol-java
+    build: java
+    command: ""
+  javascript:
+    image: gol-javascript
+    build: javascript
+  julia:
+    image: gol-julia
+    build: julia
+    command: ""
+  python:
+    image: gol-python
+    build: python
+    command: ""
+  r:
+    image: gol-r
+    build: r
+    command: ""

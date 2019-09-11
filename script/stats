@@ -1,0 +1,6 @@
+#!/bin/sh
+
+printf "\\n tyhal/crie\\n\\n"
+docker images -f reference=tyhal/crie:latest
+printf "\\n LAYER BREAK DOWN\\n\\n"
+docker history -H tyhal/crie:latest
