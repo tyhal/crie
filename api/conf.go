@@ -105,8 +105,7 @@ func removeIgnored(list []string, f func(string) bool) []string {
 }
 
 func configureConf(files []string) []string {
-
-	b, err := ioutil.ReadFile(GlobalState.ConfName)
+	f, err := os.Open(GlobalState.ConfName)
 
 	if err != nil {
 		log.Fatal(err)
@@ -114,7 +113,7 @@ func configureConf(files []string) []string {
 
 	m := conf{}
 
-	err = yaml.Unmarshal(b, &m)
+	err = yaml.NewDecoder(f).Decode(&m)
 
 	if err != nil {
 		log.Fatal("Failed to parse (" + GlobalState.ConfName + "): " + err.Error())

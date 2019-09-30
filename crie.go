@@ -13,14 +13,7 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-var rootCmd = &cobra.Command{
-	Use:   "crie",
-	Short: "crie is a formatter for many languages.",
-	Long: `
-	
-	crie brings together a vast collection of formatters and linters
-	to create a handy tool that can prettify any codebase.
-
+var quote = `
 	|> crie: the act of crying and dying at the same time
 
 	|> "this unformated code makes me want to crie"
@@ -32,15 +25,24 @@ var rootCmd = &cobra.Command{
 		Does a good teacher overlook even the most humble student?
 		Does a good father allow a single child to starve?
 		Does a good programmer refuse to maintain his code? 
-	>>-`,
+	>>-
+`
+
+var rootCmd = &cobra.Command{
+	Use:   "crie",
+	Short: "crie is a formatter for many languages.",
+	Long: `
+	
+	crie brings together a vast collection of formatters and linters
+	to create a handy tool that can prettify any codebase.`,
 }
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&api.Verbose, "verbose", "v", false, "turn on verbose printing for reports")
 	rootCmd.PersistentFlags().BoolVarP(&api.Quiet, "quiet", "q", false, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().BoolVarP(&api.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
-	rootCmd.PersistentFlags().BoolVarP(&api.GitDiff, "git-diff", "g", false, "Use the last 10 commits to check files")
-	rootCmd.PersistentFlags().StringVar(&api.GlobalState.ConfName, "config", "crie.yml", "config file")
+	rootCmd.PersistentFlags().BoolVarP(&api.GitDiff, "git-diff", "g", false, "use the last 10 commits to check files")
+	rootCmd.PersistentFlags().StringVar(&api.GlobalState.ConfName, "config", "crie.yml", "config file location")
 	rootCmd.PersistentFlags().StringVar(&api.SingleLang, "lang", "", "run with only one language (see list for available options)")
 
 	rootCmd.AddCommand(cli.ChkCmd)
