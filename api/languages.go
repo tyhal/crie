@@ -2,11 +2,14 @@ package api
 
 import "regexp"
 
+// Directory to store default configurations for tools
+var confDir = "/etc/crie" // || C:\Program Files\Common Files\crie
+
 var lPython = language{
 	name:  `python`,
 	match: regexp.MustCompile(`\.py$`),
 	fmt:   execCmd{`autopep8`, par{`--in-place`, `--aggressive`, `--aggressive`}, par{}},
-	chk:   execCmd{`pylint`, par{`--rcfile=/conf/python/.pylintrc`}, par{}},
+	chk:   execCmd{`pylint`, par{`--rcfile=` + confDir + `.pylintrc`}, par{}},
 }
 
 var lPythonDeps = language{
@@ -37,7 +40,7 @@ var lDocker = language{name: `docker`,
 // https://github.com/adrienverge/yamllint
 var lYML = language{name: `yml`,
 	match: regexp.MustCompile(`\.yml$|\.yaml$`),
-	chk:   execCmd{`yamllint`, par{`-c=/conf/yaml/.yamllintrc`}, par{}}}
+	chk:   execCmd{`yamllint`, par{`-c=` + confDir + `/yaml/.yamllintrc`}, par{}}}
 
 var lTerraform = language{name: `terraform`,
 	match: regexp.MustCompile(`\.tf$`),
@@ -61,11 +64,11 @@ var lGolang = language{name: `golang`,
 var lMarkdown = language{name: `markdown`,
 	match: regexp.MustCompile(`\.md$`),
 	fmt:   execCmd{`remark`, par{`--use`, `remark-preset-lint-recommended`}, par{`-o`}},
-	chk:   execCmd{`vale`, par{`--config`, `/conf/markdown/.vale.ini`}, par{}}}
+	chk:   execCmd{`vale`, par{`--config`, `` + confDir + `/markdown/.vale.ini`}, par{}}}
 
 var lASCIIDoctor = language{name: `asciidoctor`,
 	match: regexp.MustCompile(`\.adoc$`),
-	chk:   execCmd{`vale`, par{`--config`, `/conf/markdown/.vale.ini`}, par{}}}
+	chk:   execCmd{`vale`, par{`--config`, `` + confDir + `/markdown/.vale.ini`}, par{}}}
 
 // https://github.com/zaach/jsonlint
 var lJSON = language{name: `json`,
@@ -90,7 +93,7 @@ var lC = language{name: `c`,
 
 var lCmake = language{name: `cmake`,
 	match: regexp.MustCompile(`CMakeLists.txt$|\.cmake$`),
-	chk:   execCmd{`cmakelint`, par{`--config=/conf/cmake/.cmakelintrc`}, par{}}}
+	chk:   execCmd{`cmakelint`, par{`--config=` + confDir + `/cmake/.cmakelintrc`}, par{}}}
 
 var lAnsible = language{name: `ansible`,
 	match: regexp.MustCompile(`playbook.yml$`),
