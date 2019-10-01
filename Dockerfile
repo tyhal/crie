@@ -109,8 +109,8 @@ COPY --from=terraform_layer /terraform /bin/terraform
 COPY --from=crie_layer /crie/crie /bin/crie
 
 # [ Conf ]
-COPY conf /conf/
-RUN chown -R standards:standards /conf
+COPY conf /etc/crie/
+RUN chown -R standards:standards /etc/crie/
 ENV PATH /node_modules/.bin:$PATH
 WORKDIR /check
 
