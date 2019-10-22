@@ -9,7 +9,7 @@ var lPython = language{
 	name:  `python`,
 	match: regexp.MustCompile(`\.py$`),
 	fmt:   execCmd{`autopep8`, par{`--in-place`, `--aggressive`, `--aggressive`}, par{}},
-	chk:   execCmd{`pylint`, par{`--rcfile=` + confDir + `.pylintrc`}, par{}},
+	chk:   execCmd{`pylint`, par{`--rcfile=` + confDir + `/python/.pylintrc`}, par{}},
 }
 
 var lPythonDeps = language{
