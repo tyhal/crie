@@ -3,7 +3,7 @@
 
 # ~~~ Languages ~~~
 
-FROM alpine:3.9.4 as haskell_layer
+FROM alpine:3.10.3 as haskell_layer
 RUN apk add --no-cache git ghc=8.4.3-r0 xz wget build-base make ca-certificates \
         && update-ca-certificates
 ENV HADOVER=tags/v1.15.0
@@ -42,10 +42,10 @@ COPY api /crie/api
 COPY crie.go /crie/crie.go
 RUN go build 
 
-FROM alpine:3.9.4 as clang_layer
+FROM alpine:3.10.3 as clang_layer
 RUN apk --no-cache add clang
 
-FROM alpine:3.9.4 as terraform_layer
+FROM alpine:3.10.3 as terraform_layer
 RUN apk --no-cache add git wget zip
 ENV TERRA_VER 0.11.13
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
@@ -57,7 +57,7 @@ RUN pwd
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 
 # Alpine :ok_hand:
-FROM alpine:3.9.4
+FROM alpine:3.10.3
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
