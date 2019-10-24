@@ -114,7 +114,7 @@ func stdrun(stdtype string, getexec execselec) error {
 	}
 
 	if errCount > 0 {
-		return errors.New("🔍 NGOT FAILED: " + strconv.Itoa(errCount) + " error(s) occurred while checking")
+		return errors.New("🔍 CRIE FAILED: " + strconv.Itoa(errCount) + " error(s) occurred while checking")
 	}
 
 	return nil
