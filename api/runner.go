@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"github.com/tyhal/crie/api/clitool"
 	"os"
 	"path/filepath"
 	"sort"
@@ -15,22 +16,22 @@ var SingleLang string
 // GitDiff to use the git files instead of the entire tree
 var GitDiff bool
 
-func getLanguage(lang string) (language, error) {
+func getLanguage(lang string) (clitool.Language, error) {
 	for _, standardizer := range standards {
-		if standardizer.name == lang {
+		if standardizer.GetName() == lang {
 			return standardizer, nil
 		}
 	}
 	return standards[0], errors.New("language not found in configuration")
 }
 
-// NoStandards runs all fmt exec commands in languages and in always fmt
+// NoStandards runs all fmtConf exec commands in languages and in always fmtConf
 func NoStandards() {
 
 	// Get files not used
 	files := allFiles
 	for _, standardizer := range standards {
-		files = filter(files, false, standardizer.match.MatchString)
+		files = filter(files, false, standardizer.GetReg().MatchString)
 	}
 
 	// Get extensions or Filename(if no extension) and count occurrences
@@ -74,7 +75,11 @@ func NoStandards() {
 	}
 }
 
-func stdrun(stdtype string, getexec execselec) error {
+func stdrun(stdtype string) error {
+
+	if stdtype != "chk" {
+		return errors.New(stdtype + " not implemented")
+	}
 
 	if GitDiff {
 		allFiles = gitFiles
@@ -88,24 +93,25 @@ func stdrun(stdtype string, getexec execselec) error {
 		if err != nil {
 			return err
 		}
-		runStandards = []language{lang}
+		runStandards = []clitool.Language{lang}
 	}
 
 	// Run every formatter.
 	for _, standardizer := range runStandards {
-		execC := getexec(standardizer)
-		if execC.bin == "" {
-			continue
-		}
+
+		// TODO check if cmd exists
+		//if execC.bin == "" {
+		//	continue
+		//}
 
 		// Get the match for this formatter's files.
-		reg := standardizer.match
+		reg := standardizer.GetReg()
 
 		// filter the files to format based on given match and format them.
 		filteredFilepaths := filter(allFiles, true, reg.MatchString)
-		fmt.Println("❨ " + stdtype + " ❩ ➔ " + standardizer.name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
+		fmt.Println("❨ " + stdtype + " ❩ ➔ " + standardizer.GetName() + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
 
-		err := parallelLoop(execC, filteredFilepaths)
+		err := parallelLoop(standardizer, filteredFilepaths)
 
 		if err != nil {
 			fmt.Println(err.Error())

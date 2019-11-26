@@ -18,21 +18,7 @@ RUN $STACK_DIR/stack update
 RUN $STACK_DIR/stack --system-ghc install
 RUN $STACK_DIR/stack --system-ghc install ShellCheck
 
-FROM golang:1.12.7-alpine3.9 as go_layer
-RUN apk --no-cache add git wget
-ENV CGO_ENABLED=0
-
-FROM go_layer as golint_layer
-RUN go get -u golang.org/x/lint/golint
-
-FROM go_layer as vale_layer
-RUN go get -u github.com/errata-ai/vale
-
-FROM go_layer as shfmt_layer
-RUN go get -u mvdan.cc/sh/cmd/shfmt
-#RUN go get -u github.com/jessfraz/dockfmt
-
-FROM go_layer as crie_layer
+FROM golang:1.12.7-alpine3.9
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum
 WORKDIR /crie
@@ -75,25 +61,17 @@ RUN apk add --no-cache python3 $BUILD_LIBS \
 # [ Docker ]
 RUN apk --no-cache add gmp
 COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
-#COPY --from=go_layer /go/bin/dockfmt /bin/dockfmt
 
 # [ Bash ]
-COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
 COPY --from=haskell_layer /root/.local/bin/shellcheck /bin/shellcheck
 
 # [ Javascript ]
 RUN apk add --no-cache nodejs-npm \
     && npm install -g standard
 
-# [ Golang ]
-COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
-COPY --from=golint_layer /go/bin/golint /bin/golint
-
 # [ Markdown + AsciiDoctor ]
 RUN apk add --no-cache nodejs-npm asciidoctor \
     && npm install -g remark-cli remark-preset-lint-recommended
-COPY --from=vale_layer /go/bin/vale /bin/vale
-
 # [ JSON ]
 RUN apk add --no-cache nodejs-npm \
     && npm install -g jsonlint2

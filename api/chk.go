@@ -6,10 +6,6 @@ import (
 	"os"
 )
 
-func getchkexec(l language) execCmd {
-	return l.chk
-}
-
 func flintRun(path string) {
 	println("checking " + path)
 	flags := flint.Flags{
@@ -43,5 +39,5 @@ func Chk() error {
 			flintRun(dir)
 		}
 	}
-	return stdrun("chk", getchkexec)
+	return stdrun("chk")
 }
