@@ -2,29 +2,13 @@ package api
 
 import (
 	"fmt"
+	"github.com/tyhal/crie/api/clitool"
+	"github.com/tyhal/crie/api/linter"
 	"strings"
 )
 
-var standards = []language{
-	lBash,
-	lSh,
-	lCpp,
-	lCppheaders,
-	lC,
-	lCmake,
-	lDocker,
-	lGolang,
-	lJavascript,
-	lJSON,
-	lPython,
-	lPythonDeps,
-	lMarkdown,
-	lASCIIDoctor,
-	lTerraform,
-	lYML,
-	lAnsible,
-	lDockerCompose,
-}
+
+var standards = clitool.LanguageList
 
 // Version to print the current version of standards within crie
 func Version() int {
@@ -39,14 +23,19 @@ func pprintCmd(front string, bin string, frontparams []string, endparam []string
 	}
 }
 
-// List to print all standards chk fmt and always commands
+func printLinter(l linter.Linter) {
+	fmt.Println("	" + l.GetName())
+	// TODO
+	//pprintCmd("❨ chkConf ❩ ", l.chkConf.bin, l.chkConf.frontparams, l.chkConf.endparam)
+	//pprintCmd("❨ fmtConf ❩ ", l.fmtConf.bin, l.fmtConf.frontparams, l.fmtConf.endparam)
+}
+
+// List to print all standards chkConf fmtConf and always commands
 func List() {
 	fmt.Println(" ~~~~~~~~~ ~~~~~~~~~")
 	fmt.Println("\nLanguages:")
-	for _, standard := range standards {
-		fmt.Println("	" + standard.name)
-		pprintCmd("❨ chk ❩ ", standard.chk.bin, standard.chk.frontparams, standard.chk.endparam)
-		pprintCmd("❨ fmt ❩ ", standard.fmt.bin, standard.fmt.frontparams, standard.fmt.endparam)
+	for _, l := range standards {
+		printLinter(l)
 	}
 	fmt.Println("\n~~~~~~~~~ ~~~~~~~~~")
 }

@@ -219,7 +219,7 @@ func Initialise() {
 
 		commitSlice := "HEAD~" + strconv.Itoa(min(commitCnt, 10)) + "..HEAD"
 
-		args := par{"diff", "--name-only", commitSlice, "."}
+		args := par{"diff", "--getName-only", commitSlice, "."}
 		c = exec.Command("git", args...)
 
 		c.Env = os.Environ()

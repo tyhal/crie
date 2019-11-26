@@ -3,51 +3,19 @@ package api
 // TODO(tyler) this has repeated exec calls
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
+	"github.com/tyhal/crie/api/linter"
 	"log"
-	"os"
-	"os/exec"
 )
 
 // ContinueOnError Make flag
 var ContinueOnError = false
 
-// Verbose to print report regardless of return code
+// Verbose to print Report regardless of return code
 var Verbose = false
 
 // Quiet silence extra output
 var Quiet = false
-
-func runFiles(stdexec execCmd, filepath string, rep chan report) {
-	// Format any file received as input.
-	params := append(stdexec.frontparams, filepath)
-
-	for _, par := range stdexec.endparam {
-		params = append(params, par)
-	}
-
-	c := exec.Command(stdexec.bin, params...)
-
-	var outB, errB bytes.Buffer
-
-	c.Env = os.Environ()
-	c.Stdout = &outB
-	c.Stderr = &errB
-
-	outS := ""
-	errS := ""
-
-	err := c.Run()
-
-	if err != nil || Verbose {
-		outS = outB.String()
-		errS = errB.String()
-	}
-
-	rep <- report{filepath, err, outS, errS}
-}
 
 func filter(list []string, expect bool, f func(string) bool) []string {
 	filteredLists := make([]string, 0)
@@ -60,46 +28,41 @@ func filter(list []string, expect bool, f func(string) bool) []string {
 	return filteredLists
 }
 
-func printReportErr(rep report) error {
-	if rep.err == nil {
-		fmt.Println(" ✔️  " + rep.file)
+func printReportErr(rep linter.Report) error {
+	if rep.Err == nil {
+		fmt.Println(" ✔️  " + rep.File)
 		if Verbose && !Quiet {
-			fmt.Println("	" + rep.stdout)
+			fmt.Println("	" + rep.StdOut)
 		}
 		return nil
 	}
 
-	fmt.Println(" ✖️  " + rep.file)
+	fmt.Println(" ✖️  " + rep.File)
 
 	if Quiet {
-		return rep.err
+		return rep.Err
 	}
 
 	fmt.Println("	std out : ")
-	fmt.Println(rep.stdout)
+	fmt.Println(rep.StdOut)
 	fmt.Println("	std err : ")
-	fmt.Println(rep.stderr)
+	fmt.Println(rep.StdErr)
 
 	if ContinueOnError {
 		fmt.Println("	cmd err : ")
-		fmt.Println("	" + rep.err.Error())
+		fmt.Println("	" + rep.Err.Error())
 	} else {
-		log.Fatal(rep.err)
+		log.Fatal(rep.Err)
 	}
 
-	return rep.err
+	return rep.Err
 }
 
-func parallelLoop(ex execCmd, filteredFilepaths []string) error {
-	report := make(chan report)
-
-	if exec.Command("which", ex.bin).Run() != nil {
-		mess := "Could not find " + ex.bin + ", possibly not installed"
-		return errors.New(mess)
-	}
+func parallelLoop(l linter.Linter,filteredFilepaths []string) error {
+	report := make(chan linter.Report)
 
 	for _, filepath := range filteredFilepaths {
-		go runFiles(ex, filepath, report)
+		go l.Chk(filepath, report)
 	}
 
 	var lasterr error
