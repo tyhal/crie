@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/api"
 	"github.com/tyhal/crie/cli"
-	"os"
 )
 
 // Execute the commands that are parsed
@@ -38,8 +37,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	// TODO re-implement
-	// rootCmd.PersistentFlags().BoolVarP(&api.Verbose, "verbose", "v", false, "turn on verbose printing for reports")
+	rootCmd.PersistentFlags().BoolVarP(&api.Verbose, "verbose", "v", false, "turn on verbose printing for reports")
 	rootCmd.PersistentFlags().BoolVarP(&api.Quiet, "quiet", "q", false, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().BoolVarP(&api.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
 	rootCmd.PersistentFlags().BoolVarP(&api.GitDiff, "git-diff", "g", false, "use the last 10 commits to check files")
@@ -58,7 +56,6 @@ func init() {
 
 func main() {
 	if err := Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }

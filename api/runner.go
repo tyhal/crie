@@ -3,7 +3,8 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/tyhal/crie/api/clitool"
+	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/api/linter"
 	"os"
 	"path/filepath"
 	"sort"
@@ -16,9 +17,9 @@ var SingleLang string
 // GitDiff to use the git files instead of the entire tree
 var GitDiff bool
 
-func getLanguage(lang string) (clitool.Language, error) {
+func getLanguage(lang string) (linter.Language, error) {
 	for _, standardizer := range standards {
-		if standardizer.GetName() == lang {
+		if standardizer.Name == lang {
 			return standardizer, nil
 		}
 	}
@@ -31,7 +32,7 @@ func NoStandards() {
 	// Get files not used
 	files := allFiles
 	for _, standardizer := range standards {
-		files = filter(files, false, standardizer.GetReg().MatchString)
+		files = filter(files, false, standardizer.Match.MatchString)
 	}
 
 	// Get extensions or Filename(if no extension) and count occurrences
@@ -75,11 +76,7 @@ func NoStandards() {
 	}
 }
 
-func stdrun(stdtype string) error {
-
-	if stdtype != "chk" {
-		return errors.New(stdtype + " not implemented")
-	}
+func RunDefaults() error {
 
 	if GitDiff {
 		allFiles = gitFiles
@@ -93,34 +90,43 @@ func stdrun(stdtype string) error {
 		if err != nil {
 			return err
 		}
-		runStandards = []clitool.Language{lang}
+		runStandards = []linter.Language{lang}
 	}
 
 	// Run every formatter.
-	for _, standardizer := range runStandards {
+	for _, l := range runStandards {
 
-		// TODO check if cmd exists
-		//if execC.bin == "" {
-		//	continue
-		//}
+		toLint := l.GetLinter(CurrentLinterType)
+		toLog := log.WithFields(log.Fields{"lang": l.Name, "type": CurrentLinterType})
+
+		if toLint == nil {
+			toLog.Debug("there are no configurations associated for this action")
+			continue
+		}
+		err := toLint.WillRun()
+		if err != nil {
+			toLog.Error(err.Error())
+			errCount++
+			continue
+		}
 
 		// Get the match for this formatter's files.
-		reg := standardizer.GetReg()
+		reg := l.Match
 
 		// filter the files to format based on given match and format them.
 		filteredFilepaths := filter(allFiles, true, reg.MatchString)
-		fmt.Println("❨ " + stdtype + " ❩ ➔ " + standardizer.GetName() + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
+		fmt.Println("❨ " + CurrentLinterType + " ❩ ➔ " + l.Name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
 
-		err := parallelLoop(standardizer, filteredFilepaths)
+		err = parallelLoop(l, filteredFilepaths)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			toLog.Error(err.Error())
 			errCount++
 		}
 	}
 
 	if errCount > 0 {
-		return errors.New("🔍 CRIE FAILED: " + strconv.Itoa(errCount) + " error(s) occurred while checking")
+		return errors.New("crie found " + strconv.Itoa(errCount) + " error(s) while " + CurrentLinterType + "'ing 🔍")
 	}
 
 	return nil

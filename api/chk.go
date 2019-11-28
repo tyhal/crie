@@ -39,5 +39,6 @@ func Chk() error {
 			flintRun(dir)
 		}
 	}
-	return stdrun("chk")
+	CurrentLinterType = "chk"
+	return RunDefaults()
 }

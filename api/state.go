@@ -2,13 +2,13 @@ package api
 
 import (
 	"fmt"
-	"github.com/tyhal/crie/api/clitool"
 	"github.com/tyhal/crie/api/linter"
+	"github.com/tyhal/crie/imp"
 	"strings"
 )
 
-
-var standards = clitool.LanguageList
+var CurrentLinterType = ""
+var standards = imp.LanguageList
 
 // Version to print the current version of standards within crie
 func Version() int {
@@ -23,8 +23,8 @@ func pprintCmd(front string, bin string, frontparams []string, endparam []string
 	}
 }
 
-func printLinter(l linter.Linter) {
-	fmt.Println("	" + l.GetName())
+func printLinter(l linter.Language) {
+	fmt.Println("	" + l.Name)
 	// TODO
 	//pprintCmd("❨ chkConf ❩ ", l.chkConf.bin, l.chkConf.frontparams, l.chkConf.endparam)
 	//pprintCmd("❨ fmtConf ❩ ", l.fmtConf.bin, l.fmtConf.frontparams, l.fmtConf.endparam)

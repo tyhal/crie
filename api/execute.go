@@ -4,8 +4,8 @@ package api
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/api/linter"
-	"log"
 )
 
 // ContinueOnError Make flag
@@ -31,9 +31,6 @@ func filter(list []string, expect bool, f func(string) bool) []string {
 func printReportErr(rep linter.Report) error {
 	if rep.Err == nil {
 		fmt.Println(" ✔️  " + rep.File)
-		if Verbose && !Quiet {
-			fmt.Println("	" + rep.StdOut)
-		}
 		return nil
 	}
 
@@ -43,14 +40,11 @@ func printReportErr(rep linter.Report) error {
 		return rep.Err
 	}
 
-	fmt.Println("	std out : ")
-	fmt.Println(rep.StdOut)
-	fmt.Println("	std err : ")
-	fmt.Println(rep.StdErr)
+	log.WithFields(log.Fields{"type": "stdout"}).Info(rep.StdOut)
+	log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
 
 	if ContinueOnError {
-		fmt.Println("	cmd err : ")
-		fmt.Println("	" + rep.Err.Error())
+		log.Error(rep.Err.Error())
 	} else {
 		log.Fatal(rep.Err)
 	}
@@ -58,11 +52,13 @@ func printReportErr(rep linter.Report) error {
 	return rep.Err
 }
 
-func parallelLoop(l linter.Linter,filteredFilepaths []string) error {
+func parallelLoop(l linter.Language, filteredFilepaths []string) error {
 	report := make(chan linter.Report)
 
+	toLint := l.GetLinter(CurrentLinterType)
+
 	for _, filepath := range filteredFilepaths {
-		go l.Chk(filepath, report)
+		go toLint.Run(filepath, report)
 	}
 
 	var lasterr error
