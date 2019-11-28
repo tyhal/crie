@@ -21,9 +21,9 @@ docker tag tyhal/crie:latest "tyhal/crie:$CRIE_VERSION"
 # TESTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 set -x
 script/crie --help
-script/crie chk
+script/crie chk -v
 script/crie ls
-script/crie fmt
+script/crie fmt -v
 script/crie chk --git-diff
 script/crie chk --lang golang
 script/crie non

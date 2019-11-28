@@ -18,13 +18,16 @@ RUN $STACK_DIR/stack update
 RUN $STACK_DIR/stack --system-ghc install
 RUN $STACK_DIR/stack --system-ghc install ShellCheck
 
-FROM golang:1.12.7-alpine3.9
+FROM golang:1.12.7-alpine3.9 as crie_layer
+RUN apk --no-cache add git wget
+ENV CGO_ENABLED=0
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum
 WORKDIR /crie
 RUN go mod download
 COPY cli /crie/cli
 COPY api /crie/api
+COPY imp /crie/imp
 COPY crie.go /crie/crie.go
 RUN go build 
 
@@ -77,8 +80,9 @@ RUN apk add --no-cache nodejs-npm \
     && npm install -g jsonlint2
 
 # [ CPP ]
-RUN apk add --no-cache cppcheck
+RUN apk add --no-cache cppcheck libxml2
 COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
+COPY --from=clang_layer /usr/lib/libLLVM-8.so /usr/lib/libLLVM-8.so
 
 # [ Terraform ]
 COPY --from=terraform_layer /terraform /bin/terraform
