@@ -8,6 +8,7 @@ import (
 // Directory to store default configurations for tools
 var confDir = "/etc/crie" // || C:\Program Files\Common Files\crie
 
+// LanguageList is a monolithic configuration of all cries standard linters
 var LanguageList = []linter.Language{
 	{
 		Name:  `python`,
@@ -66,19 +67,20 @@ var LanguageList = []linter.Language{
 		Name:  `golang`,
 		Match: regexp.MustCompile(`\.go$`),
 		Fmt:   execCmd{`gofmt`, par{`-l`, `-w`}, par{}},
-		Chk:   execCmd{`golint`, par{`-set_exit_status`}, par{}}},
+		Chk:   execCmd{`golint`, par{`-set_exit_status`}, par{}},
+	},
 
 	// https://github.com/wooorm/remark-lint
 	{
 		Name:  `markdown`,
 		Match: regexp.MustCompile(`\.md$`),
 		Fmt:   execCmd{`remark`, par{`--use`, `remark-preset-lint-recommended`}, par{`-o`}},
-		Chk:   valeLint{confDir + `/markdown/.vale.ini`}},
+		Chk:   newValeLint(confDir + `/markdown/.vale.ini`)},
 
 	{
 		Name:  `asciidoctor`,
 		Match: regexp.MustCompile(`\.adoc$`),
-		Chk:   valeLint{confDir + `/markdown/.vale.ini`}},
+		Chk:   newValeLint(confDir + `/markdown/.vale.ini`)},
 
 	// https://github.com/zaach/jsonlint
 	{

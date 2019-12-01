@@ -9,7 +9,7 @@ import (
 
 func all() {
 	api.CurrentLinterType = "fmt"
-	err := api.RunDefaults()
+	err := api.RunCrie()
 
 	if err != nil {
 		log.Fatal(err)
@@ -39,7 +39,7 @@ var FmtCmd = &cobra.Command{
 	Long:  `Run all formatters in the list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api.CurrentLinterType = "fmt"
-		err := api.RunDefaults()
+		err := api.RunCrie()
 
 		if err != nil {
 			log.Fatal(err)

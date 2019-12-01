@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/api"
 	"github.com/tyhal/crie/cli"
+	"github.com/tyhal/crie/imp"
 )
 
 // Execute the commands that are parsed
@@ -55,6 +56,10 @@ func init() {
 }
 
 func main() {
+	api.SetLinters(imp.LanguageList)
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp: true,
+	})
 	if err := Execute(); err != nil {
 		log.Fatal(err)
 	}

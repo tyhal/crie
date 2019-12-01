@@ -18,7 +18,20 @@ RUN $STACK_DIR/stack update
 RUN $STACK_DIR/stack --system-ghc install
 RUN $STACK_DIR/stack --system-ghc install ShellCheck
 
-FROM golang:1.12.7-alpine3.9 as crie_layer
+FROM golang:1.12.7-alpine3.9 as go_layer
+RUN apk --no-cache add git wget
+ENV CGO_ENABLED=0
+
+# TODO implement imp/golint.go
+FROM go_layer as golint_layer
+RUN go get -u golang.org/x/lint/golint
+
+# TODO implement imp/shfmt.go
+FROM go_layer as shfmt_layer
+RUN go get -u mvdan.cc/sh/cmd/shfmt
+#RUN go get -u github.com/jessfraz/dockfmt
+
+FROM go_layer as crie_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 COPY go.mod /crie/go.mod
@@ -54,20 +67,6 @@ RUN adduser -D standards
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# [ Pips ]
-COPY requirements.txt /requirements.txt
-ENV BUILD_LIBS="python3-dev build-base libffi-dev libressl-dev"
-RUN apk add --no-cache python3 $BUILD_LIBS \
-    && pip3 install -r requirements.txt \
-    && apk del --no-cache $BUILD_LIBS
-
-# [ Docker ]
-RUN apk --no-cache add gmp
-COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
-
-# [ Bash ]
-COPY --from=haskell_layer /root/.local/bin/shellcheck /bin/shellcheck
-
 # [ Javascript ]
 RUN apk add --no-cache nodejs-npm \
     && npm install -g standard
@@ -79,10 +78,30 @@ RUN apk add --no-cache nodejs-npm asciidoctor \
 RUN apk add --no-cache nodejs-npm \
     && npm install -g jsonlint2
 
+# [ Pips ]
+COPY requirements.txt /requirements.txt
+ENV BUILD_LIBS="python3-dev build-base libffi-dev libressl-dev"
+RUN apk add --no-cache python3 $BUILD_LIBS \
+    && pip3 install -r requirements.txt \
+    && apk del --no-cache $BUILD_LIBS
+
 # [ CPP ]
+# XXX Copying deps manually to reduce size
 RUN apk add --no-cache cppcheck libxml2
-COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 COPY --from=clang_layer /usr/lib/libLLVM-8.so /usr/lib/libLLVM-8.so
+COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
+
+# [ Docker ]
+RUN apk --no-cache add gmp
+COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
+
+# [ Bash ]
+COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
+COPY --from=haskell_layer /root/.local/bin/shellcheck /bin/shellcheck
+
+# [ Golang ]
+COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
+COPY --from=golint_layer /go/bin/golint /bin/golint
 
 # [ Terraform ]
 COPY --from=terraform_layer /terraform /bin/terraform

@@ -3,16 +3,22 @@ package api
 import (
 	"fmt"
 	"github.com/tyhal/crie/api/linter"
-	"github.com/tyhal/crie/imp"
 	"strings"
 )
 
+// CurrentLinterType is a global used to know if we are <chk|fmt|neither>
 var CurrentLinterType = ""
-var standards = imp.LanguageList
 
-// Version to print the current version of standards within crie
+var languages []linter.Language
+
+// SetLinters is used to load in implemented linters from other packages
+func SetLinters(l []linter.Language) {
+	languages = l
+}
+
+// Version to print the current version of languages within crie
 func Version() int {
-	return len(standards)
+	return len(languages)
 }
 
 func pprintCmd(front string, bin string, frontparams []string, endparam []string) {
@@ -30,11 +36,11 @@ func printLinter(l linter.Language) {
 	//pprintCmd("❨ fmtConf ❩ ", l.fmtConf.bin, l.fmtConf.frontparams, l.fmtConf.endparam)
 }
 
-// List to print all standards chkConf fmtConf and always commands
+// List to print all languages chkConf fmtConf and always commands
 func List() {
 	fmt.Println(" ~~~~~~~~~ ~~~~~~~~~")
 	fmt.Println("\nLanguages:")
-	for _, l := range standards {
+	for _, l := range languages {
 		printLinter(l)
 	}
 	fmt.Println("\n~~~~~~~~~ ~~~~~~~~~")

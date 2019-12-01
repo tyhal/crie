@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-
-# Clean out images so we don't push them
-docker images -q -f reference=tyhal/crie* | tr ' ' '\n' | uniq | xargs docker rmi -f
-exit 0

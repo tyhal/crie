@@ -11,19 +11,19 @@ import (
 	"strconv"
 )
 
-// SingleLang if set will then tell standards to only use the given language
+// SingleLang if set will then tell languages to only use the given language
 var SingleLang string
 
 // GitDiff to use the git files instead of the entire tree
 var GitDiff bool
 
 func getLanguage(lang string) (linter.Language, error) {
-	for _, standardizer := range standards {
+	for _, standardizer := range languages {
 		if standardizer.Name == lang {
 			return standardizer, nil
 		}
 	}
-	return standards[0], errors.New("language not found in configuration")
+	return languages[0], errors.New("language not found in configuration")
 }
 
 // NoStandards runs all fmtConf exec commands in languages and in always fmtConf
@@ -31,7 +31,7 @@ func NoStandards() {
 
 	// Get files not used
 	files := allFiles
-	for _, standardizer := range standards {
+	for _, standardizer := range languages {
 		files = filter(files, false, standardizer.Match.MatchString)
 	}
 
@@ -63,7 +63,7 @@ func NoStandards() {
 	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
 	// Print the top 10
-	fmt.Println("Top Ten file types without standards")
+	fmt.Println("Top Ten file types without languages")
 	count := 10
 	for _, i := range values {
 		for _, s := range output[i] {
@@ -76,7 +76,8 @@ func NoStandards() {
 	}
 }
 
-func RunDefaults() error {
+// RunCrie is the generic way to run everything based on the packages configuration
+func RunCrie() error {
 
 	if GitDiff {
 		allFiles = gitFiles
@@ -84,17 +85,17 @@ func RunDefaults() error {
 
 	errCount := 0
 
-	runStandards := standards
+	currentLangs := languages
 	if SingleLang != "" {
 		lang, err := getLanguage(SingleLang)
 		if err != nil {
 			return err
 		}
-		runStandards = []linter.Language{lang}
+		currentLangs = []linter.Language{lang}
 	}
 
-	// Run every formatter.
-	for _, l := range runStandards {
+	// Run every linter.
+	for _, l := range currentLangs {
 
 		toLint := l.GetLinter(CurrentLinterType)
 		toLog := log.WithFields(log.Fields{"lang": l.Name, "type": CurrentLinterType})
