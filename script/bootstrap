@@ -23,3 +23,5 @@ fi
 if ! command -v docker; then
 	docker_inst
 fi
+
+pip3 install -r "$(dirname "$0")/../requirements.txt"

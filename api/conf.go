@@ -47,7 +47,7 @@ func newStdConf() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("New standards conf created: %s\nPlease view this and configure for your repo\n", GlobalState.ConfName)
+	fmt.Printf("New languages conf created: %s\nPlease view this and configure for your repo\n", GlobalState.ConfName)
 }
 
 func isEmpty(name string) (bool, error) {

@@ -40,5 +40,5 @@ func Chk() error {
 		}
 	}
 	CurrentLinterType = "chk"
-	return RunDefaults()
+	return RunCrie()
 }
