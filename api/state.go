@@ -2,33 +2,23 @@ package api
 
 import (
 	"fmt"
+	"github.com/tyhal/crie/api/linter"
 	"strings"
 )
 
-var standards = []language{
-	lBash,
-	lSh,
-	lCpp,
-	lCppheaders,
-	lC,
-	lCmake,
-	lDocker,
-	lGolang,
-	lJavascript,
-	lJSON,
-	lPython,
-	lPythonDeps,
-	lMarkdown,
-	lASCIIDoctor,
-	lTerraform,
-	lYML,
-	lAnsible,
-	lDockerCompose,
+// CurrentLinterType is a global used to know if we are <chk|fmt|neither>
+var CurrentLinterType = ""
+
+var languages []linter.Language
+
+// SetLinters is used to load in implemented linters from other packages
+func SetLinters(l []linter.Language) {
+	languages = l
 }
 
-// Version to print the current version of standards within crie
+// Version to print the current version of languages within crie
 func Version() int {
-	return len(standards)
+	return len(languages)
 }
 
 func pprintCmd(front string, bin string, frontparams []string, endparam []string) {
@@ -39,14 +29,17 @@ func pprintCmd(front string, bin string, frontparams []string, endparam []string
 	}
 }
 
-// List to print all standards chk fmt and always commands
+func printLinter(l linter.Language) {
+	fmt.Println("	" + l.Name)
+	// TODO inteface that prints configs for each linter.Linter
+}
+
+// List to print all languages chkConf fmt and always commands
 func List() {
 	fmt.Println(" ~~~~~~~~~ ~~~~~~~~~")
 	fmt.Println("\nLanguages:")
-	for _, standard := range standards {
-		fmt.Println("	" + standard.name)
-		pprintCmd("❨ chk ❩ ", standard.chk.bin, standard.chk.frontparams, standard.chk.endparam)
-		pprintCmd("❨ fmt ❩ ", standard.fmt.bin, standard.fmt.frontparams, standard.fmt.endparam)
+	for _, l := range languages {
+		printLinter(l)
 	}
 	fmt.Println("\n~~~~~~~~~ ~~~~~~~~~")
 }

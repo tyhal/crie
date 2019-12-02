@@ -1,7 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="go build github.com/tyhal/crie" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
-    <module name="standards" />
+  <configuration default="false" name="crie chk" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="crie" />
     <working_directory value="$PROJECT_DIR$" />
+    <parameters value="chk -v" />
     <kind value="PACKAGE" />
     <filePath value="$PROJECT_DIR$/crie.go" />
     <package value="github.com/tyhal/crie" />

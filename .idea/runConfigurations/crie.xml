@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="test" type="ShConfigurationType">
-    <option name="SCRIPT_PATH" value="$PROJECT_DIR$/script/test" />
-    <option name="SCRIPT_OPTIONS" value="" />
+  <configuration default="false" name="crie" type="ShConfigurationType">
+    <option name="SCRIPT_PATH" value="$PROJECT_DIR$/script/crie" />
+    <option name="SCRIPT_OPTIONS" value="all" />
     <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="INTERPRETER_PATH" value="/bin/sh" />
     <option name="INTERPRETER_OPTIONS" value="" />

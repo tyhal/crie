@@ -2,13 +2,14 @@ package cli
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/api"
-	"log"
 )
 
 func all() {
-	err := api.Fmt()
+	api.CurrentLinterType = "fmt"
+	err := api.RunCrie()
 
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +38,8 @@ var FmtCmd = &cobra.Command{
 	Short: "Run crie formatters in current dir",
 	Long:  `Run all formatters in the list`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := api.Fmt()
+		api.CurrentLinterType = "fmt"
+		err := api.RunCrie()
 
 		if err != nil {
 			log.Fatal(err)
