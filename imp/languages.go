@@ -40,7 +40,7 @@ var LanguageList = []linter.Language{
 		Match: regexp.MustCompile(`Dockerfile$`),
 		Chk:   execCmd{`hadolint`, par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`}, par{}}},
 
-	//	Fmt:   execCmd{`dockfmt`, par{`fmtConf`, `-w`}, par{}}}
+	//	Fmt:   execCmd{`dockfmt`, par{`fmt`, `-w`}, par{}}}
 
 	// https://github.com/adrienverge/yamllint
 	{

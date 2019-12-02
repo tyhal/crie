@@ -31,11 +31,11 @@ func filter(list []string, expect bool, f func(string) bool) []string {
 func printReportErr(rep linter.Report) error {
 
 	if rep.Err == nil {
-		fmt.Printf(" ✔️  %v: \n", rep.File)
+		fmt.Printf(" ✔️  %v\n", rep.File)
 		return nil
 	}
 
-	fmt.Printf(" ✖️  %v: \n", rep.File)
+	fmt.Printf(" ✖️  %v\n", rep.File)
 
 	if Quiet {
 		return rep.Err

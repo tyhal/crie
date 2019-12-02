@@ -31,12 +31,10 @@ func pprintCmd(front string, bin string, frontparams []string, endparam []string
 
 func printLinter(l linter.Language) {
 	fmt.Println("	" + l.Name)
-	// TODO
-	//pprintCmd("❨ chkConf ❩ ", l.chkConf.bin, l.chkConf.frontparams, l.chkConf.endparam)
-	//pprintCmd("❨ fmtConf ❩ ", l.fmtConf.bin, l.fmtConf.frontparams, l.fmtConf.endparam)
+	// TODO inteface that prints configs for each linter.Linter
 }
 
-// List to print all languages chkConf fmtConf and always commands
+// List to print all languages chkConf fmt and always commands
 func List() {
 	fmt.Println(" ~~~~~~~~~ ~~~~~~~~~")
 	fmt.Println("\nLanguages:")

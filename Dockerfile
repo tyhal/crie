@@ -32,8 +32,6 @@ RUN go get -u mvdan.cc/sh/cmd/shfmt
 #RUN go get -u github.com/jessfraz/dockfmt
 
 FROM go_layer as crie_layer
-RUN apk --no-cache add git wget
-ENV CGO_ENABLED=0
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum
 WORKDIR /crie
@@ -67,10 +65,10 @@ RUN adduser -D standards
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# TODO package.json
 # [ Javascript ]
 RUN apk add --no-cache nodejs-npm \
     && npm install -g standard
-
 # [ Markdown + AsciiDoctor ]
 RUN apk add --no-cache nodejs-npm asciidoctor \
     && npm install -g remark-cli remark-preset-lint-recommended
