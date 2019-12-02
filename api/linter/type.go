@@ -27,7 +27,7 @@ type Language struct {
 	Chk   Linter         // Convention linting tool - Errors on any problem
 }
 
-// GetLinter returns the function to run when executing
+// GetLinter allows for string indexing to get fmt or chk...
 // TODO remove requirement for this function
 func (l Language) GetLinter(which string) Linter {
 	if which == "fmt" {

@@ -26,7 +26,7 @@ func getLanguage(lang string) (linter.Language, error) {
 	return languages[0], errors.New("language not found in configuration")
 }
 
-// NoStandards runs all fmtConf exec commands in languages and in always fmtConf
+// NoStandards runs all fmt exec commands in languages and in always fmt
 func NoStandards() {
 
 	// Get files not used
@@ -63,7 +63,7 @@ func NoStandards() {
 	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
 	// Print the top 10
-	fmt.Println("Top Ten file types without languages")
+	fmt.Println("Top Ten file types without standards applied to them")
 	count := 10
 	for _, i := range values {
 		for _, s := range output[i] {
