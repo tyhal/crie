@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/api"
 	"github.com/tyhal/crie/cli"
-	"os"
+	"github.com/tyhal/crie/imp"
 )
 
 // Execute the commands that are parsed
@@ -56,8 +56,11 @@ func init() {
 }
 
 func main() {
+	api.SetLinters(imp.LanguageList)
+	log.SetFormatter(&log.TextFormatter{
+		DisableTimestamp: true,
+	})
 	if err := Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }

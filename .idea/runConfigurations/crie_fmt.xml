@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="crie fmt" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="crie" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="fmt -v" />
+    <kind value="PACKAGE" />
+    <filePath value="$PROJECT_DIR$/crie.go" />
+    <package value="github.com/tyhal/crie" />
+    <directory value="$PROJECT_DIR$/" />
+    <method v="2" />
+  </configuration>
+</component>

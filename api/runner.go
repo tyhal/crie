@@ -3,25 +3,27 @@ package api
 import (
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/api/linter"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 )
 
-// SingleLang if set will then tell standards to only use the given language
+// SingleLang if set will then tell languages to only use the given language
 var SingleLang string
 
 // GitDiff to use the git files instead of the entire tree
 var GitDiff bool
 
-func getLanguage(lang string) (language, error) {
-	for _, standardizer := range standards {
-		if standardizer.name == lang {
+func getLanguage(lang string) (linter.Language, error) {
+	for _, standardizer := range languages {
+		if standardizer.Name == lang {
 			return standardizer, nil
 		}
 	}
-	return standards[0], errors.New("language not found in configuration")
+	return languages[0], errors.New("language not found in configuration")
 }
 
 // NoStandards runs all fmt exec commands in languages and in always fmt
@@ -29,8 +31,8 @@ func NoStandards() {
 
 	// Get files not used
 	files := allFiles
-	for _, standardizer := range standards {
-		files = filter(files, false, standardizer.match.MatchString)
+	for _, standardizer := range languages {
+		files = filter(files, false, standardizer.Match.MatchString)
 	}
 
 	// Get extensions or Filename(if no extension) and count occurrences
@@ -61,7 +63,7 @@ func NoStandards() {
 	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
 	// Print the top 10
-	fmt.Println("Top Ten file types without standards")
+	fmt.Println("Top Ten file types without standards applied to them")
 	count := 10
 	for _, i := range values {
 		for _, s := range output[i] {
@@ -74,7 +76,8 @@ func NoStandards() {
 	}
 }
 
-func stdrun(stdtype string, getexec execselec) error {
+// RunCrie is the generic way to run everything based on the packages configuration
+func RunCrie() error {
 
 	if GitDiff {
 		allFiles = gitFiles
@@ -82,39 +85,49 @@ func stdrun(stdtype string, getexec execselec) error {
 
 	errCount := 0
 
-	runStandards := standards
+	currentLangs := languages
 	if SingleLang != "" {
 		lang, err := getLanguage(SingleLang)
 		if err != nil {
 			return err
 		}
-		runStandards = []language{lang}
+		currentLangs = []linter.Language{lang}
 	}
 
-	// Run every formatter.
-	for _, standardizer := range runStandards {
-		execC := getexec(standardizer)
-		if execC.bin == "" {
+	// Run every linter.
+	for _, l := range currentLangs {
+
+		toLint := l.GetLinter(CurrentLinterType)
+		toLog := log.WithFields(log.Fields{"lang": l.Name, "type": CurrentLinterType})
+
+		if toLint == nil {
+			toLog.Debug("there are no configurations associated for this action")
+			continue
+		}
+		err := toLint.WillRun()
+		if err != nil {
+			toLog.Error(err.Error())
+			errCount++
 			continue
 		}
 
 		// Get the match for this formatter's files.
-		reg := standardizer.match
+		reg := l.Match
 
 		// filter the files to format based on given match and format them.
 		filteredFilepaths := filter(allFiles, true, reg.MatchString)
-		fmt.Println("❨ " + stdtype + " ❩ ➔ " + standardizer.name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
+		fmt.Println("❨ " + CurrentLinterType + " ❩ ➔ " + l.Name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
 
-		err := parallelLoop(execC, filteredFilepaths)
+		err = parallelLoop(l, filteredFilepaths)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			toLog.Error(err.Error())
 			errCount++
 		}
 	}
 
 	if errCount > 0 {
-		return errors.New("🔍 CRIE FAILED: " + strconv.Itoa(errCount) + " error(s) occurred while checking")
+		return errors.New("crie found " + strconv.Itoa(errCount) + " error(s) while " + CurrentLinterType + "'ing 🔍")
 	}
 
 	return nil

@@ -3,10 +3,10 @@ package api
 import (
 	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -47,7 +47,7 @@ func newStdConf() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("New standards conf created: %s\nPlease view this and configure for your repo\n", GlobalState.ConfName)
+	fmt.Printf("New languages conf created: %s\nPlease view this and configure for your repo\n", GlobalState.ConfName)
 }
 
 func isEmpty(name string) (bool, error) {
@@ -156,29 +156,32 @@ func min(x, y int) int {
 // Initialise returns all valid files that have also been filtered by the config
 func Initialise() {
 
+	if Verbose {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	// Are we a repo?
 	_, err := os.Stat(".git")
 	GlobalState.IsRepo = err == nil
 
+	// Work out where we are
 	dir, err := os.Getwd()
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Create an initial file list
 	err = filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
 			allFiles = append(allFiles, path)
 		}
 		return nil
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	empty, err := isEmpty(".")
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -204,9 +207,9 @@ func Initialise() {
 
 		c := exec.Command("git",
 			par{"rev-list",
-				"--all",
 				"--no-merges",
-				"--count"}...)
+				"--count",
+				"HEAD"}...)
 
 		c.Stdout = &outB
 
@@ -214,10 +217,10 @@ func Initialise() {
 			log.Fatal(err)
 		}
 
+		// Produce string that will  query back all history or only 10 commits
 		commitCntStr := strings.Split(outB.String(), "\n")[0]
 		commitCnt, err := strconv.Atoi(commitCntStr)
-
-		commitSlice := "HEAD~" + strconv.Itoa(min(commitCnt, 10)) + "..HEAD"
+		commitSlice := "HEAD~" + strconv.Itoa(min(commitCnt-1, 10)) + "..HEAD"
 
 		args := par{"diff", "--name-only", commitSlice, "."}
 		c = exec.Command("git", args...)
@@ -229,12 +232,12 @@ func Initialise() {
 		err = c.Run()
 
 		if err != nil {
-
 			fmt.Println("I noticed you are using git but I failed to get git diff")
 			fmt.Println("... this is non-breaking (a-ok)")
-
+			log.Debug(err.Error())
+			log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
+			log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
 			gitFiles = allFiles
-
 		} else {
 			gitFiles = configureConf(strings.Split(outB.String(), "\n"))
 		}

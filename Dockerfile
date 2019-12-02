@@ -22,12 +22,11 @@ FROM golang:1.12.7-alpine3.9 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
+# TODO implement imp/golint.go
 FROM go_layer as golint_layer
 RUN go get -u golang.org/x/lint/golint
 
-FROM go_layer as vale_layer
-RUN go get -u github.com/errata-ai/vale
-
+# TODO implement imp/shfmt.go
 FROM go_layer as shfmt_layer
 RUN go get -u mvdan.cc/sh/cmd/shfmt
 #RUN go get -u github.com/jessfraz/dockfmt
@@ -39,6 +38,7 @@ WORKDIR /crie
 RUN go mod download
 COPY cli /crie/cli
 COPY api /crie/api
+COPY imp /crie/imp
 COPY crie.go /crie/crie.go
 RUN go build 
 
@@ -65,6 +65,17 @@ RUN adduser -D standards
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# TODO package.json
+# [ Javascript ]
+RUN apk add --no-cache nodejs-npm \
+    && npm install -g standard
+# [ Markdown + AsciiDoctor ]
+RUN apk add --no-cache nodejs-npm asciidoctor \
+    && npm install -g remark-cli remark-preset-lint-recommended
+# [ JSON ]
+RUN apk add --no-cache nodejs-npm \
+    && npm install -g jsonlint2
+
 # [ Pips ]
 COPY requirements.txt /requirements.txt
 ENV BUILD_LIBS="python3-dev build-base libffi-dev libressl-dev"
@@ -72,35 +83,23 @@ RUN apk add --no-cache python3 $BUILD_LIBS \
     && pip3 install -r requirements.txt \
     && apk del --no-cache $BUILD_LIBS
 
+# [ CPP ]
+# XXX Copying deps manually to reduce size
+RUN apk add --no-cache cppcheck libxml2
+COPY --from=clang_layer /usr/lib/libLLVM-8.so /usr/lib/libLLVM-8.so
+COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
+
 # [ Docker ]
 RUN apk --no-cache add gmp
 COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
-#COPY --from=go_layer /go/bin/dockfmt /bin/dockfmt
 
 # [ Bash ]
 COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
 COPY --from=haskell_layer /root/.local/bin/shellcheck /bin/shellcheck
 
-# [ Javascript ]
-RUN apk add --no-cache nodejs-npm \
-    && npm install -g standard
-
 # [ Golang ]
 COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
 COPY --from=golint_layer /go/bin/golint /bin/golint
-
-# [ Markdown + AsciiDoctor ]
-RUN apk add --no-cache nodejs-npm asciidoctor \
-    && npm install -g remark-cli remark-preset-lint-recommended
-COPY --from=vale_layer /go/bin/vale /bin/vale
-
-# [ JSON ]
-RUN apk add --no-cache nodejs-npm \
-    && npm install -g jsonlint2
-
-# [ CPP ]
-RUN apk add --no-cache cppcheck
-COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 
 # [ Terraform ]
 COPY --from=terraform_layer /terraform /bin/terraform
