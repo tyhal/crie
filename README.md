@@ -15,7 +15,7 @@ Crie is an effective way to format and lint code for a variety of languages
 Bundled all-together with Docker 
 
 ```bash
-    sudo ./script/crie install
+    git clone https://github.com/tyhal/crie /tmp/crie; sudo /tmp/crie/script/crie install
 ```
 
 #### Local Binary
