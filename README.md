@@ -23,7 +23,7 @@ Bundled all-together with Docker
 Local binary requiring all linters to be installed
 
 ```bash
-    go get -u github.com/tyhal/crie
+    (git clone https://github.com/tyhal/crie /tmp/crie; cd /tmp/crie && go install)
 ```
 
 ## Usage
