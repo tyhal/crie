@@ -1,8 +1,8 @@
 package api
 
 type conf struct {
-	Ignore   []string `yaml:"ignore"`
-	ProjDirs []string `yaml:"proj_dirs"`
+	Ignore   []string `hcl:"ignore"`
+	ProjDirs []string `hcl:"proj_dirs"`
 }
 
 type state struct {

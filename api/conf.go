@@ -200,7 +200,6 @@ func Initialise() {
 		// If we are a repo without a configuration then force it upon the project
 		if _, err := os.Stat(GlobalState.ConfName); err != nil {
 			newStdConf()
-			os.Exit(1)
 		}
 
 		var outB, errB bytes.Buffer
