@@ -47,7 +47,7 @@ RUN apk --no-cache add clang
 
 FROM alpine:3.10.3 as terraform_layer
 RUN apk --no-cache add git wget zip
-ENV TERRA_VER 0.11.13
+ENV TERRA_VER 0.12.17
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 RUN unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 RUN pwd
@@ -65,16 +65,14 @@ RUN adduser -D standards
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# TODO package.json
-# [ Javascript ]
-RUN apk add --no-cache nodejs-npm \
-    && npm install -g standard
-# [ Markdown + AsciiDoctor ]
-RUN apk add --no-cache nodejs-npm asciidoctor \
-    && npm install -g remark-cli remark-preset-lint-recommended
-# [ JSON ]
-RUN apk add --no-cache nodejs-npm \
-    && npm install -g jsonlint2
+# [ NPM pkgs]
+RUN apk add --no-cache nodejs-npm && npm install -g jsonlint2 remark-cli remark-preset-lint-recommended standard
+
+# [ OS pkgs]
+RUN apk --no-cache add gmp libxml2
+ COPY --from=clang_layer /usr/lib/libLLVM-8.so /usr/lib/libLLVM-8.so
+ COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
+RUN apk --no-cache add cppcheck asciidoctor
 
 # [ Pips ]
 COPY requirements.txt /requirements.txt
@@ -83,14 +81,6 @@ RUN apk add --no-cache python3 $BUILD_LIBS \
     && pip3 install -r requirements.txt \
     && apk del --no-cache $BUILD_LIBS
 
-# [ CPP ]
-# XXX Copying deps manually to reduce size
-RUN apk add --no-cache cppcheck libxml2
-COPY --from=clang_layer /usr/lib/libLLVM-8.so /usr/lib/libLLVM-8.so
-COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
-
-# [ Docker ]
-RUN apk --no-cache add gmp
 COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
 
 # [ Bash ]
@@ -107,11 +97,13 @@ COPY --from=terraform_layer /terraform /bin/terraform
 # [ Run Scripts ]
 COPY --from=crie_layer /crie/crie /bin/crie
 
+#ENV PATH /node_modules/.bin:$PATH
+#RUN stat /node_modules/.bin
+
 # [ Conf ]
 COPY conf /etc/crie/
 RUN chown -R standards:standards /etc/crie/
-ENV PATH /node_modules/.bin:$PATH
-WORKDIR /check
+WORKDIR /_
 
 # Give permission to non root to cache dirs
 RUN mkdir /.standard-v14-cache /.ansible

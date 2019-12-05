@@ -24,7 +24,7 @@ if [ "$1" = "install" ]; then
 	exit 0
 fi
 if [ "$1" = "all" ] || [ "$1" = "chk" ] || [ "$1" = "fmt" ] || [ "$1" = "non" ]; then
-	COMMAND="docker $D_RUN -v $PWD:/check $IMAGE $*"
+	COMMAND="docker $D_RUN -v $PWD:/_ $IMAGE $*"
 fi
 
 bash -c "$COMMAND"

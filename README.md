@@ -10,7 +10,7 @@ Crie is an effective way to format and lint code for a variety of languages
 
 ## Install options
 
-#### Docker Based Install
+#### Docker Based Install (Recommended)
 
 Bundled all-together with Docker 
 
@@ -23,9 +23,19 @@ Bundled all-together with Docker
 Local binary requiring all linters to be installed
 
 ```bash
-    (git clone https://github.com/tyhal/crie /tmp/crie; cd /tmp/crie \
-        && go install \
-        && pip3 install -r requirements.txt)
+    # Ensure your path contains $GOPATH/bin
+    git clone https://github.com/tyhal/crie /tmp/crie; cd /tmp/crie 
+    go install
+
+    # Additional tools used to lint
+    go get -u mvdan.cc/sh/cmd/shfmt golang.org/x/lint/golint
+    pip3 install -r requirements.txt
+
+    sudo npm install -g jsonlint2 remark-cli remark-preset-lint-recommended standard
+    sudo apt install cppcheck shellcheck clang-format
+
+    # TODO install help:
+    # hadolint
 ```
 
 ## Usage
