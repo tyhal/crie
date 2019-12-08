@@ -1,113 +1,57 @@
 package api
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/api/linter"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
 )
 
 var projDirs []string
 
-func (s *ProjectLintConfiguration) initialiseRepo() {
-	// If we are a repo without a configuration then force it upon the project
-	if _, err := os.Stat(s.ConfPath); err != nil {
-		createFileSettings(s.ConfPath)
-	}
-
-	var outB, errB bytes.Buffer
-
-	c := exec.Command("git",
-		par{"rev-list",
-			"--no-merges",
-			"--count",
-			"HEAD"}...)
-
-	c.Stdout = &outB
-
-	if err := c.Run(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Produce string that will  query back all history or only 10 commits
-	commitCntStr := strings.Split(outB.String(), "\n")[0]
-	commitCnt, err := strconv.Atoi(commitCntStr)
-	commitSlice := "HEAD~" + strconv.Itoa(min(commitCnt-1, s.GitDiff)) + "..HEAD"
-
-	args := par{"diff", "--name-only", commitSlice, "."}
-	c = exec.Command("git", args...)
-
-	c.Env = os.Environ()
-	c.Stdout = &outB
-	c.Stderr = &errB
-
-	err = c.Run()
-
-	if err != nil {
-		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
-		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
-		log.Fatal(err.Error())
-	} else {
-		s.gitFiles = s.loadFileSettings(strings.Split(outB.String(), "\n"))
-	}
-}
-
-func (s *ProjectLintConfiguration) initialiseFileList() {
-
-	// Work out where we are
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Create an initial file list
-	err = filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if !f.IsDir() {
-			s.allFiles = append(s.allFiles, path)
-		}
-		return nil
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	empty, err := isEmpty(".")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if empty {
-		return
-	}
-
-	// If there is a config then parse the files through it
-	if _, err := os.Stat(s.ConfPath); err == nil {
-		s.allFiles = s.loadFileSettings(s.allFiles)
-	}
-}
-
 // loadFileList returns all valid files that have also been filtered by the config
 func (s *ProjectLintConfiguration) loadFileList() {
+
+	// The logic in this needs to be collapsed
+
 	// Are we a repo?
 	_, err := os.Stat(".git")
 	s.IsRepo = err == nil
 
-	if s.GitDiff > 0 {
-		if s.IsRepo {
-			s.initialiseRepo()
+	fileList := []string{}
+
+	if s.IsRepo {
+		// If we are a repo without a configuration then force it upon the project
+		if _, err := os.Stat(s.ConfPath); err != nil {
+			createFileSettings(s.ConfPath)
+		}
+
+		if s.GitDiff > 0 {
+			// Get files changed in last s.GitDiff commits
+			fileList, err = s.fileListRepoChanged()
 		} else {
-			log.Fatal("this is not a git repo you are in")
+			// Get all files in git repo
+			fileList, err = s.fileListRepoAll()
 		}
 	} else {
-		s.initialiseFileList()
+
+		// Check if the user asked for git diffs when not in a repo
+		if s.GitDiff > 0 {
+			log.Fatal("This is not a git repo you are in")
+		}
+
+		// Generic grab all the files
+		fileList, err = s.fileListAll()
+	}
+	if err != nil {
+		log.Fatal(err.Error())
+	} else {
+		s.fileList = fileList
 	}
 }
 
@@ -141,7 +85,7 @@ func (s *ProjectLintConfiguration) NoStandards() {
 	s.loadFileList()
 
 	// Get files not used
-	files := s.allFiles
+	files := s.fileList
 	for _, standardizer := range s.Languages {
 		files = filter(files, false, standardizer.Match.MatchString)
 	}
@@ -173,7 +117,6 @@ func (s *ProjectLintConfiguration) NoStandards() {
 
 	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
-
 	// Print the top 10
 	fmt.Println("Top Ten file types without standards applied to them")
 	table := tablewriter.NewWriter(os.Stdout)
@@ -197,11 +140,6 @@ func (s *ProjectLintConfiguration) Run() error {
 
 	// Get initial list of files to use
 	s.loadFileList()
-
-	// Use git list if we are told to use atleast 1 or more git revisions
-	if s.GitDiff > 0 {
-		s.allFiles = s.gitFiles
-	}
 
 	errCount := 0
 
@@ -236,7 +174,7 @@ func (s *ProjectLintConfiguration) Run() error {
 		reg := l.Match
 
 		// filter the files to format based on given match and format them.
-		filteredFilepaths := filter(s.allFiles, true, reg.MatchString)
+		filteredFilepaths := filter(s.fileList, true, reg.MatchString)
 		fmt.Println("❨ " + s.LintType + " ❩ ➔ " + l.Name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
 
 		err = LintFileList(selectedLinter, filteredFilepaths)

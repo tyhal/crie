@@ -42,12 +42,7 @@ func (s *ProjectLintConfiguration) loadFileSettings(files []string) []string {
 }
 
 func createFileSettings(confpath string) {
-	conf := fileSettings{
-		[]string{".git"},
-		[]string{},
-	}
-
-	yamlOut, err := yaml.Marshal(conf)
+	yamlOut, err := yaml.Marshal(fileSettings{})
 
 	if err != nil {
 		log.Fatal(err)

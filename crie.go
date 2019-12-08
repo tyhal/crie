@@ -10,10 +10,9 @@ import (
 	"strconv"
 )
 
-
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "15"
+var patchNum = "16"
 
 var quote = `
 	|> crie: the act of crying and dying at the same time
