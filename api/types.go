@@ -19,9 +19,7 @@ type ProjectLintConfiguration struct {
 	Languages       []linter.Language
 	GitDiff         int
 	SingleLang      string
-	allFiles        []string // allFiles the list of loaded files that need to be parsed
-	gitFiles        []string // gitFiles the list of loaded files that 'might' need to be parsed
-
+	fileList        []string
 }
 
 type par []string

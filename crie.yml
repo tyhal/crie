@@ -1,7 +1,3 @@
 ---
 ignore:
-  - .git
-  - node_modules
-  - .cpd.yaml
-  - verify/docs/html
 proj_dirs: ["verify"]

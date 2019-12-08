@@ -19,7 +19,6 @@ func (rep *Report) Log() error {
 
 	log.WithFields(log.Fields{"type": "stdout"}).Info(rep.StdOut)
 	log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
-	log.WithFields(log.Fields{"type": "err"}).Debug(rep.Err.Error())
 
 	return rep.Err
 }
