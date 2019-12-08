@@ -13,7 +13,7 @@ var Config *api.ProjectLintConfiguration
 // FmtCmd Format code command
 var FmtCmd = &cobra.Command{
 	Use:   "fmt",
-	Short: "Run crie formatters in current dir",
+	Short: "Run formatters",
 	Long:  `Run all formatters in the list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		Config.LintType = "fmt"
@@ -29,7 +29,7 @@ var FmtCmd = &cobra.Command{
 var LsCmd = &cobra.Command{
 	Use:     "ls",
 	Aliases: []string{"list"},
-	Short:   "List all languages available",
+	Short:   "List languages",
 	Long:    `List all languages available and the commands run when used`,
 	Run: func(cmd *cobra.Command, args []string) {
 		Config.List()
@@ -40,7 +40,7 @@ var LsCmd = &cobra.Command{
 var ChkCmd = &cobra.Command{
 	Use:     "chk",
 	Aliases: []string{"check"},
-	Short:   "Run crie checkers in current dir",
+	Short:   "Run checkers",
 	Long:    `Check all code standards for coding conventions`,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -69,7 +69,7 @@ var NonCmd = &cobra.Command{
 var LntCmd = &cobra.Command{
 	Use:     "lnt",
 	Aliases: []string{"lint", "all"},
-	Short:   "Fully Lint the code",
+	Short:   "Run everything",
 	Long:    `Runs both format and then check`,
 	Run: func(cmd *cobra.Command, args []string) {
 		Config.LintType = "fmt"

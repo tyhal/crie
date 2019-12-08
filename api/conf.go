@@ -52,23 +52,15 @@ func (s *ProjectLintConfiguration) initialiseRepo() {
 	err = c.Run()
 
 	if err != nil {
-		fmt.Println("I noticed you are using git but I failed to get git diff")
-		fmt.Println("... this is non-breaking (a-ok)")
-		log.Debug(err.Error())
 		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
 		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
-		s.gitFiles = s.allFiles
+		log.Fatal(err.Error())
 	} else {
 		s.gitFiles = s.loadFileSettings(strings.Split(outB.String(), "\n"))
 	}
 }
 
-// loadFileList returns all valid files that have also been filtered by the config
-func (s *ProjectLintConfiguration) loadFileList() {
-
-	// Are we a repo?
-	_, err := os.Stat(".git")
-	s.IsRepo = err == nil
+func (s *ProjectLintConfiguration) initialiseFileList() {
 
 	// Work out where we are
 	dir, err := os.Getwd()
@@ -100,9 +92,22 @@ func (s *ProjectLintConfiguration) loadFileList() {
 	if _, err := os.Stat(s.ConfPath); err == nil {
 		s.allFiles = s.loadFileSettings(s.allFiles)
 	}
+}
 
-	if s.IsRepo {
-		s.initialiseRepo()
+// loadFileList returns all valid files that have also been filtered by the config
+func (s *ProjectLintConfiguration) loadFileList() {
+	// Are we a repo?
+	_, err := os.Stat(".git")
+	s.IsRepo = err == nil
+
+	if s.GitDiff > 0 {
+		if s.IsRepo {
+			s.initialiseRepo()
+		} else {
+			log.Fatal("this is not a git repo you are in")
+		}
+	} else {
+		s.initialiseFileList()
 	}
 }
 

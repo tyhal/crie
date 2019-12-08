@@ -16,7 +16,7 @@ func Execute() error {
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "12"
+var patchNum = "14"
 
 var quote = `
 	|> crie: the act of crying and dying at the same time
@@ -37,9 +37,8 @@ var rootCmd = &cobra.Command{
 	Use:     "crie",
 	Short:   "crie is a formatter for many languages.",
 	Version: majorNum + "." + strconv.Itoa(len(imp.LanguageList)-minorOffset) + "." + patchNum,
-	Example: "crie chk --git-diff 1 --lang python",
+	Example: "check all python files in the last commit 'crie chk --git-diff 1 --lang python'",
 	Long: `
-
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can prettify any codebase.`,
 }
@@ -84,7 +83,10 @@ func init() {
 }
 
 func main() {
+
+	// You could change this to your own implementation of standards
 	state.Languages = imp.LanguageList
+
 	log.SetFormatter(&log.TextFormatter{
 		DisableTimestamp: true,
 	})
