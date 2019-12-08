@@ -1,6 +1,3 @@
 ---
 ignore:
-  - .git
-  - .cpd.yaml
-  - verify/docs/html
 proj_dirs: ["verify"]

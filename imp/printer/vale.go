@@ -41,8 +41,8 @@ func fixOutputSpacing(msg string) string {
 	return msg
 }
 
-// PrintVerboseAlerts prints Alerts in verbose format.
-func PrintVerboseAlerts(linted []*core.File, wrap bool) (string, error) {
+// GetVerboseAlerts prints Alerts in verbose format.
+func GetVerboseAlerts(linted []*core.File, wrap bool) (io.Reader, error) {
 	var lintErrors, lintWarnings, lintSuggestions int
 	var e, w, s int
 	var symbol string
@@ -71,11 +71,15 @@ func PrintVerboseAlerts(linted []*core.File, wrap bool) (string, error) {
 	}
 
 	n := len(linted)
-	fmt.Fprintf(buf, "%s %s, %s and %s in %d %s.\n", symbol,
+	_, formatErr := fmt.Fprintf(buf, "%s %s, %s and %s in %d %s.\n", symbol,
 		colorize(etotal, errorColor), colorize(wtotal, warningColor),
 		colorize(stotal, suggestionColor), n, pluralize("file", n))
 
-	return buf.String(), err
+	if formatErr != nil {
+		err = formatErr
+	}
+
+	return buf, err
 }
 
 // printVerboseAlert includes an alert's line, column, level, and message.
