@@ -173,18 +173,23 @@ func (s *ProjectLintConfiguration) NoStandards() {
 
 	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
+
 	// Print the top 10
 	fmt.Println("Top Ten file types without standards applied to them")
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"extension", "count"})
 	count := 10
 	for _, i := range values {
 		for _, s := range output[i] {
-			fmt.Printf("%s, %d\n", s, i)
+			table.Append([]string{s, strconv.Itoa(i)})
 			count--
 			if count < 0 {
+				table.Render()
 				return
 			}
 		}
 	}
+	table.Render()
 }
 
 // Run is the generic way to run everything based on the packages configuration
