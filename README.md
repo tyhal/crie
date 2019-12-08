@@ -6,13 +6,13 @@ Crie is an effective way to format and lint code for a variety of languages
 
 -   Alpine based image to reduce download size
 -   Extendable for more languages
--   Opinionated configuration to avoid wasting time discussing styles
+-   Batteries included but replaceable - default configuration (/imp) is separated from core library
 
 ## Install options
 
 #### Docker Based Install (Recommended)
 
-Bundled all-together with Docker 
+Bundled all-together with Docker
 
 ```bash
     git clone https://github.com/tyhal/crie /tmp/crie; sudo /tmp/crie/script/crie install
@@ -24,7 +24,7 @@ Local binary requiring all linters to be installed
 
 ```bash
     # Ensure your path contains $GOPATH/bin
-    git clone https://github.com/tyhal/crie /tmp/crie; cd /tmp/crie 
+    git clone https://github.com/tyhal/crie /tmp/crie; cd /tmp/crie
     go install
 
     # Additional tools used to lint
