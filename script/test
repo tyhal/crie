@@ -24,7 +24,7 @@ script/crie --help
 script/crie chk -v
 script/crie ls
 script/crie fmt -v
-script/crie chk --git-diff
+script/crie chk --git-diff 9
 script/crie chk --lang golang
 script/crie non
 set +x

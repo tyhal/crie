@@ -3,20 +3,7 @@
 
 # ~~~ Languages ~~~
 
-FROM alpine:3.10.3 as haskell_layer
-RUN apk add --no-cache git ghc=8.4.3-r0 xz wget build-base make ca-certificates \
-        && update-ca-certificates
-ENV HADOVER=tags/v1.15.0
-RUN git clone --recursive https://github.com/lukasmartinelli/hadolint.git
-WORKDIR /hadolint
-RUN git checkout "$HADOVER"
-ENV STACK_DIR stack-1.9.1-linux-x86_64-static
-RUN wget --no-check-certificate -O  /stack.tar.gz https://github.com/commercialhaskell/stack/releases/download/v1.9.1/$STACK_DIR.tar.gz
-RUN tar -xvzf /stack.tar.gz
-RUN chmod +x $STACK_DIR/stack
-RUN $STACK_DIR/stack update
-RUN $STACK_DIR/stack --system-ghc install
-RUN $STACK_DIR/stack --system-ghc install ShellCheck
+FROM tyhal/hadolint-hadolint:v1.15.0 as hadolint_layer
 
 FROM golang:1.12.7-alpine3.9 as go_layer
 RUN apk --no-cache add git wget
@@ -40,7 +27,7 @@ COPY cli /crie/cli
 COPY api /crie/api
 COPY imp /crie/imp
 COPY crie.go /crie/crie.go
-RUN go build 
+RUN go build
 
 FROM alpine:3.10.3 as clang_layer
 RUN apk --no-cache add clang
@@ -50,7 +37,6 @@ RUN apk --no-cache add git wget zip
 ENV TERRA_VER 0.12.17
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 RUN unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
-RUN pwd
 
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 # ~~~~~~~~~~~~~~~~~ ~~~ TOP LAYER ~~~ ~~~~~~~~~~~~~~~~~
@@ -81,11 +67,11 @@ RUN apk add --no-cache python3 $BUILD_LIBS \
     && pip3 install -r requirements.txt \
     && apk del --no-cache $BUILD_LIBS
 
-COPY --from=haskell_layer /root/.local/bin/hadolint /bin/hadolint
+COPY --from=hadolint_layer /hadolint /bin/hadolint
 
 # [ Bash ]
 COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
-COPY --from=haskell_layer /root/.local/bin/shellcheck /bin/shellcheck
+COPY --from=hadolint_layer /shellcheck /bin/shellcheck
 
 # [ Golang ]
 COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
@@ -97,17 +83,14 @@ COPY --from=terraform_layer /terraform /bin/terraform
 # [ Run Scripts ]
 COPY --from=crie_layer /crie/crie /bin/crie
 
-#ENV PATH /node_modules/.bin:$PATH
-#RUN stat /node_modules/.bin
-
 # [ Conf ]
 COPY conf /etc/crie/
 RUN chown -R standards:standards /etc/crie/
-WORKDIR /_
+WORKDIR /l
 
 # Give permission to non root to cache dirs
 RUN mkdir /.standard-v14-cache /.ansible
-RUN chmod -R o+rw /.standard-v14-cache /.ansible
+RUN chmod -R o+rw /home /.standard-v14-cache /.ansible
 
 ENTRYPOINT ["/bin/crie"]
 

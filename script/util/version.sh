@@ -4,13 +4,14 @@ set -e
 # TODO Put into build process of standards
 PATCHOFFSET=0
 
-STD_MAJOR="$(script/crie version --major | tr -d "[:space:]")"
-STD_MINOR="$(script/crie version --minor | tr -d "[:space:]")"
-STD_PATCH="$(script/crie version --patch | tr -d "[:space:]")"
+TEST_FULL="$(script/crie --version | awk '{print $3}' | tr -d "[:space:]")"
+echo "$TEST_FULL"
+STD_MAJOR="$(echo "$TEST_FULL" | awk -F '.' '{print $1}')"
+STD_MINOR="$(echo "$TEST_FULL" | awk -F '.' '{print $2}')"
+STD_PATCH="$(echo "$TEST_FULL" | awk -F '.' '{print $3}')"
 
 STD_FULL="$STD_MAJOR.$STD_MINOR.$STD_PATCH"
 
-TEST_FULL="$(script/crie version | tr -d "[:space:]")"
 if [ "$STD_FULL" != "$TEST_FULL" ]; then
 	echo "FAIL! THE WHOLE DOES NOT MATCH THE SUM OF ITS PARTS, WHOLE: $STD_FULL PARTS: $TEST_FULL"
 	exit 1
