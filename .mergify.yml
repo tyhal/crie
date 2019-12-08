@@ -4,7 +4,6 @@ pull_request_rules:
       - author=dependabot-preview[bot]
       - status-success=ci/dockercloud
       - status-success=License Compliance
-      - "status-failure!=LGTM analysis: JavaScript"
     actions:
       merge:
         method: merge
@@ -13,7 +12,6 @@ pull_request_rules:
       - author=renovate[bot]
       - status-success=ci/dockercloud
       - status-success=License Compliance
-      - "status-failure!=LGTM analysis: JavaScript"
     actions:
       merge:
         method: merge
@@ -22,7 +20,6 @@ pull_request_rules:
       - author=snyk-bot[bot]
       - status-success=ci/dockercloud
       - status-success=License Compliance
-      - "status-failure!=LGTM analysis: JavaScript"
     actions:
       merge:
         method: merge
@@ -31,7 +28,6 @@ pull_request_rules:
       - author=tyhal
       - status-success=ci/dockercloud
       - status-success=License Compliance
-      - "status-failure!=LGTM analysis: JavaScript"
     actions:
       merge:
         method: merge
