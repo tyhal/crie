@@ -16,7 +16,7 @@ func Execute() error {
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "14"
+var patchNum = "15"
 
 var quote = `
 	|> crie: the act of crying and dying at the same time
@@ -57,7 +57,6 @@ func setLogLevel() {
 }
 
 func addLinteCommand(cmd *cobra.Command) {
-	// TODO probably only add to commands that need it
 	cmd.PersistentFlags().BoolVarP(&state.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
 	cmd.PersistentFlags().IntVarP(&state.GitDiff, "git-diff", "g", 0, "check files that changed in the last X commits")
 	cmd.PersistentFlags().StringVar(&state.SingleLang, "lang", "", "run with only one language (see ls for available options)")
