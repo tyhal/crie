@@ -6,7 +6,7 @@ replace github.com/pengwynn/flint => github.com/tyhal/flint v0.1.1-0.20190910041
 
 require (
 	github.com/errata-ai/vale v1.7.1
-	github.com/fatih/color v1.5.0
+	github.com/fatih/color v1.7.0
 	github.com/olekukonko/tablewriter v0.0.0-20170719101040-be5337e7b39e
 	github.com/pengwynn/flint v0.0.0-00010101000000-000000000000
 	github.com/sirupsen/logrus v1.4.2
