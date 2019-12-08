@@ -6,12 +6,17 @@ import (
 	"github.com/tyhal/crie/api"
 	"github.com/tyhal/crie/cli"
 	"github.com/tyhal/crie/imp"
+	"strconv"
 )
 
 // Execute the commands that are parsed
 func Execute() error {
 	return rootCmd.Execute()
 }
+
+var majorNum = "0"
+var minorOffset = 0
+var patchNum = "12"
 
 var quote = `
 	|> crie: the act of crying and dying at the same time
@@ -24,42 +29,66 @@ var quote = `
 		Does a good farmer neglect a crop he has planted?
 		Does a good teacher overlook even the most humble student?
 		Does a good father allow a single child to starve?
-		Does a good programmer refuse to maintain his code? 
+		Does a good programmer refuse to maintain his code?
 	>>-
 `
 
 var rootCmd = &cobra.Command{
-	Use:   "crie",
-	Short: "crie is a formatter for many languages.",
+	Use:     "crie",
+	Short:   "crie is a formatter for many languages.",
+	Version: majorNum + "." + strconv.Itoa(len(imp.LanguageList)-minorOffset) + "." + patchNum,
+	Example: "crie chk --git-diff 1 --lang python",
 	Long: `
-	
+
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can prettify any codebase.`,
 }
 
+var quiet = false
+var verbose = false
+var state api.ProjectLintConfiguration
+
+func setLogLevel() {
+	if verbose {
+		log.SetLevel(log.DebugLevel)
+	}
+	if quiet {
+		log.SetLevel(log.FatalLevel)
+	}
+}
+
+func addLinteCommand(cmd *cobra.Command) {
+	// TODO probably only add to commands that need it
+	cmd.PersistentFlags().BoolVarP(&state.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
+	cmd.PersistentFlags().IntVarP(&state.GitDiff, "git-diff", "g", 0, "check files that changed in the last X commits")
+	cmd.PersistentFlags().StringVar(&state.SingleLang, "lang", "", "run with only one language (see ls for available options)")
+	rootCmd.AddCommand(cmd)
+}
+
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&api.Verbose, "verbose", "v", false, "turn on verbose printing for reports")
-	rootCmd.PersistentFlags().BoolVarP(&api.Quiet, "quiet", "q", false, "turn off extra prints from failures (suppresses verbose)")
-	rootCmd.PersistentFlags().BoolVarP(&api.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
-	rootCmd.PersistentFlags().BoolVarP(&api.GitDiff, "git-diff", "g", false, "use the last 10 commits to check files")
-	rootCmd.PersistentFlags().StringVar(&api.GlobalState.ConfName, "config", "crie.yml", "config file location")
-	rootCmd.PersistentFlags().StringVar(&api.SingleLang, "lang", "", "run with only one language (see list for available options)")
 
-	rootCmd.AddCommand(cli.ChkCmd)
-	rootCmd.AddCommand(cli.FmtCmd)
-	rootCmd.AddCommand(cli.AllCmd)
-	rootCmd.AddCommand(cli.VersionCmd)
+	cli.Config = &state
+
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", verbose, "turn on verbose printing for reports")
+	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
+	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "config file location")
+
+	addLinteCommand(cli.ChkCmd)
+	addLinteCommand(cli.FmtCmd)
+	addLinteCommand(cli.LntCmd)
+	addLinteCommand(cli.NonCmd)
+
 	rootCmd.AddCommand(cli.LsCmd)
-	rootCmd.AddCommand(cli.NonCmd)
 
-	cobra.OnInitialize(api.Initialise)
+	cobra.OnInitialize(setLogLevel)
 }
 
 func main() {
-	api.SetLinters(imp.LanguageList)
+	state.Languages = imp.LanguageList
 	log.SetFormatter(&log.TextFormatter{
 		DisableTimestamp: true,
 	})
+
 	if err := Execute(); err != nil {
 		log.Fatal(err)
 	}

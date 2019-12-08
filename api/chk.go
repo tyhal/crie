@@ -33,12 +33,12 @@ func flintRun(path string) {
 }
 
 // Chk runs all Chk exec commands in languages and in always Chk
-func Chk() error {
-	if SingleLang == "" && GlobalState.IsRepo {
+func (s *ProjectLintConfiguration) Chk() error {
+	if s.SingleLang == "" && s.IsRepo {
 		for _, dir := range projDirs {
 			flintRun(dir)
 		}
 	}
-	CurrentLinterType = "chk"
-	return RunCrie()
+	s.LintType = "chk"
+	return s.Run()
 }

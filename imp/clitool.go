@@ -16,6 +16,10 @@ type execCmd struct {
 	endparam    par
 }
 
+func (e execCmd) Name() string {
+	return e.bin
+}
+
 func (e execCmd) WillRun() error {
 	if exec.Command("which", e.bin).Run() != nil {
 		return errors.New("could not find " + e.bin + ", possibly not installed")
@@ -40,15 +44,7 @@ func (e execCmd) Run(filepath string, rep chan linter.Report) {
 	c.Stdout = &outB
 	c.Stderr = &errB
 
-	outS := ""
-	errS := ""
-
 	err := c.Run()
 
-	if err != nil {
-		outS = outB.String()
-		errS = errB.String()
-	}
-
-	rep <- linter.Report{filepath, err, outS, errS}
+	rep <- linter.Report{filepath, err, &outB, &errB}
 }

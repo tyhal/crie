@@ -2,167 +2,73 @@ package api
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
-	"io"
-	"io/ioutil"
+	"github.com/tyhal/crie/api/linter"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
 
-// GlobalState to store relevant information
-var GlobalState state
-
 var projDirs []string
 
-// allFiles the list of loaded files that need to be parsed
-var allFiles []string
-
-// gitFiles the list of loaded files that 'might' need to be parsed
-var gitFiles []string
-
-// CheckIgnores is to run against only the ignored files
-var CheckIgnores = false
-
-func newStdConf() {
-	conf := conf{
-		[]string{".git"},
-		[]string{},
+func (s *ProjectLintConfiguration) initialiseRepo() {
+	// If we are a repo without a configuration then force it upon the project
+	if _, err := os.Stat(s.ConfPath); err != nil {
+		createFileSettings(s.ConfPath)
 	}
 
-	yamlOut, err := yaml.Marshal(conf)
+	var outB, errB bytes.Buffer
 
-	if err != nil {
+	c := exec.Command("git",
+		par{"rev-list",
+			"--no-merges",
+			"--count",
+			"HEAD"}...)
+
+	c.Stdout = &outB
+
+	if err := c.Run(); err != nil {
 		log.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(GlobalState.ConfName, yamlOut, 0666)
+	// Produce string that will  query back all history or only 10 commits
+	commitCntStr := strings.Split(outB.String(), "\n")[0]
+	commitCnt, err := strconv.Atoi(commitCntStr)
+	commitSlice := "HEAD~" + strconv.Itoa(min(commitCnt-1, s.GitDiff)) + "..HEAD"
+
+	args := par{"diff", "--name-only", commitSlice, "."}
+	c = exec.Command("git", args...)
+
+	c.Env = os.Environ()
+	c.Stdout = &outB
+	c.Stderr = &errB
+
+	err = c.Run()
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("I noticed you are using git but I failed to get git diff")
+		fmt.Println("... this is non-breaking (a-ok)")
+		log.Debug(err.Error())
+		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
+		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
+		s.gitFiles = s.allFiles
+	} else {
+		s.gitFiles = s.loadFileSettings(strings.Split(outB.String(), "\n"))
 	}
-
-	fmt.Printf("New languages conf created: %s\nPlease view this and configure for your repo\n", GlobalState.ConfName)
 }
 
-func isEmpty(name string) (bool, error) {
-	f, err := os.Open(name)
-	if err != nil {
-		return false, err
-	}
-	defer f.Close()
-
-	_, err = f.Readdirnames(1) // Or f.Readdir(1)
-	if err == io.EOF {
-		return true, nil
-	}
-	return false, err // Either not empty or error, suits both cases
-}
-
-// Builds up a new list with allFiles matching the match in the config file
-func getAllIgnored(allFiles []string, list []string, f func(string) bool) []string {
-	filteredLists := make([]string, 0)
-	for _, entry := range allFiles {
-		result := f(entry)
-		_, err := os.Stat(entry)
-		if result && err == nil {
-			filteredLists = append(filteredLists, entry)
-		}
-	}
-	appendedList := append(list, filteredLists...)
-
-	// Remove duplicates
-	seen := make(map[string]struct{}, len(appendedList))
-	j := 0
-	for _, v := range appendedList {
-		if _, ok := seen[v]; ok {
-			continue
-		}
-		seen[v] = struct{}{}
-		appendedList[j] = v
-		j++
-	}
-
-	return appendedList[:j]
-}
-
-// Narrows down the list by returning only results that do not match the match in the config file
-func removeIgnored(list []string, f func(string) bool) []string {
-	filteredLists := make([]string, 0)
-	for _, entry := range list {
-		result := f(entry)
-		_, err := os.Stat(entry)
-		if !result && err == nil {
-			filteredLists = append(filteredLists, entry)
-		}
-	}
-	return filteredLists
-}
-
-func configureConf(files []string) []string {
-	f, err := os.Open(GlobalState.ConfName)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	m := conf{}
-
-	err = yaml.NewDecoder(f).Decode(&m)
-
-	if err != nil {
-		log.Fatal("Failed to parse (" + GlobalState.ConfName + "): " + err.Error())
-	}
-
-	var allFiles = files
-
-	if CheckIgnores {
-		files = nil // Clear the list - it'll have files added, rather than removed
-	}
-
-	for _, ignReg := range m.Ignore {
-		reg, err := regexp.Compile(ignReg)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if CheckIgnores {
-			files = getAllIgnored(allFiles, files, reg.MatchString)
-		} else {
-			files = removeIgnored(files, reg.MatchString)
-		}
-	}
-
-	// Add more project roots
-	projDirs = m.ProjDirs
-	projDirs = append(projDirs, ".")
-
-	return files
-}
-
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-// Initialise returns all valid files that have also been filtered by the config
-func Initialise() {
-
-	if Verbose {
-		log.SetLevel(log.DebugLevel)
-	}
+// loadFileList returns all valid files that have also been filtered by the config
+func (s *ProjectLintConfiguration) loadFileList() {
 
 	// Are we a repo?
 	_, err := os.Stat(".git")
-	GlobalState.IsRepo = err == nil
+	s.IsRepo = err == nil
 
 	// Work out where we are
 	dir, err := os.Getwd()
@@ -173,7 +79,7 @@ func Initialise() {
 	// Create an initial file list
 	err = filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
-			allFiles = append(allFiles, path)
+			s.allFiles = append(s.allFiles, path)
 		}
 		return nil
 	})
@@ -191,54 +97,152 @@ func Initialise() {
 	}
 
 	// If there is a config then parse the files through it
-	if _, err := os.Stat(GlobalState.ConfName); err == nil {
-		allFiles = configureConf(allFiles)
+	if _, err := os.Stat(s.ConfPath); err == nil {
+		s.allFiles = s.loadFileSettings(s.allFiles)
 	}
 
-	if GlobalState.IsRepo {
+	if s.IsRepo {
+		s.initialiseRepo()
+	}
+}
 
-		// If we are a repo without a configuration then force it upon the project
-		if _, err := os.Stat(GlobalState.ConfName); err != nil {
-			newStdConf()
+// SetLanguages is used to load in implemented linters from other packages
+func (s *ProjectLintConfiguration) SetLanguages(l []linter.Language) {
+	s.Languages = l
+}
+
+// List to print all languages chkConf fmt and always commands
+func (s *ProjectLintConfiguration) List() {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"language", "checker", "formatter", "associated files"})
+	for _, l := range s.Languages {
+		table.Append([]string{l.Name, getName(l.Chk), getName(l.Fmt), l.Match.String()})
+	}
+	table.Render()
+}
+
+// GetLanguage lets us query a language that might be in our projects configuration
+func (s *ProjectLintConfiguration) GetLanguage(lang string) (linter.Language, error) {
+	for _, standardizer := range s.Languages {
+		if standardizer.Name == lang {
+			return standardizer, nil
+		}
+	}
+	return linter.Language{}, errors.New("language not found in configuration")
+}
+
+// NoStandards runs all fmt exec commands in languages and in always fmt
+func (s *ProjectLintConfiguration) NoStandards() {
+	s.loadFileList()
+
+	// Get files not used
+	files := s.allFiles
+	for _, standardizer := range s.Languages {
+		files = filter(files, false, standardizer.Match.MatchString)
+	}
+
+	// Get extensions or Filename(if no extension) and count occurrences
+	dict := make(map[string]int)
+	for _, str := range files {
+
+		_, s := filepath.Split(str)
+
+		for i := len(str) - 1; i >= 0 && !os.IsPathSeparator(str[i]); i-- {
+			if str[i] == '.' {
+				s = str[i:]
+			}
 		}
 
-		var outB, errB bytes.Buffer
+		dict[s] = dict[s] + 1
+	}
 
-		c := exec.Command("git",
-			par{"rev-list",
-				"--no-merges",
-				"--count",
-				"HEAD"}...)
+	// Print dict in order
+	output := map[int][]string{}
+	var values []int
+	for i, file := range dict {
+		output[file] = append(output[file], i)
+	}
+	for i := range output {
+		values = append(values, i)
+	}
 
-		c.Stdout = &outB
+	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
-		if err = c.Run(); err != nil {
-			log.Fatal(err)
+	// Print the top 10
+	fmt.Println("Top Ten file types without standards applied to them")
+	count := 10
+	for _, i := range values {
+		for _, s := range output[i] {
+			fmt.Printf("%s, %d\n", s, i)
+			count--
+			if count < 0 {
+				return
+			}
+		}
+	}
+}
+
+// Run is the generic way to run everything based on the packages configuration
+func (s *ProjectLintConfiguration) Run() error {
+
+	// Get initial list of files to use
+	s.loadFileList()
+
+	// Use git list if we are told to use atleast 1 or more git revisions
+	if s.GitDiff > 0 {
+		s.allFiles = s.gitFiles
+	}
+
+	errCount := 0
+
+	currentLangs := s.Languages
+	if s.SingleLang != "" {
+		lang, err := s.GetLanguage(s.SingleLang)
+		if err != nil {
+			return err
+		}
+		currentLangs = []linter.Language{lang}
+	}
+
+	// Run every linter.
+	for _, l := range currentLangs {
+
+		selectedLinter := l.GetLinter(s.LintType)
+		toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.LintType})
+
+		if selectedLinter == nil {
+			toLog.Debug("there are no configurations associated for this action")
+			continue
 		}
 
-		// Produce string that will  query back all history or only 10 commits
-		commitCntStr := strings.Split(outB.String(), "\n")[0]
-		commitCnt, err := strconv.Atoi(commitCntStr)
-		commitSlice := "HEAD~" + strconv.Itoa(min(commitCnt-1, 10)) + "..HEAD"
+		err := selectedLinter.WillRun()
+		if err != nil {
+			toLog.Error(err.Error())
+			errCount++
+			continue
+		}
 
-		args := par{"diff", "--name-only", commitSlice, "."}
-		c = exec.Command("git", args...)
+		// Get the match for this formatter's files.
+		reg := l.Match
 
-		c.Env = os.Environ()
-		c.Stdout = &outB
-		c.Stderr = &errB
+		// filter the files to format based on given match and format them.
+		filteredFilepaths := filter(s.allFiles, true, reg.MatchString)
+		fmt.Println("❨ " + s.LintType + " ❩ ➔ " + l.Name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
 
-		err = c.Run()
+		err = LintFileList(selectedLinter, filteredFilepaths)
 
 		if err != nil {
-			fmt.Println("I noticed you are using git but I failed to get git diff")
-			fmt.Println("... this is non-breaking (a-ok)")
-			log.Debug(err.Error())
-			log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
-			log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
-			gitFiles = allFiles
-		} else {
-			gitFiles = configureConf(strings.Split(outB.String(), "\n"))
+			toLog.Error(err.Error())
+			errCount++
+			if !s.ContinueOnError {
+				break
+			}
 		}
 	}
+
+	if errCount > 0 {
+		return errors.New("crie found " + strconv.Itoa(errCount) + " error(s) while " + s.LintType + "'ing 🔍")
+	}
+
+	return nil
 }

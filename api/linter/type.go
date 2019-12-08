@@ -1,6 +1,7 @@
 package linter
 
 import (
+	"io"
 	"log"
 	"regexp"
 )
@@ -9,12 +10,13 @@ import (
 type Report struct {
 	File   string
 	Err    error
-	StdOut string
-	StdErr string
+	StdOut io.Reader
+	StdErr io.Reader
 }
 
 // Linter is a simple inteface to enable a setup and check using WillRun before executing multiple Run's
 type Linter interface {
+	Name() string
 	WillRun() error
 	Run(filepath string, rep chan Report)
 }

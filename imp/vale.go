@@ -8,11 +8,16 @@ import (
 	"github.com/errata-ai/vale/lint"
 	"github.com/tyhal/crie/api/linter"
 	"github.com/tyhal/crie/imp/printer"
+	"io"
 )
 
 type valeLint struct {
 	configPath string
 	linter     *lint.Linter
+}
+
+func (e valeLint) Name() string {
+	return "vale"
 }
 
 func (e valeLint) WillRun() error {
@@ -25,12 +30,12 @@ func (e valeLint) WillRun() error {
 }
 
 func (e valeLint) Run(filepath string, rep chan linter.Report) {
-	var stdout string
+	var stdout io.Reader
 	linted, err := e.linter.LintString(filepath)
 	if err == nil {
-		stdout, err = printer.PrintVerboseAlerts(linted, e.linter.Config.Wrap)
+		stdout, err = printer.GetVerboseAlerts(linted, e.linter.Config.Wrap)
 	}
-	rep <- linter.Report{filepath, err, stdout, ""}
+	rep <- linter.Report{filepath, err, stdout, nil}
 }
 
 func newValeLint(confpath string) valeLint {
