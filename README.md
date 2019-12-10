@@ -1,16 +1,32 @@
-# Crie enforcement
+<h1 align="center">
+    crie.
+</h1>
+<p align="center">
+    <img src="https://raw.githubusercontent.com/tyhal/crie/master/doc/demo.svg?sanitize=true" width="572" alt="crie cli demo">
+</p>
+<p align="center">
+    Effectively format and lint code for a variety of languages
+</p>
 
 [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/tyhal/crie.svg)](https://hub.docker.com/r/tyhal/crie)
 
-Crie is an effective way to format and lint code for a variety of languages
+## Features
 
--   Alpine based image to reduce download size
+#### This tool enables teams of developers to use static-analysis where they normally wouldn't:
+
+-   Avoid remembering multiple run configurations
+-   Avoid various install instructions
+
+#### Quality of Life:
+
+-   Git friendly - Check only changed files in the last few commits
 -   Extendable for more languages
--   Batteries included but replaceable - default configuration (/imp) is separated from core library
+-   Fast and clean output
+-   Batteries included but replaceable
+-   Identify files lacking any static-analysis
+-   Send logs via logstash to create analytics
 
-## Install options
-
-#### Docker Based Install (Recommended)
+## Install
 
 Bundled all-together with Docker
 
@@ -18,32 +34,8 @@ Bundled all-together with Docker
     git clone https://github.com/tyhal/crie /tmp/crie; sudo /tmp/crie/script/crie install
 ```
 
-#### Local Binary
-
-Local binary requiring all linters to be installed
+The suggested way to start running crie is to run `chk` at the top of your project and add `--continue` to see every error in the project (this will not change any code)
 
 ```bash
-    # Ensure your path contains $GOPATH/bin
-    git clone https://github.com/tyhal/crie /tmp/crie; cd /tmp/crie
-    go install
-
-    # Additional tools used to lint
-    go get -u mvdan.cc/sh/cmd/shfmt golang.org/x/lint/golint
-    pip3 install -r requirements.txt
-
-    sudo npm install -g jsonlint2 remark-cli remark-preset-lint-recommended standard
-    sudo apt install cppcheck shellcheck clang-format
-
-    # TODO install help:
-    # hadolint
-```
-
-## Usage
-
-```bash
-    crie chk
-```
-
-```bash
-    crie fmt
+    crie chk --continue
 ```
