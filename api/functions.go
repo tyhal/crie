@@ -1,6 +1,7 @@
 package api
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/api/linter"
 	"io"
 	"os"
@@ -72,7 +73,7 @@ func LintFileList(l linter.Linter, fileList []string) error {
 		err := curReport.Log()
 
 		if err != nil {
-			// Don't just return we still have channels to join
+			log.WithFields(log.Fields{"type": "err"}).Debug(curReport.Err)
 			lasterr = err
 		}
 	}
