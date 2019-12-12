@@ -37,14 +37,11 @@ func (e execCmd) Run(filepath string, rep chan linter.Report) {
 	}
 
 	c := exec.Command(e.bin, params...)
-
-	var outB, errB bytes.Buffer
-
+	var inB, outB, errB bytes.Buffer
 	c.Env = os.Environ()
+	c.Stdin = &inB // Was having /dev/null open too many times
 	c.Stdout = &outB
 	c.Stderr = &errB
-
 	err := c.Run()
-
-	rep <- linter.Report{filepath, err, &outB, &errB}
+	rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
 }
