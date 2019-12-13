@@ -12,7 +12,7 @@ import (
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "22"
+var patchNum = "23"
 
 var quote = `
 	|> crie: the act of crying and dying at the same time
@@ -54,8 +54,10 @@ func setLogLevel() {
 
 func addLinteCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&state.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
+	cmd.PersistentFlags().BoolVarP(&state.ShowPasses, "passes", "p", false, "show files that passed")
 	cmd.PersistentFlags().IntVarP(&state.GitDiff, "git-diff", "g", 0, "check files that changed in the last X commits")
-	cmd.PersistentFlags().StringVar(&state.SingleLang, "lang", "", "run with only one language (see ls for available options)")
+	cmd.PersistentFlags().StringVar(&state.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
+
 	rootCmd.AddCommand(cmd)
 }
 

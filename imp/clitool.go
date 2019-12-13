@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"github.com/tyhal/crie/api/linter"
-	"os"
 	"os/exec"
 )
 
@@ -37,11 +36,12 @@ func (e execCmd) Run(filepath string, rep chan linter.Report) {
 	}
 
 	c := exec.Command(e.bin, params...)
-	var inB, outB, errB bytes.Buffer
-	c.Env = os.Environ()
-	c.Stdin = &inB // Was having /dev/null open too many times
+
+	var outB, errB bytes.Buffer
 	c.Stdout = &outB
 	c.Stderr = &errB
+
 	err := c.Run()
+
 	rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
 }
