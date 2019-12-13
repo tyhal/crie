@@ -15,10 +15,17 @@ var LanguageList = []linter.Language{
 		Match: regexp.MustCompile(`\.py$`),
 		Fmt:   execCmd{`autopep8`, par{`--in-place`, `--aggressive`, `--aggressive`}, par{}},
 		Chk:   execCmd{`pylint`, par{`--rcfile=` + confDir + `/python/.pylintrc`}, par{}},
-	}, {
+	},
+	{
 		Name:  `pythondeps`,
 		Match: regexp.MustCompile(`requirements.txt$`),
 		Fmt:   execCmd{`pur`, par{`-r`}, par{}},
+	},
+	{
+		Name:  `proto`,
+		Match: regexp.MustCompile(`.proto$`),
+		Chk:   protoLint{Fix: false},
+		Fmt:   protoLint{Fix: true},
 	},
 
 	// https://github.com/mvdan/sh/releases/download/v1.3.0/shfmt_v1.3.0_linux_amd64
