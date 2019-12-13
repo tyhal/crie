@@ -9,6 +9,7 @@ import (
 	"github.com/tyhal/crie/api/linter"
 	"github.com/tyhal/crie/imp/printer"
 	"io"
+	"math"
 )
 
 type valeLint struct {
@@ -20,13 +21,16 @@ func (e valeLint) Name() string {
 	return "vale"
 }
 
-func (e valeLint) WillRun() error {
+func (e valeLint) WillRun() (err error) {
 	config := core.NewConfig()
-	config, err := core.LoadConfig(config, e.configPath, "warning", false)
+	config, err = core.LoadConfig(config, e.configPath, "warning", false)
 	e.linter.Config = config
 	e.linter.CheckManager = check.NewManager(config)
-	return err
+	return
+}
 
+func (e valeLint) MaxConcurrency() int {
+	return math.MaxInt32
 }
 
 func (e valeLint) Run(filepath string, rep chan linter.Report) {

@@ -24,7 +24,6 @@
 -   Fast and clean output
 -   Batteries included but replaceable
 -   Identify files lacking any static-analysis
--   Send logs via logstash to create analytics
 
 ## Install
 

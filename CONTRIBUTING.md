@@ -23,6 +23,9 @@ Local binary requiring all linters to be installed
     # Ensure your path contains $GOPATH/bin
     go install
 
+    # Ensure you have all the configuration files
+	cp -r "/conf" /etc/crie/
+
     # Additional tools used to lint
     go get -u mvdan.cc/sh/cmd/shfmt golang.org/x/lint/golint
     pip3 install -r requirements.txt

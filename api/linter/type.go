@@ -2,7 +2,7 @@ package linter
 
 import (
 	"io"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"regexp"
 )
 

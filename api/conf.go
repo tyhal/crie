@@ -141,6 +141,9 @@ func (s *ProjectLintConfiguration) Run() error {
 	// Get initial list of files to use
 	s.loadFileList()
 
+	// XXX Set separate a separate packages setting based on our configuration
+	linter.ShowPass = s.ShowPasses
+
 	errCount := 0
 
 	currentLangs := s.Languages
@@ -175,6 +178,12 @@ func (s *ProjectLintConfiguration) Run() error {
 
 		// filter the files to format based on given match and format them.
 		filteredFilepaths := filter(s.fileList, true, reg.MatchString)
+
+		// Skip language as no files found
+		if len(filteredFilepaths) == 0 {
+			continue
+		}
+
 		fmt.Println("❨ " + s.LintType + " ❩ ➔ " + l.Name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
 
 		err = LintFileList(selectedLinter, filteredFilepaths)
@@ -189,7 +198,7 @@ func (s *ProjectLintConfiguration) Run() error {
 	}
 
 	if errCount > 0 {
-		return errors.New("crie found " + strconv.Itoa(errCount) + " error(s) while " + s.LintType + "'ing 🔍")
+		return errors.New("crie found " + strconv.Itoa(errCount) + " language(s) failed while " + s.LintType + "'ing 🔍")
 	}
 
 	return nil

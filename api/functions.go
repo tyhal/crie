@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/api/linter"
 	"io"
@@ -61,22 +62,38 @@ func filter(list []string, expect bool, f func(string) bool) []string {
 
 // LintFileList simply takes a single Linter and runs it for each file
 func LintFileList(l linter.Linter, fileList []string) error {
-	report := make(chan linter.Report)
+	linterReport := make(chan linter.Report)
+	didRepErr := make(chan bool)
+	maxCon := min(maxConcurrency(), len(fileList))
 
-	for _, codePath := range fileList {
-		go l.Run(codePath, report)
-	}
-
-	var lasterr error
-	for range fileList {
-		curReport := <-report
-		err := curReport.Log()
-
-		if err != nil {
-			log.WithFields(log.Fields{"type": "err"}).Debug(curReport.Err)
-			lasterr = err
+	go func() {
+		lintErr := false
+		for i := range fileList {
+			if i%maxCon == 0 {
+				didRepErr <- lintErr
+			}
+			report := <-linterReport
+			err := report.Log()
+			if err != nil {
+				log.WithFields(log.Fields{"type": "err"}).Debug(report.Err)
+				lintErr = true
+			}
 		}
+		didRepErr <- lintErr
+	}()
+
+	didErr := false
+	for i, codePath := range fileList {
+		if i%maxCon == 0 {
+			if <-didRepErr {
+				didErr = true
+			}
+		}
+		go l.Run(codePath, linterReport)
 	}
 
-	return lasterr
+	if <-didRepErr || didErr {
+		return errors.New("some files failed to pass (" + l.Name() + ")")
+	}
+	return nil
 }

@@ -16,6 +16,7 @@ type ProjectLintConfiguration struct {
 	ConfPath        string
 	LintType        string
 	ContinueOnError bool
+	ShowPasses      bool
 	Languages       []linter.Language
 	GitDiff         int
 	SingleLang      string
