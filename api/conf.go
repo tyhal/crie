@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/api/linter"
@@ -118,7 +117,6 @@ func (s *ProjectLintConfiguration) NoStandards() {
 	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
 	// Print the top 10
-	fmt.Println("Top Ten file types without standards applied to them")
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"extension", "count"})
 	count := 10
@@ -166,13 +164,6 @@ func (s *ProjectLintConfiguration) Run() error {
 			continue
 		}
 
-		err := selectedLinter.WillRun()
-		if err != nil {
-			toLog.Error(err.Error())
-			errCount++
-			continue
-		}
-
 		// Get the match for this formatter's files.
 		reg := l.Match
 
@@ -184,7 +175,14 @@ func (s *ProjectLintConfiguration) Run() error {
 			continue
 		}
 
-		fmt.Println("❨ " + s.LintType + " ❩ ➔ " + l.Name + " ❲" + strconv.Itoa(len(filteredFilepaths)) + "❳")
+		err := selectedLinter.WillRun()
+		if err != nil {
+			toLog.Error(err.Error())
+			errCount++
+			continue
+		}
+
+		log.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info(l.Name)
 
 		err = LintFileList(selectedLinter, filteredFilepaths)
 
@@ -198,8 +196,9 @@ func (s *ProjectLintConfiguration) Run() error {
 	}
 
 	if errCount > 0 {
-		return errors.New("crie found " + strconv.Itoa(errCount) + " language(s) failed while " + s.LintType + "'ing 🔍")
+		return errors.New("found " + strconv.Itoa(errCount) + " language(s) failed while " + s.LintType + "'ing \u26c8")
 	}
 
+	log.Println(s.LintType + "'ing passed \u26c5")
 	return nil
 }

@@ -1,8 +1,8 @@
 package linter
 
 import (
-	"io"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"regexp"
 )
 

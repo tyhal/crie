@@ -15,12 +15,12 @@ func (rep *Report) Log() error {
 
 	if rep.Err == nil {
 		if ShowPass {
-			fmt.Printf(" ✔️  %v\n", rep.File)
+			fmt.Printf("\u2714 %v\n", rep.File)
 		}
 		return nil
 	}
 
-	fmt.Printf(" ✖️  %v\n", rep.File)
+	fmt.Printf("\u274C %v\n", rep.File)
 	log.WithFields(log.Fields{"type": "stdout"}).Info(rep.StdOut)
 	log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
 
