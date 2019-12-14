@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/api"
@@ -57,10 +56,10 @@ var NonCmd = &cobra.Command{
 	Use:     "non",
 	Aliases: []string{"not-linted"},
 	Short:   "List what isn't supported for this project",
-	Long: `Find the file extensions that dont
-			have an associated regex match within crie`,
+	Long: `List what isn't supported for this project
+
+Find the file extensions that dont have an associated regex match within crie`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("")
 		Config.NoStandards()
 	},
 }
@@ -73,14 +72,19 @@ var LntCmd = &cobra.Command{
 	Long:    `Runs both format and then check`,
 	Run: func(cmd *cobra.Command, args []string) {
 		Config.LintType = "fmt"
-		err := Config.Run()
 
+		log.Info("❨ fmt ❩")
+		err := Config.Run()
 		if err != nil {
-			log.Fatal(err)
+			if Config.ContinueOnError {
+				log.Error(err)
+			} else {
+				log.Fatal(err)
+			}
 		}
 
+		log.Info("❨ chk ❩")
 		err = Config.Chk()
-
 		if err != nil {
 			log.Fatal(err)
 		}

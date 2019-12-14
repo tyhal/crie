@@ -12,7 +12,7 @@ import (
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "23"
+var patchNum = "25"
 
 var quote = `
 	|> crie: the act of crying and dying at the same time
@@ -52,7 +52,7 @@ func setLogLevel() {
 	}
 }
 
-func addLinteCommand(cmd *cobra.Command) {
+func addLintCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&state.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
 	cmd.PersistentFlags().BoolVarP(&state.ShowPasses, "passes", "p", false, "show files that passed")
 	cmd.PersistentFlags().IntVarP(&state.GitDiff, "git-diff", "g", 0, "check files that changed in the last X commits")
@@ -69,11 +69,11 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "config file location")
 
-	addLinteCommand(cli.ChkCmd)
-	addLinteCommand(cli.FmtCmd)
-	addLinteCommand(cli.LntCmd)
-	addLinteCommand(cli.NonCmd)
+	addLintCommand(cli.ChkCmd)
+	addLintCommand(cli.FmtCmd)
+	addLintCommand(cli.LntCmd)
 
+	rootCmd.AddCommand(cli.NonCmd)
 	rootCmd.AddCommand(cli.LsCmd)
 
 	cobra.OnInitialize(setLogLevel)
