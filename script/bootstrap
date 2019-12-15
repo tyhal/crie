@@ -4,10 +4,7 @@ set -xe
 : "${GOROOT:=/usr/local/go}"
 
 docker_inst() {
-	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-	echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
-	apt-get update -y
-	apt-get install -y docker-ce docker-ce-cli containerd.io
+	curl -fsSL https://get.docker.com | sh get-docker.sh
 }
 
 go_inst() {
