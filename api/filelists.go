@@ -17,8 +17,10 @@ func (s *ProjectLintConfiguration) fileListRepoChanged() ([]string, error) {
 	var outB, errB bytes.Buffer
 
 	c := exec.Command("git",
-		par{"rev-list",
+		Par{"rev-list",
 			"--no-merges",
+			"--max-count",
+			strconv.Itoa(s.GitDiff),
 			"--count",
 			"HEAD"}...)
 	c.Stdout = &outB
@@ -26,21 +28,18 @@ func (s *ProjectLintConfiguration) fileListRepoChanged() ([]string, error) {
 		return nil, err
 	}
 
-	// Produce string that will  query back all history or only 10 commits
-	commitCntStr := strings.Split(outB.String(), "\n")[0]
-	commitCnt, err := strconv.Atoi(commitCntStr)
-	commitSlice := "HEAD~" + strconv.Itoa(min(commitCnt-1, s.GitDiff)) + "..HEAD"
+	commitSlice := "HEAD~" + strings.Split(outB.String(), "\n")[0] + "..HEAD"
 
-	args := par{"diff", "--name-only", commitSlice, "."}
+	args := Par{"diff", "--name-only", commitSlice, "."}
 	c = exec.Command("git", args...)
 	c.Env = os.Environ()
 	c.Stdout = &outB
 	c.Stderr = &errB
-	err = c.Run()
+	err := c.Run()
 
 	if err != nil {
-		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB)
-		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB)
+		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
+		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
 		return nil, err
 	}
 
@@ -49,7 +48,7 @@ func (s *ProjectLintConfiguration) fileListRepoChanged() ([]string, error) {
 
 func (s *ProjectLintConfiguration) fileListRepoAll() ([]string, error) {
 	var outB, errB bytes.Buffer
-	args := par{"ls-files"}
+	args := Par{"ls-files"}
 	c := exec.Command("git", args...)
 	c.Env = os.Environ()
 	c.Stdout = &outB
@@ -57,8 +56,8 @@ func (s *ProjectLintConfiguration) fileListRepoAll() ([]string, error) {
 	err := c.Run()
 
 	if err != nil {
-		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB)
-		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB)
+		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
+		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
 		return nil, err
 	}
 
@@ -68,7 +67,7 @@ func (s *ProjectLintConfiguration) fileListRepoAll() ([]string, error) {
 func (s *ProjectLintConfiguration) fileListAll() ([]string, error) {
 
 	// Work out where we are
-	dir, err := os.Getwd()
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		return nil, err
 	}

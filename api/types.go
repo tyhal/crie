@@ -12,9 +12,8 @@ type fileSettings struct {
 
 // ProjectLintConfiguration is what is required for an entire project to be linted
 type ProjectLintConfiguration struct {
-	IsRepo          bool
 	ConfPath        string
-	LintType        string
+	lintType        string
 	ContinueOnError bool
 	ShowPasses      bool
 	Languages       []linter.Language
@@ -23,4 +22,5 @@ type ProjectLintConfiguration struct {
 	fileList        []string
 }
 
-type par []string
+// Par represents cli parameters
+type Par []string

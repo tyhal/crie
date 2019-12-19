@@ -13,19 +13,23 @@ type protoLint struct {
 	Fix bool
 }
 
-func (e protoLint) Name() string {
+func (e *protoLint) Name() string {
 	return "protolint"
 }
 
-func (e protoLint) WillRun() (err error) {
+func (e *protoLint) WillRun() (err error) {
 	return
 }
 
-func (e protoLint) MaxConcurrency() int {
+func (e *protoLint) DidRun() {
+	return
+}
+
+func (e *protoLint) MaxConcurrency() int {
 	return math.MaxInt32
 }
 
-func (e protoLint) Run(filepath string, rep chan linter.Report) {
+func (e *protoLint) Run(filepath string, rep chan linter.Report) {
 	var outB, errB bytes.Buffer
 	err := api.Lint(
 		filepath,

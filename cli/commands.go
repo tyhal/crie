@@ -15,8 +15,7 @@ var FmtCmd = &cobra.Command{
 	Short: "Run formatters",
 	Long:  `Run all formatters in the list`,
 	Run: func(cmd *cobra.Command, args []string) {
-		Config.LintType = "fmt"
-		err := Config.Run()
+		err := Config.Run("fmt")
 
 		if err != nil {
 			log.Fatal(err)
@@ -42,8 +41,7 @@ var ChkCmd = &cobra.Command{
 	Short:   "Run checkers",
 	Long:    `Check all code standards for coding conventions`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		err := Config.Chk()
+		err := Config.Run("chk")
 
 		if err != nil {
 			log.Fatal(err)
@@ -64,6 +62,18 @@ Find the file extensions that dont have an associated regex match within crie`,
 	},
 }
 
+func stage(stageName string) {
+	log.Info("❨ " + stageName + " ❩")
+	err := Config.Run(stageName)
+	if err != nil {
+		if Config.ContinueOnError {
+			log.Error(err)
+		} else {
+			log.Fatal(err)
+		}
+	}
+}
+
 // LntCmd Runs all commands
 var LntCmd = &cobra.Command{
 	Use:     "lnt",
@@ -71,22 +81,11 @@ var LntCmd = &cobra.Command{
 	Short:   "Run everything",
 	Long:    `Runs both format and then check`,
 	Run: func(cmd *cobra.Command, args []string) {
-		Config.LintType = "fmt"
 
-		log.Info("❨ fmt ❩")
-		err := Config.Run()
-		if err != nil {
-			if Config.ContinueOnError {
-				log.Error(err)
-			} else {
-				log.Fatal(err)
-			}
-		}
+		stage("fmt")
+		stage("chk")
 
-		log.Info("❨ chk ❩")
-		err = Config.Chk()
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Info("❨ proj ❩")
+		Config.CheckProjects()
 	},
 }

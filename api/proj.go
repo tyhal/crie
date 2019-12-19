@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func flintRun(path string) {
+func runFlint(path string) {
 	flags := flint.Flags{
 		RunReadme:        true,
 		RunContributing:  true,
@@ -31,13 +31,14 @@ func flintRun(path string) {
 	}
 }
 
-// Chk runs all Chk exec commands in languages and in always Chk
-func (s *ProjectLintConfiguration) Chk() error {
-	if s.SingleLang == "" && s.IsRepo {
+// CheckProjects for missing files that should be included
+func (s *ProjectLintConfiguration) CheckProjects() {
+	if s.SingleLang == "" && s.IsRepo() {
+		log.WithFields(log.Fields{"projects": len(projDirs)}).Info("required files")
 		for _, dir := range projDirs {
-			flintRun(dir)
+			runFlint(dir)
 		}
+	} else {
+		log.Info("not checking for any projects")
 	}
-	s.LintType = "chk"
-	return s.Run()
 }
