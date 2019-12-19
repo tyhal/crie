@@ -54,5 +54,5 @@ func createFileSettings(confpath string) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("New languages fileSettings created: %s\nPlease view this and configure for your repo\n", confpath)
+	fmt.Printf("New languages file created: %s\nPlease view this and configure for your repo\n", confpath)
 }

@@ -1,6 +1,8 @@
 package imp
 
 import (
+	"github.com/tyhal/crie/api"
+	"github.com/tyhal/crie/api/imp"
 	"github.com/tyhal/crie/api/linter"
 	"regexp"
 )
@@ -13,19 +15,19 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `python`,
 		Match: regexp.MustCompile(`\.py$`),
-		Fmt:   execCmd{`autopep8`, par{`--in-place`, `--aggressive`, `--aggressive`}, par{}},
-		Chk:   execCmd{`pylint`, par{`--rcfile=` + confDir + `/python/.pylintrc`}, par{}},
+		Fmt:   &imp.ExecCmd{Bin: `autopep8`, FrontPar: api.Par{`--in-place`, `--aggressive`, `--aggressive`}},
+		Chk:   &imp.ExecCmd{Bin: `pylint`, FrontPar: api.Par{`--rcfile=` + confDir + `/python/.pylintrc`}},
 	},
 	{
 		Name:  `pythondeps`,
 		Match: regexp.MustCompile(`requirements.txt$`),
-		Fmt:   execCmd{`pur`, par{`-r`}, par{}},
+		Fmt:   &imp.ExecCmd{Bin: `pur`, FrontPar: api.Par{`-r`}},
 	},
 	{
 		Name:  `proto`,
 		Match: regexp.MustCompile(`.proto$`),
-		Chk:   protoLint{Fix: false},
-		Fmt:   protoLint{Fix: true},
+		Chk:   &protoLint{Fix: false},
+		Fmt:   &protoLint{Fix: true},
 	},
 
 	// https://github.com/mvdan/sh/releases/download/v1.3.0/shfmt_v1.3.0_linux_amd64
@@ -33,55 +35,58 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `bash`,
 		Match: regexp.MustCompile(`\.bash$`),
-		Fmt:   execCmd{`shfmt`, par{`-w`, `-ln`, `bash`}, par{}},
-		Chk:   execCmd{`shellcheck`, par{`-x`, `--shell=bash`, `-Calways`}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `shfmt`, FrontPar: api.Par{`-w`, `-ln`, `bash`}},
+		Chk:   &imp.ExecCmd{Bin: `shellcheck`, FrontPar: api.Par{`-x`, `--shell=bash`, `-Calways`}}},
 	{
 		Name:  `sh`,
 		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$`),
-		Fmt:   execCmd{`shfmt`, par{`-w`, `-ln`, `posix`}, par{}},
-		Chk:   execCmd{`shellcheck`, par{`-x`, `--shell=sh`, `-Calways`}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `shfmt`, FrontPar: api.Par{`-w`, `-ln`, `posix`}},
+		Chk:   &imp.ExecCmd{Bin: `shellcheck`, FrontPar: api.Par{`-x`, `--shell=sh`, `-Calways`}}},
 
 	// https://github.com/lukasmartinelli/hadolint
 	{
 		Name:  `docker`,
 		Match: regexp.MustCompile(`Dockerfile$`),
-		Chk:   execCmd{`hadolint`, par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`}, par{}}},
+		Chk: &imp.ExecCmd{
+			Bin:      `hadolint`,
+			FrontPar: api.Par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`},
+			Docker:   imp.DockerCmd{Image: "docker.io/tyhal/hadolint-hadolint:v1.15.0"}}},
 
-	//	Fmt:   execCmd{`dockfmt`, par{`fmt`, `-w`}, par{}}}
+	//	Fmt:   ExecCmd{`dockfmt`, par{`fmt`, `-w`}, par{}}}
 
 	// https://github.com/adrienverge/yamllint
 	{
 		Name:  `yml`,
 		Match: regexp.MustCompile(`\.yml$|\.yaml$`),
-		Chk:   execCmd{`yamllint`, par{`-c=` + confDir + `/yaml/.yamllintrc`}, par{}}},
+		Chk:   &imp.ExecCmd{Bin: `yamllint`, FrontPar: api.Par{`-c=` + confDir + `/yaml/.yamllintrc`}}},
 
 	{
 		Name:  `terraform`,
 		Match: regexp.MustCompile(`\.tf$`),
-		Fmt:   execCmd{`terraform`, par{`fmt`}, par{}},
-		Chk:   execCmd{`terraform`, par{`fmt`, `-check=true`}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `terraform`, FrontPar: api.Par{`fmt`}},
+		Chk:   &imp.ExecCmd{Bin: `terraform`, FrontPar: api.Par{`fmt`, `-check=true`}}},
 
 	// https://blog.jetbrains.com/webstorm/2017/01/webstorm-2017-1-eap-171-2272/
 	// https://github.com/standard/standard
 	{
 		Name:  `javascript`,
 		Match: regexp.MustCompile(`\.js$|\.jsx$`),
-		Fmt:   execCmd{`standard`, par{`--fix`}, par{}},
-		Chk:   execCmd{`standard`, par{}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `standard`, FrontPar: api.Par{`--fix`}},
+		Chk:   &imp.ExecCmd{Bin: `standard`}},
 
 	// https://golang.org/cmd/gofmt/
 	{
 		Name:  `golang`,
 		Match: regexp.MustCompile(`\.go$`),
-		Fmt:   execCmd{`gofmt`, par{`-l`, `-w`}, par{}},
-		Chk:   execCmd{`golint`, par{`-set_exit_status`}, par{}},
+		Fmt:   &imp.ExecCmd{Bin: `gofmt`, FrontPar: api.Par{`-l`, `-w`}},
+		Chk:   &imp.ExecCmd{Bin: `golint`, FrontPar: api.Par{`-set_exit_status`}},
 	},
 
 	// https://github.com/wooorm/remark-lint
 	{
 		Name:  `markdown`,
 		Match: regexp.MustCompile(`\.md$`),
-		Fmt:   execCmd{`remark`, par{`--use`, `remark-preset-lint-recommended`}, par{`-o`}},
+		Fmt:   &imp.ExecCmd{Bin: `remark`, FrontPar: api.Par{`--use`, `remark-preset-lint-recommended`}, EndPar: api.Par{`-o`}},
 		Chk:   newValeLint(confDir + `/markdown/.vale.ini`)},
 
 	{
@@ -93,38 +98,38 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `json`,
 		Match: regexp.MustCompile(`\.json$|\.JSON$`),
-		Fmt:   execCmd{`jsonlint`, par{`-i`, `-s`, `-c`, `-q`}, par{}},
-		Chk:   execCmd{`jsonlint`, par{`-q`}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `jsonlint`, FrontPar: api.Par{`-i`, `-s`, `-c`, `-q`}},
+		Chk:   &imp.ExecCmd{Bin: `jsonlint`, FrontPar: api.Par{`-q`}}},
 
 	// noExplicitConstructor and noConstructor unfortunately have problems with CUDA_CALLABLE
 	{
 		Name:  `cpp`,
 		Match: regexp.MustCompile(`\.cc$|\.cpp$`),
-		Fmt:   execCmd{`clang-format`, par{`-style=file`, `-i`}, par{}},
-		Chk:   execCmd{`cppcheck`, par{`--enable=all`, `--language=c++`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `clang-format`, FrontPar: api.Par{`-style=file`, `-i`}},
+		Chk:   &imp.ExecCmd{Bin: `cppcheck`, FrontPar: api.Par{`--enable=all`, `--language=c++`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`}}},
 
 	{
 		Name:  `cppheaders`,
 		Match: regexp.MustCompile(`\.h$|\.hpp$`),
-		Fmt:   execCmd{`clang-format`, par{`-style=file`, `-i`}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `clang-format`, FrontPar: api.Par{`-style=file`, `-i`}}},
 
 	{
 		Name:  `c`,
 		Match: regexp.MustCompile(`\.c$`),
-		Fmt:   execCmd{`clang-format`, par{`-style=file`, `-i`}, par{}},
-		Chk:   execCmd{`cppcheck`, par{`--enable=all`, `--language=c`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`}, par{}}},
+		Fmt:   &imp.ExecCmd{Bin: `clang-format`, FrontPar: api.Par{`-style=file`, `-i`}},
+		Chk:   &imp.ExecCmd{Bin: `cppcheck`, FrontPar: api.Par{`--enable=all`, `--language=c`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`}}},
 
 	{
 		Name:  `cmake`,
 		Match: regexp.MustCompile(`CMakeLists.txt$|\.cmake$`),
-		Chk:   execCmd{`cmakelint`, par{`--config=` + confDir + `/cmake/.cmakelintrc`}, par{}}},
+		Chk:   &imp.ExecCmd{Bin: `cmakelint`, FrontPar: api.Par{`--config=` + confDir + `/cmake/.cmakelintrc`}}},
 
 	{
 		Name:  `ansible`,
 		Match: regexp.MustCompile(`playbook.yml$`),
-		Chk:   execCmd{`ansible-lint`, par{}, par{}}},
+		Chk:   &imp.ExecCmd{Bin: `ansible-lint`}},
 
 	{
 		Name:  `dockercompose`,
 		Match: regexp.MustCompile(`docker-compose.yml$|docker-compose.yaml$`),
-		Chk:   execCmd{`docker-compose`, par{`-f`}, par{`config`, `-q`}}}}
+		Chk:   &imp.ExecCmd{Bin: `docker-compose`, FrontPar: api.Par{`-f`}, EndPar: api.Par{`config`, `-q`}}}}
