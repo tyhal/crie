@@ -18,6 +18,7 @@ type Report struct {
 type Linter interface {
 	Name() string
 	WillRun() error
+	DidRun()
 	Run(filepath string, rep chan Report)
 }
 

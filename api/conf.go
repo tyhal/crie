@@ -13,18 +13,19 @@ import (
 
 var projDirs []string
 
+// IsRepo checks for a .git folder
+func (s *ProjectLintConfiguration) IsRepo() bool {
+	_, err := os.Stat(".git")
+	return err == nil
+}
+
 // loadFileList returns all valid files that have also been filtered by the config
 func (s *ProjectLintConfiguration) loadFileList() {
 
-	// The logic in this needs to be collapsed
-
-	// Are we a repo?
-	_, err := os.Stat(".git")
-	s.IsRepo = err == nil
-
 	fileList := []string{}
+	var err error
 
-	if s.IsRepo {
+	if s.IsRepo() {
 		// If we are a repo without a configuration then force it upon the project
 		if _, err := os.Stat(s.ConfPath); err != nil {
 			createFileSettings(s.ConfPath)
@@ -134,7 +135,9 @@ func (s *ProjectLintConfiguration) NoStandards() {
 }
 
 // Run is the generic way to run everything based on the packages configuration
-func (s *ProjectLintConfiguration) Run() error {
+func (s *ProjectLintConfiguration) Run(lintType string) error {
+
+	s.lintType = lintType
 
 	// Get initial list of files to use
 	s.loadFileList()
@@ -156,8 +159,8 @@ func (s *ProjectLintConfiguration) Run() error {
 	// Run every linter.
 	for _, l := range currentLangs {
 
-		selectedLinter := l.GetLinter(s.LintType)
-		toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.LintType})
+		selectedLinter := l.GetLinter(s.lintType)
+		toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.lintType})
 
 		if selectedLinter == nil {
 			toLog.Debug("there are no configurations associated for this action")
@@ -185,6 +188,7 @@ func (s *ProjectLintConfiguration) Run() error {
 		log.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info(l.Name)
 
 		err = LintFileList(selectedLinter, filteredFilepaths)
+		selectedLinter.DidRun()
 
 		if err != nil {
 			toLog.Error(err.Error())
@@ -196,9 +200,9 @@ func (s *ProjectLintConfiguration) Run() error {
 	}
 
 	if errCount > 0 {
-		return errors.New("found " + strconv.Itoa(errCount) + " language(s) failed while " + s.LintType + "'ing \u26c8")
+		return errors.New("found " + strconv.Itoa(errCount) + " language(s) failed while " + s.lintType + "'ing \u26c8")
 	}
 
-	log.Println(s.LintType + "'ing passed \u26c5")
+	log.Println(s.lintType + "'ing passed \u26c5")
 	return nil
 }
