@@ -19,10 +19,10 @@
 
 #### Quality of Life:
 
--   Git friendly - Check only changed files in the last few commits
+-   Git friendly - Only check changed files in the last few commits
 -   Extendable for more languages
 -   Fast and clean output
--   Batteries included but replaceable
+-   Batteries included but swappable - Swap any implementation with another linter
 -   Identify files lacking any static-analysis
 
 ## Install
