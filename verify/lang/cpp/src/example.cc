@@ -6,7 +6,7 @@
 
 int test::myClass::afunction( int a )
 {
-    //	int unused = 0;
+    // int unused = 0;
     return a;
 }
 
