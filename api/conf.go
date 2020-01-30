@@ -134,6 +134,44 @@ func (s *ProjectLintConfiguration) NoStandards() {
 	table.Render()
 }
 
+func (s *ProjectLintConfiguration) tryLint(l linter.Language) error {
+	selectedLinter := l.GetLinter(s.lintType)
+	toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.lintType})
+
+	if selectedLinter == nil {
+		toLog.Debug("there are no configurations associated for this action")
+		return nil
+	}
+
+	// Get the match for this formatter's files.
+	reg := l.Match
+
+	// filter the files to format based on given match and format them.
+	filteredFilepaths := filter(s.fileList, true, reg.MatchString)
+
+	// Skip language as no files found
+	if len(filteredFilepaths) == 0 {
+		return nil
+	}
+
+	err := selectedLinter.WillRun()
+	if err != nil {
+		toLog.Error(err.Error())
+		return err
+	}
+
+	log.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info(l.Name)
+
+	err = LintFileList(selectedLinter, filteredFilepaths)
+	selectedLinter.DidRun()
+	if err != nil {
+		toLog.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
 // Run is the generic way to run everything based on the packages configuration
 func (s *ProjectLintConfiguration) Run(lintType string) error {
 
@@ -158,40 +196,8 @@ func (s *ProjectLintConfiguration) Run(lintType string) error {
 
 	// Run every linter.
 	for _, l := range currentLangs {
-
-		selectedLinter := l.GetLinter(s.lintType)
-		toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.lintType})
-
-		if selectedLinter == nil {
-			toLog.Debug("there are no configurations associated for this action")
-			continue
-		}
-
-		// Get the match for this formatter's files.
-		reg := l.Match
-
-		// filter the files to format based on given match and format them.
-		filteredFilepaths := filter(s.fileList, true, reg.MatchString)
-
-		// Skip language as no files found
-		if len(filteredFilepaths) == 0 {
-			continue
-		}
-
-		err := selectedLinter.WillRun()
+		err := s.tryLint(l)
 		if err != nil {
-			toLog.Error(err.Error())
-			errCount++
-			continue
-		}
-
-		log.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info(l.Name)
-
-		err = LintFileList(selectedLinter, filteredFilepaths)
-		selectedLinter.DidRun()
-
-		if err != nil {
-			toLog.Error(err.Error())
 			errCount++
 			if !s.ContinueOnError {
 				break

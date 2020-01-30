@@ -60,27 +60,29 @@ func filter(list []string, expect bool, f func(string) bool) []string {
 	return filteredLists
 }
 
+func reporter(maxCon int, fileList []string, didRepErr chan bool, linterReport chan linter.Report) {
+	lintErr := false
+	for i := range fileList {
+		if i%maxCon == 0 {
+			didRepErr <- lintErr
+		}
+		report := <-linterReport
+		err := report.Log()
+		if err != nil {
+			log.WithFields(log.Fields{"type": "err"}).Debug(report.Err)
+			lintErr = true
+		}
+	}
+	didRepErr <- lintErr
+}
+
 // LintFileList simply takes a single Linter and runs it for each file
 func LintFileList(l linter.Linter, fileList []string) error {
 	linterReport := make(chan linter.Report)
 	didRepErr := make(chan bool)
 	maxCon := min(maxConcurrency(), len(fileList))
 
-	go func() {
-		lintErr := false
-		for i := range fileList {
-			if i%maxCon == 0 {
-				didRepErr <- lintErr
-			}
-			report := <-linterReport
-			err := report.Log()
-			if err != nil {
-				log.WithFields(log.Fields{"type": "err"}).Debug(report.Err)
-				lintErr = true
-			}
-		}
-		didRepErr <- lintErr
-	}()
+	go reporter(maxCon, fileList, didRepErr, linterReport)
 
 	didErr := false
 	for i, codePath := range fileList {

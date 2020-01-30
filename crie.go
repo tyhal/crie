@@ -12,7 +12,7 @@ import (
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "27"
+var patchNum = "33"
 
 var quote = `
 	|> crie: the act of crying and dying at the same time

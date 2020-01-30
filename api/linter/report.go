@@ -1,7 +1,5 @@
 package linter
 
-// TODO(tyler) this has repeated exec calls
-
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"

@@ -44,7 +44,6 @@ func (e *ExecCmd) Name() string {
 func (e *ExecCmd) WillRun() error {
 	e.useDocker = exec.Command("which", e.Bin).Run() != nil
 	if e.useDocker {
-		// TODO check if Docker is working
 		if e.Docker.Image == "" {
 			return errors.New("could not find " + e.Bin + ", possibly not installed")
 		}
@@ -56,17 +55,7 @@ func (e *ExecCmd) WillRun() error {
 	return nil
 }
 
-// Code References
-// docker exec:
-// github.com/docker/cli@ba63a92655c0bea4857b8d6cc4991498858b3c60/-/blob/cli/command/container/exec.go#L122
-// client exec:
-// github.com/docker/docker@v1.13.1/client/container_exec.go:28
-// moby daemon exec:
-// github.com/moby/moby@a874c42edac24ab5c22d56e49e9262eec6fd8e63/-/blob/daemon/exec.go#L113
-// moby dameon exec post handler:
-// github.com/moby/moby@a874c42edac24ab5c22d56e49e9262eec6fd8e63/-/blob/api/server/router/container/exec.go#L71:27
-
-// TODO Put working solution to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
+// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 func (e *ExecCmd) execDocker(params []string, stdout io.Writer) error {
 	ctx := context.Background()
 	cmd := append([]string{"/bin/" + e.Bin}, params...)

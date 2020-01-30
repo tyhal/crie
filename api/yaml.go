@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-func (s *ProjectLintConfiguration) loadFileSettings(files []string) []string {
+func (s *ProjectLintConfiguration) processFilesWithConfig(files []string) []string {
 	f, err := os.Open(s.ConfPath)
 
 	if err != nil {

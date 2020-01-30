@@ -1,7 +1,5 @@
 package api
 
-// TODO Generalise so you can have anything as a 'lint me list'
-
 import (
 	"bytes"
 	"errors"
@@ -13,8 +11,34 @@ import (
 	"strings"
 )
 
-func (s *ProjectLintConfiguration) fileListRepoChanged() ([]string, error) {
+func (s *ProjectLintConfiguration) loadFilesGit(args Par) ([]string, error) {
 	var outB, errB bytes.Buffer
+	c := exec.Command("git", args...)
+	c.Env = os.Environ()
+	c.Stdout = &outB
+	c.Stderr = &errB
+	err := c.Run()
+	if err != nil {
+		log.WithFields(log.Fields{"type": "stdout"}).Debug(&outB)
+		log.WithFields(log.Fields{"type": "stderr"}).Debug(&outB)
+		return nil, err
+	}
+
+	// Skip files that do not exist at head
+	filelist := strings.Split(outB.String(), "\n")
+	var finallist []string
+	for _, file := range filelist {
+		_, err := os.Stat(file)
+		if err == nil {
+			finallist = append(finallist, file)
+		}
+	}
+
+	return s.processFilesWithConfig(finallist), nil
+}
+
+func (s *ProjectLintConfiguration) fileListRepoChanged() ([]string, error) {
+	var outB bytes.Buffer
 
 	c := exec.Command("git",
 		Par{"rev-list",
@@ -27,41 +51,12 @@ func (s *ProjectLintConfiguration) fileListRepoChanged() ([]string, error) {
 	if err := c.Run(); err != nil {
 		return nil, err
 	}
-
 	commitSlice := "HEAD~" + strings.Split(outB.String(), "\n")[0] + "..HEAD"
-
-	args := Par{"diff", "--name-only", commitSlice, "."}
-	c = exec.Command("git", args...)
-	c.Env = os.Environ()
-	c.Stdout = &outB
-	c.Stderr = &errB
-	err := c.Run()
-
-	if err != nil {
-		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
-		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
-		return nil, err
-	}
-
-	return s.loadFileSettings(strings.Split(outB.String(), "\n")), nil
+	return s.loadFilesGit(Par{"diff", "--name-only", commitSlice, "."})
 }
 
 func (s *ProjectLintConfiguration) fileListRepoAll() ([]string, error) {
-	var outB, errB bytes.Buffer
-	args := Par{"ls-files"}
-	c := exec.Command("git", args...)
-	c.Env = os.Environ()
-	c.Stdout = &outB
-	c.Stderr = &errB
-	err := c.Run()
-
-	if err != nil {
-		log.WithFields(log.Fields{"type": "stdout"}).Debug(outB.String())
-		log.WithFields(log.Fields{"type": "stderr"}).Debug(errB.String())
-		return nil, err
-	}
-
-	return s.loadFileSettings(strings.Split(outB.String(), "\n")), nil
+	return s.loadFilesGit(Par{"ls-files"})
 }
 
 func (s *ProjectLintConfiguration) fileListAll() ([]string, error) {
@@ -99,5 +94,5 @@ func (s *ProjectLintConfiguration) fileListAll() ([]string, error) {
 		return allFiles, nil
 	}
 
-	return s.loadFileSettings(allFiles), nil
+	return s.processFilesWithConfig(allFiles), nil
 }
