@@ -29,10 +29,10 @@ COPY imp /crie/imp
 COPY crie.go /crie/crie.go
 RUN go build
 
-FROM alpine:3.10.3 as clang_layer
+FROM alpine:3.11.5 as clang_layer
 RUN apk --no-cache add clang
 
-FROM alpine:3.10.3 as terraform_layer
+FROM alpine:3.11.5 as terraform_layer
 RUN apk --no-cache add git wget zip
 ENV TERRA_VER 0.12.17
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
@@ -43,7 +43,7 @@ RUN unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 
 # Alpine :ok_hand:
-FROM alpine:3.10.3
+FROM alpine:3.11.5
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
