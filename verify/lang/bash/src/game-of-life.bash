@@ -76,7 +76,7 @@ for ((g = 0; g <= iterations; g++)); do
 	cpym
 	for ((y = 1; y <= rows; y++)); do
 		for ((x = 1; x <= cols; x++)); do
-			cell $x $y
+			cell "$x" "$y"
 			MAIN_M["$x,$y"]=$R
 		done
 	done
