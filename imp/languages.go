@@ -50,7 +50,7 @@ var LanguageList = []linter.Language{
 		Chk: &imp.ExecCmd{
 			Bin:      `hadolint`,
 			FrontPar: api.Par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`},
-			Docker:   imp.DockerCmd{Image: "docker.io/tyhal/hadolint-hadolint:v1.15.0"}}},
+			Docker:   imp.DockerCmd{Image: "docker.io/tyhal/hadolint-hadolint:v1.18.0"}}},
 
 	//	Fmt:   ExecCmd{`dockfmt`, par{`fmt`, `-w`}, par{}}}
 
