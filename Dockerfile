@@ -71,7 +71,7 @@ RUN apk add --no-cache python3 py3-pip $BUILD_LIBS \
 COPY --from=hadolint_layer /hadolint /bin/hadolint
 
 # [ Bash ]
-RUN apk add --no-cache libffi
+RUN apk add --no-cache libffih
 COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
 COPY --from=hadolint_layer /shellcheck /bin/shellcheck
 

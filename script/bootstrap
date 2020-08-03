@@ -8,7 +8,7 @@ docker_inst() {
 }
 
 go_inst() {
-	version=1.13.4
+	version=1.14.6
 	file="go$version.$(uname -s)-amd64.tar.gz"
 	curl "https://dl.google.com/go/$file" -o "/tmp/$file"
 	tar -C "$(dirname "$GOROOT")" -xzf "/tmp/$file"

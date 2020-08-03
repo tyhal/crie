@@ -125,8 +125,8 @@ func (e *ExecCmd) startDocker() error {
 	}
 	resp, err := e.Docker.client.ContainerCreate(ctx,
 		&container.Config{
-			Entrypoint: []string{"sh"},
-			Cmd:        []string{"-c", "while true; do sleep 1000; done"},
+			Entrypoint: []string{"/bin/sleep"},
+			Cmd:        []string{"3600"},
 			Image:      e.Docker.Image,
 			WorkingDir: dir,
 		},

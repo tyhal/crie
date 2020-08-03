@@ -7,7 +7,6 @@ replace github.com/pengwynn/flint => github.com/tyhal/flint v0.1.1-0.20190910041
 replace github.com/yoheimuta/protolint => github.com/tyhal/protolint v0.23.2-crie
 
 require (
-	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -23,7 +22,6 @@ require (
 	github.com/spf13/cobra v0.0.7
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/yoheimuta/protolint v0.25.0
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
 	golang.org/x/sys v0.0.0-20191210023423-ac6580df4449 // indirect
 	google.golang.org/appengine v1.6.5 // indirect

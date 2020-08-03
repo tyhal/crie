@@ -20,7 +20,7 @@ func (s *ProjectLintConfiguration) loadFilesGit(args Par) ([]string, error) {
 	err := c.Run()
 	if err != nil {
 		log.WithFields(log.Fields{"type": "stdout"}).Debug(&outB)
-		log.WithFields(log.Fields{"type": "stderr"}).Debug(&outB)
+		log.WithFields(log.Fields{"type": "stderr"}).Debug(&errB)
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (s *ProjectLintConfiguration) fileListRepoChanged() ([]string, error) {
 	if err := c.Run(); err != nil {
 		return nil, err
 	}
-	commitSlice := "HEAD~" + strings.Split(outB.String(), "\n")[0] + "..HEAD"
+	commitSlice := "HEAD~" + strings.Split(outB.String(), "\n")[0]
 	return s.loadFilesGit(Par{"diff", "--name-only", commitSlice, "."})
 }
 
