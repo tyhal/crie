@@ -20,7 +20,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/pengwynn/flint v0.0.0-00010101000000-000000000000
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v0.0.7
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/yoheimuta/protolint v0.23.1
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
