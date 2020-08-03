@@ -36,7 +36,7 @@ var LanguageList = []linter.Language{
 		Name:  `bash`,
 		Match: regexp.MustCompile(`\.bash$`),
 		Fmt:   &imp.ExecCmd{Bin: `shfmt`, FrontPar: api.Par{`-w`, `-ln`, `bash`}},
-		Chk:   &imp.ExecCmd{Bin: `shellcheck`, FrontPar: api.Par{`-x`, `--shell=bash`, `-Calways`},
+		Chk: &imp.ExecCmd{Bin: `shellcheck`, FrontPar: api.Par{`-x`, `--shell=bash`, `-Calways`},
 			Docker: imp.DockerCmd{Image: "docker.io/tyhal/hadolint-hadolint:v1.18.0"}}},
 	{
 		Name:  `sh`,
