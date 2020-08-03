@@ -3,7 +3,6 @@ pull_request_rules:
     conditions:
       - author=dependabot-preview[bot]
       - status-success=ci/dockercloud
-      - status-success=License Compliance
     actions:
       merge:
         method: merge
@@ -11,7 +10,6 @@ pull_request_rules:
     conditions:
       - author=renovate[bot]
       - status-success=ci/dockercloud
-      - status-success=License Compliance
     actions:
       merge:
         method: merge
@@ -19,7 +17,6 @@ pull_request_rules:
     conditions:
       - author=snyk-bot[bot]
       - status-success=ci/dockercloud
-      - status-success=License Compliance
     actions:
       merge:
         method: merge
@@ -27,7 +24,6 @@ pull_request_rules:
     conditions:
       - author=tyhal
       - status-success=ci/dockercloud
-      - status-success=License Compliance
     actions:
       merge:
         method: merge
