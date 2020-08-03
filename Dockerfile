@@ -3,9 +3,9 @@
 
 # ~~~ Languages ~~~
 
-FROM tyhal/hadolint-hadolint:v1.15.0 as hadolint_layer
+FROM tyhal/hadolint-hadolint:v1.18.0 as hadolint_layer
 
-FROM golang:1.12.14-alpine3.9 as go_layer
+FROM golang:1.14.6-alpine3.12 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
@@ -29,12 +29,12 @@ COPY imp /crie/imp
 COPY crie.go /crie/crie.go
 RUN go build
 
-FROM alpine:3.10.3 as clang_layer
+FROM alpine:3.12.0 as clang_layer
 RUN apk --no-cache add clang
 
-FROM alpine:3.10.3 as terraform_layer
+FROM alpine:3.12.0 as terraform_layer
 RUN apk --no-cache add git wget zip
-ENV TERRA_VER 0.12.17
+ENV TERRA_VER 0.12.26
 RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 RUN unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 
@@ -43,7 +43,7 @@ RUN unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 
 # Alpine :ok_hand:
-FROM alpine:3.10.3
+FROM alpine:3.12.0
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
@@ -56,22 +56,24 @@ RUN apk add --no-cache nodejs-npm && npm install -g jsonlint2 remark-cli remark-
 
 # [ OS pkgs]
 RUN apk --no-cache add gmp libxml2
- COPY --from=clang_layer /usr/lib/libLLVM-8.so /usr/lib/libLLVM-8.so
- COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
+COPY --from=clang_layer /usr/lib/libclang-cpp.so.10 /usr/lib/libclang-cpp.so.10
+COPY --from=clang_layer /usr/lib/libLLVM-10.so /usr/lib/libLLVM-10.so
+COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 RUN apk --no-cache add cppcheck asciidoctor
 
 # [ Pips ]
 COPY requirements.txt /requirements.txt
 ENV BUILD_LIBS="python3-dev build-base libffi-dev libressl-dev"
-RUN apk add --no-cache python3 $BUILD_LIBS \
+RUN apk add --no-cache python3 py3-pip $BUILD_LIBS \
     && pip3 install -r requirements.txt \
     && apk del --no-cache $BUILD_LIBS
 
-COPY --from=hadolint_layer /bin/hadolint /bin/hadolint
+COPY --from=hadolint_layer /hadolint /bin/hadolint
 
 # [ Bash ]
+RUN apk add --no-cache libffi
 COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
-COPY --from=hadolint_layer /bin/shellcheck /bin/shellcheck
+COPY --from=hadolint_layer /shellcheck /bin/shellcheck
 
 # [ Golang ]
 COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
