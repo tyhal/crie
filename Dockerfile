@@ -68,12 +68,11 @@ RUN apk add --no-cache python3 py3-pip $BUILD_LIBS \
     && pip3 install -r requirements.txt \
     && apk del --no-cache $BUILD_LIBS
 
-COPY --from=hadolint_layer /hadolint /bin/hadolint
+COPY --from=hadolint_layer /bin/hadolint /bin/hadolint
 
 # [ Bash ]
-RUN apk add --no-cache libffih
 COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
-COPY --from=hadolint_layer /shellcheck /bin/shellcheck
+COPY --from=hadolint_layer /bin/shellcheck /bin/shellcheck
 
 # [ Golang ]
 COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
