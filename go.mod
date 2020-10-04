@@ -17,7 +17,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20170719101040-be5337e7b39e
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
-	github.com/pengwynn/flint v0.0.0-00010101000000-000000000000
+	github.com/pengwynn/flint v0.0.0-20200815234107-7de6b195eeac
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cobra v0.0.7
 	github.com/stretchr/testify v1.4.0 // indirect
