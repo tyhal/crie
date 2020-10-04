@@ -5,7 +5,7 @@ package imp
 import (
 	"bytes"
 	"github.com/tyhal/crie/api/linter"
-	"github.com/yoheimuta/protolint/api"
+	"github.com/tyhal/protolint/api"
 	"math"
 )
 

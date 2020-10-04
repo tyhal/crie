@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/pengwynn/flint/flint"
 	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/flint/flint"
 	"os"
 )
 

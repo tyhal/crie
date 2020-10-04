@@ -15,7 +15,7 @@ pull_request_rules:
         method: merge
   - name: automatic merge for Synk pull requests
     conditions:
-      - author=snyk-bot[bot]
+      - author=snyk-bot
       - status-success=ci/dockercloud
     actions:
       merge:
