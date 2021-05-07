@@ -5,7 +5,7 @@
 
 FROM tyhal/hadolint-hadolint:v1.18.0 as hadolint_layer
 
-FROM golang:1.15.5-alpine3.12 as go_layer
+FROM golang:1.16.4-alpine3.12 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
