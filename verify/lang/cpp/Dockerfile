@@ -1,5 +1,5 @@
 	
-FROM	gcc:8.1.0
+FROM	gcc:8.5.0
 RUN	apt-get update -y \
 	&& apt-get install -y \
 	--no-install-recommends \
