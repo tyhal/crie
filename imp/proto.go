@@ -37,5 +37,5 @@ func (e *protoLint) Run(filepath string, rep chan linter.Report) {
 		&outB,
 		&errB,
 	)
-	rep <- linter.Report{filepath, err, &outB, &errB}
+	rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
 }

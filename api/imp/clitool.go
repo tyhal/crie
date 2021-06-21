@@ -180,10 +180,7 @@ func (e *ExecCmd) Run(filepath string, rep chan linter.Report) {
 	var outB, errB bytes.Buffer
 	var err error
 	if e.useDocker {
-		if err = e.execDocker(params, &outB); err != nil {
-			rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
-			return
-		}
+		err = e.execDocker(params, &outB)
 	} else {
 		// Local binary
 		c := exec.Command(e.Bin, params...)

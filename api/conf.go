@@ -22,7 +22,7 @@ func (s *ProjectLintConfiguration) IsRepo() bool {
 // loadFileList returns all valid files that have also been filtered by the config
 func (s *ProjectLintConfiguration) loadFileList() {
 
-	fileList := []string{}
+	var fileList []string
 	var err error
 
 	if s.IsRepo() {

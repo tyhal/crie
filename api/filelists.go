@@ -67,7 +67,7 @@ func (s *ProjectLintConfiguration) fileListAll() ([]string, error) {
 		return nil, err
 	}
 
-	allFiles := []string{}
+	var allFiles []string
 
 	// Create an initial file list
 	err = filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {

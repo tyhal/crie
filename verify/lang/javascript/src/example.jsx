@@ -3,7 +3,7 @@ const Menu = require('Menu')
 const Dropdown = require('Dropdown')
 
 // Using JSX to express UI components.
-var dropdown = (
+const dropdown = (
   <Dropdown>
     A dropdown list
     <Menu>
@@ -14,6 +14,6 @@ var dropdown = (
   </Dropdown>
 )
 
-var z = { foo: 'bar' }
+const z = { foo: 'bar' }
 
 console.log({ z, dropdown })

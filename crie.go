@@ -12,22 +12,22 @@ import (
 
 var majorNum = "0"
 var minorOffset = 0
-var patchNum = "44"
+var patchNum = "53"
 
-var quote = `
-	|> crie: the act of crying and dying at the same time
-
-	|> "this unformated code makes me want to crie"
-
-	|> Its more important about picking a standard than it is to pick any certain one.
-
-	>>-
-		Does a good farmer neglect a crop he has planted?
-		Does a good teacher overlook even the most humble student?
-		Does a good father allow a single child to starve?
-		Does a good programmer refuse to maintain his code?
-	>>-
-`
+//`
+//	|> crie: the act of crying and dying at the same time
+//
+//	|> "this unformated code makes me want to crie"
+//
+//	|> Its more important about picking a standard than it is to pick any certain one.
+//
+//	>>-
+//		Does a good farmer neglect a crop he has planted?
+//		Does a good teacher overlook even the most humble student?
+//		Does a good father allow a single child to starve?
+//		Does a good programmer refuse to maintain his code?
+//	>>-
+//`
 
 var rootCmd = &cobra.Command{
 	Use:     "crie",
@@ -41,14 +41,23 @@ var rootCmd = &cobra.Command{
 
 var quiet = false
 var verbose = false
+var json = false
 var state api.ProjectLintConfiguration
 
-func setLogLevel() {
+func setLogging() {
 	if verbose {
 		log.SetLevel(log.DebugLevel)
 	}
 	if quiet {
 		log.SetLevel(log.FatalLevel)
+	}
+	if json {
+		log.SetFormatter(&log.JSONFormatter{})
+	} else {
+		log.SetFormatter(&log.TextFormatter{
+			DisableTimestamp: true,
+			DisableSorting:   true,
+		})
 	}
 }
 
@@ -65,6 +74,7 @@ func init() {
 
 	cli.Config = &state
 
+	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", json, "turn on json output")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", verbose, "turn on verbose printing for reports")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "config file location")
@@ -76,17 +86,13 @@ func init() {
 	rootCmd.AddCommand(cli.NonCmd)
 	rootCmd.AddCommand(cli.LsCmd)
 
-	cobra.OnInitialize(setLogLevel)
+	cobra.OnInitialize(setLogging)
 }
 
 func main() {
 
 	// You could change this to your own implementation of standards
 	state.Languages = imp.LanguageList
-
-	log.SetFormatter(&log.TextFormatter{
-		DisableTimestamp: true,
-	})
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

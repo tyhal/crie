@@ -18,7 +18,7 @@ func (rep *Report) Log() error {
 		return nil
 	}
 
-	fmt.Printf("\u274C %v\n", rep.File)
+	log.Printf("\u274C %v\n", rep.File)
 	log.WithFields(log.Fields{"type": "stdout"}).Info(rep.StdOut)
 	log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
 

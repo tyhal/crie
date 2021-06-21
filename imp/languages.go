@@ -37,13 +37,13 @@ var LanguageList = []linter.Language{
 		Match: regexp.MustCompile(`\.bash$`),
 		Fmt:   &imp.ExecCmd{Bin: `shfmt`, FrontPar: api.Par{`-w`, `-ln`, `bash`}},
 		Chk: &imp.ExecCmd{Bin: `shellcheck`, FrontPar: api.Par{`-x`, `--shell=bash`, `-Calways`},
-			Docker: imp.DockerCmd{Image: "docker.io/tyhal/hadolint-hadolint:v1.18.0"}}},
+			Docker: imp.DockerCmd{Image: "tyhal/hadolint:0.0.2"}}},
 	{
 		Name:  `sh`,
 		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$`),
 		Fmt:   &imp.ExecCmd{Bin: `shfmt`, FrontPar: api.Par{`-w`, `-ln`, `posix`}},
 		Chk: &imp.ExecCmd{Bin: `shellcheck`, FrontPar: api.Par{`-x`, `--shell=sh`, `-Calways`},
-			Docker: imp.DockerCmd{Image: "docker.io/tyhal/hadolint-hadolint:v1.18.0"}}},
+			Docker: imp.DockerCmd{Image: "tyhal/hadolint:0.0.2"}}},
 
 	// https://github.com/lukasmartinelli/hadolint
 	{
@@ -51,8 +51,8 @@ var LanguageList = []linter.Language{
 		Match: regexp.MustCompile(`Dockerfile$`),
 		Chk: &imp.ExecCmd{
 			Bin:      `hadolint`,
-			FrontPar: api.Par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`},
-			Docker:   imp.DockerCmd{Image: "docker.io/tyhal/hadolint-hadolint:v1.18.0"}}},
+			FrontPar: api.Par{`--config`, confDir + `/docker/hadolint.yml`},
+			Docker:   imp.DockerCmd{Image: "tyhal/hadolint:0.0.2"}}},
 
 	//	Fmt:   ExecCmd{`dockfmt`, par{`fmt`, `-w`}, par{}}}
 
@@ -88,7 +88,7 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `markdown`,
 		Match: regexp.MustCompile(`\.md$`),
-		Fmt:   &imp.ExecCmd{Bin: `remark`, FrontPar: api.Par{`--use`, `remark-preset-lint-recommended`}, EndPar: api.Par{`-o`}},
+		Fmt:   &imp.ExecCmd{Bin: `remark`, FrontPar: api.Par{`--use`, `remark-preset-lint-recommended`}, EndPar: api.Par{`-o`}, Docker: imp.DockerCmd{Image: "tyhal/remark:0.0.2"}},
 		Chk:   newValeLint(confDir + `/markdown/.vale.ini`)},
 
 	{
@@ -126,10 +126,12 @@ var LanguageList = []linter.Language{
 		Match: regexp.MustCompile(`CMakeLists.txt$|\.cmake$`),
 		Chk:   &imp.ExecCmd{Bin: `cmakelint`, FrontPar: api.Par{`--config=` + confDir + `/cmake/.cmakelintrc`}}},
 
+	// TODO Review tools that parse child files - ansiblelint needs to install dependencies similiar to how clang-tidy does
 	{
 		Name:  `ansible`,
 		Match: regexp.MustCompile(`playbook.yml$`),
-		Chk:   &imp.ExecCmd{Bin: `ansible-lint`}},
+		//Chk:   &imp.ExecCmd{Bin: `ansible-lint`}
+	},
 
 	{
 		Name:  `dockercompose`,
