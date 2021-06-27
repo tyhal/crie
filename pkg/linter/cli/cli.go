@@ -112,7 +112,10 @@ func (e *Lint) startDocker() error {
 	// Ensure we have the image downloaded
 	pullstat, err := c.ImagePull(ctx, e.Docker.Image, types.ImagePullOptions{})
 	if err != nil {
-		panic(err)
+		log.WithFields(log.Fields{
+			"stage": "docker pull",
+			"image": e.Docker.Image,
+		}).Fatal(err)
 	}
 	var pullOut bytes.Buffer
 	if _, err = io.Copy(&pullOut, pullstat); err != nil {

@@ -11,6 +11,10 @@ import (
 // Directory to store default configurations for tools
 var confDir = "/etc/crie" // || C:\Program Files\Common Files\crie
 
+var hadolintImg = "docker.io/tyhal/hadolint:0.0.2"
+var remarkImg = "docker.io/tyhal/remark:0.0.2"
+
+
 // LanguageList is a monolithic configuration of all cries standard linters
 var LanguageList = []linter.Language{
 	{
@@ -38,22 +42,23 @@ var LanguageList = []linter.Language{
 		Match: regexp.MustCompile(`\.bash$`),
 		Fmt:   &cli.Lint{Bin: `shfmt`, FrontPar: cli.Par{`-w`, `-ln`, `bash`}},
 		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`},
-			Docker: cli.DockerCmd{Image: "tyhal/hadolint:0.0.2"}}},
+			Docker: cli.DockerCmd{Image: hadolintImg}}},
 	{
 		Name:  `sh`,
 		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$`),
 		Fmt:   &cli.Lint{Bin: `shfmt`, FrontPar: cli.Par{`-w`, `-ln`, `posix`}},
 		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`},
-			Docker: cli.DockerCmd{Image: "tyhal/hadolint:0.0.2"}}},
+			Docker: cli.DockerCmd{Image: hadolintImg}}},
 
 	// https://github.com/lukasmartinelli/hadolint
+	// TODO use config file when it can be mounted into the docker cmd too
 	{
 		Name:  `docker`,
 		Match: regexp.MustCompile(`Dockerfile$`),
 		Chk: &cli.Lint{
 			Bin:      `hadolint`,
-			FrontPar: cli.Par{`--config`, confDir + `/docker/hadolint.yml`},
-			Docker:   cli.DockerCmd{Image: "tyhal/hadolint:0.0.2"}}},
+			FrontPar: cli.Par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`},
+			Docker:   cli.DockerCmd{Image:hadolintImg}}},
 
 	//	Fmt:   Lint{`dockfmt`, par{`fmt`, `-w`}, par{}}}
 
@@ -89,7 +94,7 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `markdown`,
 		Match: regexp.MustCompile(`\.md$`),
-		Fmt:   &cli.Lint{Bin: `remark`, FrontPar: cli.Par{`--use`, `remark-preset-lint-recommended`}, EndPar: cli.Par{`-o`}, Docker: cli.DockerCmd{Image: "tyhal/remark:0.0.2"}},
+		Fmt:   &cli.Lint{Bin: `remark`, FrontPar: cli.Par{`--use`, `remark-preset-lint-recommended`}, EndPar: cli.Par{`-o`}, Docker: cli.DockerCmd{Image: remarkImg}},
 		Chk:   vale2.NewValeLint(confDir + `/markdown/.vale.ini`)},
 
 	{
