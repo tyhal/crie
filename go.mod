@@ -14,7 +14,7 @@ require (
 	github.com/jdkato/prose v1.2.1 // indirect
 	github.com/jdkato/regexp v0.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.0 // indirect
-	github.com/olekukonko/tablewriter v0.0.4
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/remeh/sizedwaitgroup v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.5.0
