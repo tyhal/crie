@@ -9,7 +9,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/errata-ai/vale v1.7.1
-	github.com/fatih/color v1.9.0
+	github.com/fatih/color v1.12.0
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/jdkato/prose v1.2.1 // indirect
 	github.com/jdkato/regexp v0.1.0 // indirect
