@@ -2,7 +2,7 @@
 
 // If on linux then try to increase file limits
 
-package api
+package cli
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -22,7 +22,8 @@ func convertLimit(limit uint64) int {
 	return out / maxFilesPerRoutine
 }
 
-func maxConcurrency() int {
+// MaxConcurrency returns the max concurrency name
+func (e *Lint) MaxConcurrency() int {
 	var limit syscall.Rlimit
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &limit)
 	if err != nil {

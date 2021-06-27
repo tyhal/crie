@@ -2,8 +2,9 @@
 # ~~~ Languages ~~~
 
 FROM tyhal/hadolint:0.0.2 as hadolint_layer
+FROM hashicorp/terraform:1.0.1 as terraform_layer
 
-FROM golang:1.15.5-alpine3.12 as go_layer
+FROM golang:1.16.5-alpine3.12 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
@@ -20,21 +21,16 @@ FROM go_layer as crie_layer
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum
 WORKDIR /crie
-RUN --mount=type=cache,target=/go/pkg/mod go mod download
-COPY cli /crie/cli
-COPY api /crie/api
-COPY imp /crie/imp
-COPY crie.go /crie/crie.go
-RUN --mount=type=cache,target=/root/.cache/go-build go build
+# --mount=type=cache,target=/go/pkg/mod
+RUN go mod download
+COPY cmd /crie/cmd
+COPY internal /crie/internal
+COPY pkg /crie/pkg
+# --mount=type=cache,target=/root/.cache/go-build
+RUN go build ./cmd/crie
 
 FROM alpine:3.12.1 as clang_layer
 RUN apk --no-cache add clang
-
-FROM alpine:3.12.1 as terraform_layer
-RUN apk --no-cache add git wget zip
-ENV TERRA_VER 0.12.26
-RUN wget --progress=dot:giga "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip" \
-    && unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 # ~~~~~~~~~~~~~~~~~ ~~~ TOP LAYER ~~~ ~~~~~~~~~~~~~~~~~
@@ -79,7 +75,7 @@ COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
 COPY --from=golint_layer /go/bin/golint /bin/golint
 
 # [ Terraform ]
-COPY --from=terraform_layer /terraform /bin/terraform
+COPY --from=terraform_layer /bin/terraform /bin/terraform
 
 # [ Run Scripts ]
 COPY --from=crie_layer /crie/crie /bin/crie

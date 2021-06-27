@@ -1,4 +1,4 @@
-package printer
+package vale
 
 // github.com/errata-ai/vale@v1.7.1/ui/color.go
 // COPY of above (MIT) licensed project

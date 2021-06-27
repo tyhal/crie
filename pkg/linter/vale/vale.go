@@ -1,4 +1,4 @@
-package imp
+package vale
 
 // github.com/errata-ai/vale@v1.7.1
 
@@ -6,22 +6,24 @@ import (
 	"github.com/errata-ai/vale/check"
 	"github.com/errata-ai/vale/core"
 	"github.com/errata-ai/vale/lint"
-	"github.com/tyhal/crie/api/linter"
-	"github.com/tyhal/crie/imp/printer"
+	"github.com/tyhal/crie/pkg/crie/linter"
 	"io"
 	"math"
 )
 
-type valeLint struct {
+// Lint Lint
+type Lint struct {
 	configPath string
 	linter     *lint.Linter
 }
 
-func (e *valeLint) Name() string {
+// Name Name
+func (e *Lint) Name() string {
 	return "vale"
 }
 
-func (e *valeLint) WillRun() (err error) {
+// WillRun WillRun
+func (e *Lint) WillRun() (err error) {
 	config := core.NewConfig()
 	config, err = core.LoadConfig(config, e.configPath, "warning", false)
 	e.linter.Config = config
@@ -29,23 +31,27 @@ func (e *valeLint) WillRun() (err error) {
 	return
 }
 
-func (e *valeLint) DidRun() {
+// DidRun DidRun
+func (e *Lint) DidRun() {
 	return
 }
 
-func (e *valeLint) MaxConcurrency() int {
+// MaxConcurrency MaxConcurrency
+func (e *Lint) MaxConcurrency() int {
 	return math.MaxInt32
 }
 
-func (e *valeLint) Run(filepath string, rep chan linter.Report) {
+// Run Run
+func (e *Lint) Run(filepath string, rep chan linter.Report) {
 	var stdout io.Reader
 	linted, err := e.linter.LintString(filepath)
 	if err == nil {
-		stdout, err = printer.GetVerboseAlerts(linted, e.linter.Config.Wrap)
+		stdout, err = GetVerboseAlerts(linted, e.linter.Config.Wrap)
 	}
 	rep <- linter.Report{File: filepath, Err: err, StdOut: stdout}
 }
 
-func newValeLint(confpath string) *valeLint {
-	return &valeLint{confpath, &lint.Linter{}}
+// NewValeLint NewValeLint
+func NewValeLint(confpath string) *Lint {
+	return &Lint{confpath, &lint.Linter{}}
 }

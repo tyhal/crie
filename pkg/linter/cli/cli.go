@@ -1,4 +1,4 @@
-package imp
+package cli
 
 import (
 	"bytes"
@@ -9,8 +9,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/api"
-	"github.com/tyhal/crie/api/linter"
+	linter "github.com/tyhal/crie/pkg/crie/linter"
 	"io"
 	"os"
 	"os/exec"
@@ -19,14 +18,17 @@ import (
 	"time"
 )
 
-// ExecCmd defines a predefined command to run against a file
-type ExecCmd struct {
+// Lint defines a predefined command to run against a file
+type Lint struct {
 	Bin       string
-	FrontPar  api.Par
-	EndPar    api.Par
+	FrontPar  Par
+	EndPar    Par
 	Docker    DockerCmd
 	useDocker bool
 }
+
+// Par represents cli parameters
+type Par []string
 
 // DockerCmd an image to launch
 type DockerCmd struct {
@@ -36,12 +38,12 @@ type DockerCmd struct {
 }
 
 // Name returns the command name
-func (e *ExecCmd) Name() string {
+func (e *Lint) Name() string {
 	return e.Bin
 }
 
 // WillRun does preflight checks for the 'Run'
-func (e *ExecCmd) WillRun() error {
+func (e *Lint) WillRun() error {
 	e.useDocker = exec.Command("which", e.Bin).Run() != nil
 	if e.useDocker {
 		if e.Docker.Image == "" {
@@ -56,7 +58,7 @@ func (e *ExecCmd) WillRun() error {
 }
 
 // working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
-func (e *ExecCmd) execDocker(params []string, stdout io.Writer) error {
+func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 	ctx := context.Background()
 	cmd := append([]string{"/bin/" + e.Bin}, params...)
 	config := types.ExecConfig{
@@ -100,7 +102,7 @@ func (e *ExecCmd) execDocker(params []string, stdout io.Writer) error {
 	}
 }
 
-func (e *ExecCmd) startDocker() error {
+func (e *Lint) startDocker() error {
 	ctx := context.Background()
 	c, err := client.NewEnvClient()
 	if err != nil {
@@ -151,7 +153,7 @@ func (e *ExecCmd) startDocker() error {
 }
 
 // DidRun should be called after all other Runs to clean up
-func (e *ExecCmd) DidRun() {
+func (e *Lint) DidRun() {
 	if e.useDocker {
 		ctx := context.Background()
 		var timeout time.Duration
@@ -171,7 +173,7 @@ func (e *ExecCmd) DidRun() {
 }
 
 // Run does the work required to lint the given filepath
-func (e *ExecCmd) Run(filepath string, rep chan linter.Report) {
+func (e *Lint) Run(filepath string, rep chan linter.Report) {
 
 	params := append(e.FrontPar, filepath)
 	params = append(params, e.EndPar...)

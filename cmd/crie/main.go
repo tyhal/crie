@@ -3,9 +3,9 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/api"
-	"github.com/tyhal/crie/cli"
-	"github.com/tyhal/crie/imp"
+	"github.com/tyhal/crie/cmd/crie/cmd"
+	"github.com/tyhal/crie/cmd/crie/conf"
+	"github.com/tyhal/crie/pkg/crie/project"
 	"os"
 	"strconv"
 )
@@ -32,7 +32,7 @@ var patchNum = "53"
 var rootCmd = &cobra.Command{
 	Use:     "crie",
 	Short:   "crie is a formatter for many languages.",
-	Version: majorNum + "." + strconv.Itoa(len(imp.LanguageList)-minorOffset) + "." + patchNum,
+	Version: majorNum + "." + strconv.Itoa(len(conf.LanguageList)-minorOffset) + "." + patchNum,
 	Example: "check all python files in the last commit 'crie chk --git-diff 1 --lang python'",
 	Long: `
 	crie brings together a vast collection of formatters and linters
@@ -42,7 +42,7 @@ var rootCmd = &cobra.Command{
 var quiet = false
 var verbose = false
 var json = false
-var state api.ProjectLintConfiguration
+var state project.LintConfiguration
 
 func setLogging() {
 	if verbose {
@@ -72,19 +72,19 @@ func addLintCommand(cmd *cobra.Command) {
 
 func init() {
 
-	cli.Config = &state
+	cmd.Config = &state
 
 	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", json, "turn on json output")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", verbose, "turn on verbose printing for reports")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "config file location")
 
-	addLintCommand(cli.ChkCmd)
-	addLintCommand(cli.FmtCmd)
-	addLintCommand(cli.LntCmd)
+	addLintCommand(cmd.ChkCmd)
+	addLintCommand(cmd.FmtCmd)
+	addLintCommand(cmd.LntCmd)
 
-	rootCmd.AddCommand(cli.NonCmd)
-	rootCmd.AddCommand(cli.LsCmd)
+	rootCmd.AddCommand(cmd.NonCmd)
+	rootCmd.AddCommand(cmd.LsCmd)
 
 	cobra.OnInitialize(setLogging)
 }
@@ -92,7 +92,7 @@ func init() {
 func main() {
 
 	// You could change this to your own implementation of standards
-	state.Languages = imp.LanguageList
+	state.Languages = conf.LanguageList
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

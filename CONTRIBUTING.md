@@ -1,5 +1,7 @@
 # Contributing
 
+[main configuration file](cmd/crie/conf/languages.go)
+
 ## Building and testing
 
 ```bash

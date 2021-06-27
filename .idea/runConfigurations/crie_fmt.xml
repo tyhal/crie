@@ -4,9 +4,9 @@
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="fmt -v" />
     <kind value="PACKAGE" />
-    <filePath value="$PROJECT_DIR$/crie.go" />
-    <package value="github.com/tyhal/crie" />
+    <package value="github.com/tyhal/crie/cmd/crie" />
     <directory value="$PROJECT_DIR$/" />
+    <filePath value="$PROJECT_DIR$/crie.go" />
     <method v="2" />
   </configuration>
 </component>
