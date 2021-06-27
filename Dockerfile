@@ -1,11 +1,10 @@
-# Effective Standards Development
-
-
+# syntax=docker/dockerfile:1.2
 # ~~~ Languages ~~~
 
-FROM tyhal/hadolint-hadolint:v1.18.0 as hadolint_layer
+FROM tyhal/hadolint:0.0.2 as hadolint_layer
+FROM hashicorp/terraform:1.0.1 as terraform_layer
 
-FROM golang:1.15.5-alpine3.12 as go_layer
+FROM golang:1.16.5-alpine3.12 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
@@ -22,21 +21,16 @@ FROM go_layer as crie_layer
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum
 WORKDIR /crie
+# --mount=type=cache,target=/go/pkg/mod
 RUN go mod download
-COPY cli /crie/cli
-COPY api /crie/api
-COPY imp /crie/imp
-COPY crie.go /crie/crie.go
-RUN go build
+COPY cmd /crie/cmd
+COPY internal /crie/internal
+COPY pkg /crie/pkg
+# --mount=type=cache,target=/root/.cache/go-build
+RUN go build ./cmd/crie
 
 FROM alpine:3.12.1 as clang_layer
 RUN apk --no-cache add clang
-
-FROM alpine:3.12.1 as terraform_layer
-RUN apk --no-cache add git wget zip
-ENV TERRA_VER 0.12.26
-RUN wget "https://releases.hashicorp.com/terraform/$TERRA_VER/terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
-RUN unzip "terraform_${TERRA_VER}_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.zip"
 
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 # ~~~~~~~~~~~~~~~~~ ~~~ TOP LAYER ~~~ ~~~~~~~~~~~~~~~~~
@@ -47,6 +41,7 @@ FROM alpine:3.12.1
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
+# hadolint ignore=DL3059
 RUN adduser -D standards
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,10 +57,11 @@ COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 RUN apk --no-cache add cppcheck asciidoctor
 
 # [ Pips ]
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
 COPY requirements.txt /requirements.txt
 ENV BUILD_LIBS="python3-dev build-base libffi-dev libressl-dev"
 RUN apk add --no-cache python3 py3-pip $BUILD_LIBS \
-    && pip3 install -r requirements.txt \
+    && pip3 --no-cache-dir install -r requirements.txt \
     && apk del --no-cache $BUILD_LIBS
 
 COPY --from=hadolint_layer /bin/hadolint /bin/hadolint
@@ -79,7 +75,7 @@ COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
 COPY --from=golint_layer /go/bin/golint /bin/golint
 
 # [ Terraform ]
-COPY --from=terraform_layer /terraform /bin/terraform
+COPY --from=terraform_layer /bin/terraform /bin/terraform
 
 # [ Run Scripts ]
 COPY --from=crie_layer /crie/crie /bin/crie
@@ -90,8 +86,8 @@ RUN chown -R standards:standards /etc/crie/
 WORKDIR /l
 
 # Give permission to non root to cache dirs
-RUN mkdir /.standard-v14-cache /.ansible
-RUN chmod -R o+rw /home /.standard-v14-cache /.ansible
+RUN mkdir /.standard-v14-cache /.ansible \
+    && chmod -R o+rw /home /.standard-v14-cache /.ansible
 
 ENTRYPOINT ["/bin/crie"]
 

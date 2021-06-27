@@ -1,13 +1,13 @@
-package cli
+package cmd
 
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/api"
+	"github.com/tyhal/crie/pkg/crie/project"
 )
 
 // Config is a reference to an all ready setup configuration that these commands will utilise
-var Config *api.ProjectLintConfiguration
+var Config *project.LintConfiguration
 
 // FmtCmd Format code command
 var FmtCmd = &cobra.Command{

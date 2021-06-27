@@ -19,6 +19,7 @@ type Linter interface {
 	Name() string
 	WillRun() error
 	DidRun()
+	MaxConcurrency() int
 	Run(filepath string, rep chan Report)
 }
 

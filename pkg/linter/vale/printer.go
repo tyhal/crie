@@ -1,4 +1,4 @@
-package printer
+package vale
 
 // github.com/errata-ai/vale@v1.7.1/ui/color.go
 // COPY of above (MIT) licensed project
@@ -20,10 +20,9 @@ import (
 )
 
 const (
-	errorColor      color.Attribute = color.FgRed
-	warningColor                    = color.FgYellow
-	suggestionColor                 = color.FgBlue
-	underlineColor                  = color.Underline
+	errorColor      = color.FgRed
+	warningColor    = color.FgYellow
+	suggestionColor = color.FgBlue
 )
 
 func pluralize(s string, n int) string {
@@ -85,7 +84,7 @@ func GetVerboseAlerts(linted []*core.File, wrap bool) (io.Reader, error) {
 // printVerboseAlert includes an alert's line, column, level, and message.
 func printVerboseAlert(f *core.File, wrap bool, writer io.Writer) (int, int, int) {
 	var loc, level string
-	var errors, warnings, notifications int
+	var errorCount, warningCount, notifyCount int
 
 	alerts := f.SortedAlerts()
 	if len(alerts) == 0 {
@@ -102,19 +101,19 @@ func printVerboseAlert(f *core.File, wrap bool, writer io.Writer) (int, int, int
 		a.Message = fixOutputSpacing(a.Message)
 		if a.Severity == "suggestion" {
 			level = colorize(a.Severity, suggestionColor)
-			notifications++
+			notifyCount++
 		} else if a.Severity == "warning" {
 			level = colorize(a.Severity, warningColor)
-			warnings++
+			warningCount++
 		} else {
 			level = colorize(a.Severity, errorColor)
-			errors++
+			errorCount++
 		}
 		loc = fmt.Sprintf("%d:%d", a.Line, a.Span[0])
 		table.Append([]string{loc, level, a.Message, a.Check})
 	}
 	table.Render()
-	return errors, warnings, notifications
+	return errorCount, warningCount, notifyCount
 }
 
 func colorize(message string, textColor color.Attribute) string {

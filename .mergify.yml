@@ -1,29 +1,22 @@
 pull_request_rules:
   - name: automatic merge for Dependabot pull requests
     conditions:
-      - author=dependabot-preview[bot]
-      - status-success=ci/dockercloud
+      - author=dependabot[bot]
+      - status-success=ci/dockercloud-stage
     actions:
       merge:
         method: merge
   - name: automatic merge for Renovate pull requests
     conditions:
       - author=renovate[bot]
-      - status-success=ci/dockercloud
+      - status-success=ci/dockercloud-stage
     actions:
       merge:
         method: merge
   - name: automatic merge for Synk pull requests
     conditions:
       - author=snyk-bot
-      - status-success=ci/dockercloud
-    actions:
-      merge:
-        method: merge
-  - name: automatic merge for Tyhal pull requests
-    conditions:
-      - author=tyhal
-      - status-success=ci/dockercloud
+      - status-success=ci/dockercloud-stage
     actions:
       merge:
         method: merge

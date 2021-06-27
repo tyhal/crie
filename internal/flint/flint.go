@@ -1,4 +1,4 @@
-package api
+package runflint
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -6,7 +6,8 @@ import (
 	"os"
 )
 
-func runFlint(path string) {
+// RunFlint RunFlint
+func RunFlint(path string) {
 	flags := flint.Flags{
 		RunReadme:        true,
 		RunContributing:  true,
@@ -28,17 +29,5 @@ func runFlint(path string) {
 			summary.Print(os.Stderr, true)
 			os.Exit(sev)
 		}
-	}
-}
-
-// CheckProjects for missing files that should be included
-func (s *ProjectLintConfiguration) CheckProjects() {
-	if s.SingleLang == "" && s.IsRepo() {
-		log.WithFields(log.Fields{"projects": len(projDirs)}).Info("required files")
-		for _, dir := range projDirs {
-			runFlint(dir)
-		}
-	} else {
-		log.Info("not checking for any projects")
 	}
 }
