@@ -9,15 +9,15 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/errata-ai/vale v1.7.1
-	github.com/fatih/color v1.9.0
+	github.com/fatih/color v1.12.0
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/jdkato/prose v1.2.1 // indirect
 	github.com/jdkato/regexp v0.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.0 // indirect
-	github.com/olekukonko/tablewriter v0.0.4
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/remeh/sizedwaitgroup v1.0.0 // indirect
-	github.com/sirupsen/logrus v1.5.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v0.0.7
 	github.com/tyhal/flint v0.1.4-crie
 	github.com/tyhal/protolint v0.25.3-crie
