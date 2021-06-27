@@ -14,7 +14,6 @@ var confDir = "/etc/crie" // || C:\Program Files\Common Files\crie
 var hadolintImg = "docker.io/tyhal/hadolint:0.0.2"
 var remarkImg = "docker.io/tyhal/remark:0.0.2"
 
-
 // LanguageList is a monolithic configuration of all cries standard linters
 var LanguageList = []linter.Language{
 	{
@@ -58,7 +57,7 @@ var LanguageList = []linter.Language{
 		Chk: &cli.Lint{
 			Bin:      `hadolint`,
 			FrontPar: cli.Par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`},
-			Docker:   cli.DockerCmd{Image:hadolintImg}}},
+			Docker:   cli.DockerCmd{Image: hadolintImg}}},
 
 	//	Fmt:   Lint{`dockfmt`, par{`fmt`, `-w`}, par{}}}
 
