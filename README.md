@@ -2,7 +2,7 @@
     crie.
 </h1>
 <p align="center">
-    <img src="https://raw.githubusercontent.com/tyhal/crie/master/doc/demo.svg?sanitize=true" width="572" alt="crie cli demo">
+    <img src="https://raw.githubusercontent.com/tyhal/crie/main/doc/demo.svg?sanitize=true" width="572" alt="crie cli demo">
 </p>
 <p align="center">
     Effectively format and lint code for a variety of languages

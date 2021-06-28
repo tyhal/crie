@@ -2,7 +2,7 @@
   <configuration default="false" name="crie fmt" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="crie" />
     <working_directory value="$PROJECT_DIR$" />
-    <parameters value="fmt -v" />
+    <parameters value="fmt -v -p" />
     <kind value="PACKAGE" />
     <package value="github.com/tyhal/crie/cmd/crie" />
     <directory value="$PROJECT_DIR$/" />
