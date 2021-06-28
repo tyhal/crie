@@ -16,13 +16,11 @@ FROM go_layer as crie_layer
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum
 WORKDIR /crie
-# --mount=type=cache,target=/go/pkg/mod
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
 COPY cmd /crie/cmd
 COPY internal /crie/internal
 COPY pkg /crie/pkg
-# --mount=type=cache,target=/root/.cache/go-build
-RUN go build ./cmd/crie
+RUN --mount=type=cache,target=/root/.cache/go-build go build ./cmd/crie
 
 FROM alpine:3.12.1 as clang_layer
 RUN apk --no-cache add clang
@@ -62,7 +60,6 @@ RUN apk add --no-cache python3 py3-pip $BUILD_LIBS \
 COPY --from=hadolint_layer /bin/hadolint /bin/hadolint
 
 # [ Bash ]
-COPY --from=shfmt_layer /go/bin/shfmt /bin/shfmt
 COPY --from=hadolint_layer /bin/shellcheck /bin/shellcheck
 
 # [ Golang ]
