@@ -12,11 +12,6 @@ ENV CGO_ENABLED=0
 FROM go_layer as golint_layer
 RUN go get -u golang.org/x/lint/golint
 
-# TODO implement imp/shfmt.go
-FROM go_layer as shfmt_layer
-RUN go get -u mvdan.cc/sh/cmd/shfmt
-#RUN go get -u github.com/jessfraz/dockfmt
-
 FROM go_layer as crie_layer
 COPY go.mod /crie/go.mod
 COPY go.sum /crie/go.sum

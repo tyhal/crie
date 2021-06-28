@@ -4,7 +4,9 @@ import (
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"github.com/tyhal/crie/pkg/linter/cli"
 	proto2 "github.com/tyhal/crie/pkg/linter/proto"
+	"github.com/tyhal/crie/pkg/linter/shfmt"
 	vale2 "github.com/tyhal/crie/pkg/linter/vale"
+	"mvdan.cc/sh/v3/syntax"
 	"regexp"
 )
 
@@ -13,6 +15,7 @@ var confDir = "/etc/crie" // || C:\Program Files\Common Files\crie
 
 var hadolintImg = "docker.io/tyhal/hadolint:0.0.2"
 var remarkImg = "docker.io/tyhal/remark:0.0.2"
+var terraformImg = "docker.io/hashicorp/terraform:1.0.1"
 
 // LanguageList is a monolithic configuration of all cries standard linters
 var LanguageList = []linter.Language{
@@ -39,13 +42,13 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `bash`,
 		Match: regexp.MustCompile(`\.bash$`),
-		Fmt:   &cli.Lint{Bin: `shfmt`, FrontPar: cli.Par{`-w`, `-ln`, `bash`}},
+		Fmt:   &shfmt.Lint{Language: syntax.LangBash},
 		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`},
 			Docker: cli.DockerCmd{Image: hadolintImg}}},
 	{
 		Name:  `sh`,
-		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$`),
-		Fmt:   &cli.Lint{Bin: `shfmt`, FrontPar: cli.Par{`-w`, `-ln`, `posix`}},
+		Match: regexp.MustCompile(`\.sh$|script/[^.]*$`),
+		Fmt:   &shfmt.Lint{Language: syntax.LangPOSIX},
 		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`},
 			Docker: cli.DockerCmd{Image: hadolintImg}}},
 
@@ -70,8 +73,8 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `terraform`,
 		Match: regexp.MustCompile(`\.tf$`),
-		Fmt:   &cli.Lint{Bin: `terraform`, FrontPar: cli.Par{`fmt`}},
-		Chk:   &cli.Lint{Bin: `terraform`, FrontPar: cli.Par{`fmt`, `-check=true`}}},
+		Fmt:   &cli.Lint{Bin: `terraform`, Docker: cli.DockerCmd{Image: terraformImg}, FrontPar: cli.Par{`fmt`}},
+		Chk:   &cli.Lint{Bin: `terraform`, Docker: cli.DockerCmd{Image: terraformImg}, FrontPar: cli.Par{`fmt`, `-check=true`}}},
 
 	// https://blog.jetbrains.com/webstorm/2017/01/webstorm-2017-1-eap-171-2272/
 	// https://github.com/standard/standard
