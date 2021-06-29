@@ -10,7 +10,6 @@ import (
 	"bytes"
 	maybeio "github.com/google/renameio/maybe"
 	"io"
-	"mvdan.cc/sh/v3/fileutil"
 	"mvdan.cc/sh/v3/syntax"
 	"os"
 )
@@ -25,16 +24,6 @@ func (s *shfmt) formatPath(path string, checkShebang bool) error {
 	}
 	defer f.Close()
 	readBuf.Reset()
-	if checkShebang {
-		n, err := f.Read(copyBuf[:32])
-		if err != nil {
-			return err
-		}
-		if !fileutil.HasShebang(copyBuf[:n]) {
-			return nil
-		}
-		readBuf.Write(copyBuf[:n])
-	}
 	if _, err := io.CopyBuffer(&readBuf, f, copyBuf); err != nil {
 		return err
 	}
