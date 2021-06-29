@@ -3,7 +3,7 @@ FROM	gcc:11.1.0
 RUN	apt-get update -y \
 	&& apt-get install -y \
 	--no-install-recommends \
-	cmake=3.13.4* \
+	cmake=3.18.4* \
 	&& rm -rf /var/lib/apt/lists/*
 COPY	.	/src/
 WORKDIR	/build/

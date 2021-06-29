@@ -52,6 +52,7 @@ func (e *Lint) WillRun() error {
 		if err := e.startDocker(); err != nil {
 			return err
 		}
+
 		log.Warn("it's more efficient to have " + e.Bin + " installed locally")
 	}
 	return nil
@@ -61,6 +62,7 @@ func (e *Lint) WillRun() error {
 func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 	ctx := context.Background()
 	cmd := append([]string{"/bin/" + e.Bin}, params...)
+	log.Trace(cmd)
 	config := types.ExecConfig{
 		Cmd:          cmd,
 		Env:          os.Environ(),
@@ -102,32 +104,54 @@ func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 	}
 }
 
-func (e *Lint) startDocker() error {
-	ctx := context.Background()
-	c, err := client.NewEnvClient()
-	if err != nil {
-		return err
-	}
+func (e *Lint) pullDocker(ctx context.Context) error {
 
 	// Ensure we have the image downloaded
-	pullstat, err := c.ImagePull(ctx, e.Docker.Image, types.ImagePullOptions{})
+	pullstat, err := e.Docker.client.ImagePull(ctx, e.Docker.Image, types.ImagePullOptions{})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"stage": "docker pull",
 			"image": e.Docker.Image,
 		}).Fatal(err)
+		return err
 	}
+
 	var pullOut bytes.Buffer
-	if _, err = io.Copy(&pullOut, pullstat); err != nil {
-		panic(err)
-	}
+	_, err = io.Copy(&pullOut, pullstat)
 	log.Debug(pullOut.String())
 
-	e.Docker.client = c
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	return err
+}
+
+func (e *Lint) startDocker() error {
+	ctx := context.Background()
+
+	// Add our client
+	{
+		c, err := client.NewEnvClient()
+		if err != nil {
+			return err
+		}
+		e.Docker.client = c
+	}
+
+	_, err := e.Docker.client.ImageHistory(ctx, e.Docker.Image)
+	if err != nil {
+		if err := e.pullDocker(ctx); err != nil {
+			return err
+		}
+	}
+
+	// Ensure we can mount our filesystem to the same path inside the container
+	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
+	dir, err := filepath.Abs(wd)
+	if err != nil {
+		return err
+	}
+
 	resp, err := e.Docker.client.ContainerCreate(ctx,
 		&container.Config{
 			Entrypoint: []string{"/bin/sleep"},
@@ -148,6 +172,7 @@ func (e *Lint) startDocker() error {
 	if err != nil {
 		return err
 	}
+
 	if err := e.Docker.client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}

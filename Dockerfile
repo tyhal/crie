@@ -4,7 +4,7 @@
 FROM tyhal/hadolint:0.0.2 as hadolint_layer
 FROM hashicorp/terraform:1.0.1 as terraform_layer
 
-FROM golang:1.16.5-alpine3.12 as go_layer
+FROM golang:1.16.5-alpine3.13 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
@@ -22,7 +22,7 @@ COPY internal /crie/internal
 COPY pkg /crie/pkg
 RUN --mount=type=cache,target=/root/.cache/go-build go build ./cmd/crie
 
-FROM alpine:3.12.1 as clang_layer
+FROM alpine:3.13.0 as clang_layer
 RUN apk --no-cache add clang
 
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
@@ -30,7 +30,7 @@ RUN apk --no-cache add clang
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 
 # Alpine :ok_hand:
-FROM alpine:3.12.1
+FROM alpine:3.13.0
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
@@ -40,9 +40,9 @@ RUN adduser -D standards
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # [ NPM pkgs]
-RUN apk add --no-cache nodejs-npm && npm install -g jsonlint2 remark-cli remark-preset-lint-recommended standard
+RUN apk add --no-cache npm && npm install -g jsonlint2 remark-cli remark-preset-lint-recommended standard
 
-# [ OS pkgs]
+# [ OS pkgs] - We pull clang-format out specifically because we don't need the rest of clang
 RUN apk --no-cache add gmp libxml2
 COPY --from=clang_layer /usr/lib/libclang-cpp.so.10 /usr/lib/libclang-cpp.so.10
 COPY --from=clang_layer /usr/lib/libLLVM-10.so /usr/lib/libLLVM-10.so

@@ -47,7 +47,7 @@ var LanguageList = []linter.Language{
 			Docker: cli.DockerCmd{Image: hadolintImg}}},
 	{
 		Name:  `sh`,
-		Match: regexp.MustCompile(`\.sh$|script/[^.]*$`),
+		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$|^script/[^.]*$`),
 		Fmt:   &shfmt.Lint{Language: syntax.LangPOSIX},
 		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`},
 			Docker: cli.DockerCmd{Image: hadolintImg}}},
