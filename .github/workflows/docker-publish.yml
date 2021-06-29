@@ -1,4 +1,4 @@
-name: Docker
+name: docker-build
 
 on:
   push:
@@ -16,7 +16,7 @@ on:
 
 jobs:
 
-  test:
+  docker-build-test:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 

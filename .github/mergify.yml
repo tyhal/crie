@@ -1,40 +1,40 @@
 queue_rules:
   - name: default
     conditions:
-      - status-success=Docker / test (pull_request)
+      - status-success=docker-build-test
 
 pull_request_rules:
   - name: automatic merge for Dependabot pull requests
     conditions:
-      - base=master
+      - base=main
       - author~=^dependabot(|-preview)\[bot\]$
-      - status-success=Docker / test (pull_request)
+      - status-success=docker-build-test
     actions:
       queue:
         name: default
   - name: automatic merge for Renovate pull requests
     conditions:
-      - base=master
+      - base=main
       - author=renovate[bot]
-      - status-success=Docker / test (pull_request)
+      - status-success=docker-build-test
     actions:
       queue:
         name: default
   - name: automatic merge for Synk pull requests
     conditions:
-      - base=master
+      - base=main
       - title~=^\[Snyk\]
       - head~=^snyk-fix
       - check-success~=^security/snyk
-      - status-success=Docker / test (pull_request)
+      - status-success=docker-build-test
     actions:
       queue:
         name: default
   - name: automatic merge for ImgBot pull requests
     conditions:
-      - base=master
+      - base=main
       - author=imgbot[bot]
-      - status-success=Docker / test (pull_request)
+      - status-success=docker-build-test
     actions:
       queue:
         name: default
