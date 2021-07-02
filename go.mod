@@ -23,7 +23,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/remeh/sizedwaitgroup v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.2.0
+	github.com/spf13/cobra v1.2.1
 	github.com/tyhal/flint v0.1.4-crie
 	github.com/tyhal/protolint v0.25.3-crie
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
