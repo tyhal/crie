@@ -2,7 +2,7 @@
 # ~~~ Languages ~~~
 
 FROM tyhal/hadolint:0.0.2 as hadolint_layer
-FROM hashicorp/terraform:1.0.1 as terraform_layer
+FROM hashicorp/terraform:1.0.2 as terraform_layer
 
 FROM golang:1.16.5-alpine3.13 as go_layer
 RUN apk --no-cache add git wget
