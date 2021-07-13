@@ -4,7 +4,7 @@
 FROM tyhal/hadolint:0.0.2 as hadolint_layer
 FROM hashicorp/terraform:1.0.2 as terraform_layer
 
-FROM golang:1.16.6-alpine3.13 as go_layer
+FROM golang:1.17beta1-alpine3.13 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
