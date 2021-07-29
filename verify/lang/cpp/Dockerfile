@@ -1,5 +1,5 @@
 
-FROM	gcc:11.1.0
+FROM	gcc:11.2.0
 RUN	apt-get update -y \
 	&& apt-get install -y \
 	--no-install-recommends \
