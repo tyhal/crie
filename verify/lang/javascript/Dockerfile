@@ -1,4 +1,4 @@
-FROM node:16.7.0
+FROM node:16.8.0
 COPY src/ /src/
 WORKDIR /src
 RUN npm install
