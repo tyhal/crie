@@ -1,7 +1,7 @@
 cmakelint==1.4.1
 docker-compose==1.29.2
 yamllint==1.26.3
-pylint==2.10.2
+pylint==2.11.0
 autopep8==1.5.7
 pur==5.4.2
 ansible-lint==5.1.3
