@@ -13,6 +13,7 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/google/renameio v1.0.1
+	github.com/google/renameio/v2 v2.0.0
 	github.com/hashicorp/go-hclog v0.15.0 // indirect
 	github.com/hashicorp/go-plugin v1.4.1 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
