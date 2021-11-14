@@ -4,7 +4,7 @@ set -xe
 : "${GOROOT:=/usr/local/go}"
 
 docker_inst() {
-	curl -fsSL https://get.docker.com | sh get-docker.sh
+	curl -fsSL https://get.docker.com | sh 
 }
 
 go_inst() {

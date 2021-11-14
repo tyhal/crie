@@ -23,10 +23,10 @@ Local binary requiring all linters to be installed
 
 ```bash
     # Ensure your path contains $GOPATH/bin
-    go install
+    go install ./cmd/crie
 
     # Ensure you have all the configuration files
-	cp -r "/conf" /etc/crie/
+	cp -r conf /etc/crie/
 
     # Additional tools used to lint
     go get -u mvdan.cc/sh/cmd/shfmt golang.org/x/lint/golint
