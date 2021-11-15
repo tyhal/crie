@@ -22,7 +22,7 @@ COPY internal /crie/internal
 COPY pkg /crie/pkg
 RUN --mount=type=cache,target=/root/.cache/go-build go build ./cmd/crie
 
-FROM alpine:3.13.0 as clang_layer
+FROM alpine:3.14.3 as clang_layer
 RUN apk --no-cache add clang
 
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
@@ -30,7 +30,7 @@ RUN apk --no-cache add clang
 # ~~~           ~~~ ~~~~~~~~~~~~~~~~~ ~~~           ~~~
 
 # Alpine :ok_hand:
-FROM alpine:3.13.0
+FROM alpine:3.14.3
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
