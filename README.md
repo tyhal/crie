@@ -27,10 +27,19 @@
 
 ## Install
 
-Bundled all-together with Docker
+Getting the tool
 
 ```bash
-    git clone https://github.com/tyhal/crie /tmp/crie; sudo /tmp/crie/script/crie install
+    go install github.com/tyhal/crie/cmd/crie@latest
+```
+
+Getting the just the config via git
+
+```bash
+git clone --depth 1 --filter=blob:none --sparse https://github.com/tyhal/crie ~/.crie
+cd ~/.crie
+git sparse-checkout set /conf
+cd -
 ```
 
 The suggested way to start running crie is to run `chk` at the top of your project and add `--continue` to see every error in the project (this will not change any code)
