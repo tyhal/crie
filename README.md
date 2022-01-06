@@ -33,7 +33,7 @@ Getting the tool
     go install github.com/tyhal/crie/cmd/crie@latest
 ```
 
-Getting the just the config via git
+Getting the config via git
 
 ```bash
 git clone --depth 1 --filter=blob:none --sparse https://github.com/tyhal/crie ~/.crie
