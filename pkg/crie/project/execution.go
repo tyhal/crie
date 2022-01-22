@@ -111,16 +111,16 @@ func (s *LintConfiguration) tryLint(l linter.Language) error {
 		return nil
 	}
 
+	defer selectedLinter.DidRun()
+
 	err := selectedLinter.WillRun()
 	if err != nil {
 		toLog.Error(err.Error())
 		return err
 	}
 
-	log.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info(l.Name)
-
+	toLog.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info("running")
 	err = linter.LintFileList(selectedLinter, filteredFilepaths)
-	selectedLinter.DidRun()
 	if err != nil {
 		toLog.Error(err.Error())
 		return err

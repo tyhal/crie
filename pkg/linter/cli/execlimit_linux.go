@@ -1,3 +1,4 @@
+//go:build linux
 // +build linux
 
 // If on linux then try to increase file limits

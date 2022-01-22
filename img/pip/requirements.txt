@@ -1,0 +1,8 @@
+cmakelint==1.4.2
+docker-compose==1.29.2
+yamllint==1.26.3
+pylint==2.12.2
+autopep8==1.6.0
+pur==6.0.1
+ansible-lint==5.3.2
+ansible==5.3.0

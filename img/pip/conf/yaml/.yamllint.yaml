@@ -32,7 +32,7 @@ rules:
   hyphens:
     max-spaces-after: 1
   indentation:
-    spaces: 2                       # Default: consistent
+    spaces: 2                   # Default: consistent
     indent-sequences: true      # Default true (**)
     check-multi-line-strings: false
   key-duplicates: enable
