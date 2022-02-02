@@ -3,27 +3,26 @@ package conf
 import (
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"github.com/tyhal/crie/pkg/linter/cli"
-	proto2 "github.com/tyhal/crie/pkg/linter/proto"
 	"github.com/tyhal/crie/pkg/linter/shfmt"
-	vale2 "github.com/tyhal/crie/pkg/linter/vale"
 	"mvdan.cc/sh/v3/syntax"
 	"regexp"
 )
 
-// Directory to store default configurations for tools
-var confDir = "/etc/crie" // || C:\Program Files\Common Files\crie
+var imgHadolint = "docker.io/tyhal/hadolint:latest" // TODO versioning + renovatebot
+var imgTerraform = "docker.io/hashicorp/terraform:1.0.1"
 
-var hadolintImg = "docker.io/tyhal/hadolint:0.0.2"
-var remarkImg = "docker.io/tyhal/remark:0.0.2"
-var terraformImg = "docker.io/hashicorp/terraform:1.0.1"
+var imgCrieNpm = "docker.io/tyhal/crie-dep-npm:latest"
+var imgCriePip = "docker.io/tyhal/crie-dep-pip:latest"
+var imgCrieGo = "docker.io/tyhal/crie-dep-go:0.0.2"
+var imgCrieApk = "docker.io/tyhal/crie-dep-apk:0.0.2"
 
 // LanguageList is a monolithic configuration of all cries standard linters
 var LanguageList = []linter.Language{
 	{
 		Name:  `python`,
 		Match: regexp.MustCompile(`\.py$`),
-		Fmt:   &cli.Lint{Bin: `autopep8`, FrontPar: cli.Par{`--in-place`, `--aggressive`, `--aggressive`}},
-		Chk:   &cli.Lint{Bin: `pylint`, FrontPar: cli.Par{`--rcfile=` + confDir + `/python/.pylintrc`}},
+		Fmt:   &cli.Lint{Bin: `autopep8`, FrontPar: cli.Par{`--in-place`, `--aggressive`, `--aggressive`}, Docker: cli.DockerCmd{Image: imgCriePip}},
+		Chk:   &cli.Lint{Bin: `pylint`, Docker: cli.DockerCmd{Image: imgCriePip}},
 	},
 	{
 		Name:  `pythondeps`,
@@ -33,8 +32,8 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `proto`,
 		Match: regexp.MustCompile(`.proto$`),
-		Chk:   &proto2.Lint{Fix: false},
-		Fmt:   &proto2.Lint{Fix: true},
+		Chk:   &cli.Lint{Bin: `protolint`, Docker: cli.DockerCmd{Image: imgCrieNpm}},
+		Fmt:   &cli.Lint{Bin: `protolint`, Docker: cli.DockerCmd{Image: imgCrieNpm}},
 	},
 
 	// https://github.com/mvdan/sh/releases/download/v1.3.0/shfmt_v1.3.0_linux_amd64
@@ -43,14 +42,13 @@ var LanguageList = []linter.Language{
 		Name:  `bash`,
 		Match: regexp.MustCompile(`\.bash$`),
 		Fmt:   &shfmt.Lint{Language: syntax.LangBash},
-		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`},
-			Docker: cli.DockerCmd{Image: hadolintImg}}},
+		Chk:   &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`}, Docker: cli.DockerCmd{Image: imgHadolint}}},
 	{
 		Name:  `sh`,
 		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$|^script/[^.]*$`),
 		Fmt:   &shfmt.Lint{Language: syntax.LangPOSIX},
 		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`},
-			Docker: cli.DockerCmd{Image: hadolintImg}}},
+			Docker: cli.DockerCmd{Image: imgHadolint}}},
 
 	// https://github.com/lukasmartinelli/hadolint
 	// TODO use config file when it can be mounted into the docker cmd too
@@ -60,7 +58,7 @@ var LanguageList = []linter.Language{
 		Chk: &cli.Lint{
 			Bin:      `hadolint`,
 			FrontPar: cli.Par{`--ignore`, `DL3007`, `--ignore`, `DL3018`, `--ignore`, `DL3016`, `--ignore`, `DL4006`},
-			Docker:   cli.DockerCmd{Image: hadolintImg}}},
+			Docker:   cli.DockerCmd{Image: imgHadolint}}},
 
 	//	Fmt:   Lint{`dockfmt`, par{`fmt`, `-w`}, par{}}}
 
@@ -68,21 +66,23 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `yml`,
 		Match: regexp.MustCompile(`\.yml$|\.yaml$`),
-		Chk:   &cli.Lint{Bin: `yamllint`, FrontPar: cli.Par{`-c=` + confDir + `/yaml/.yamllintrc`}}},
+		Chk:   &cli.Lint{Bin: `yamllint`, Docker: cli.DockerCmd{Image: imgCriePip}}},
 
 	{
 		Name:  `terraform`,
 		Match: regexp.MustCompile(`\.tf$`),
-		Fmt:   &cli.Lint{Bin: `terraform`, Docker: cli.DockerCmd{Image: terraformImg}, FrontPar: cli.Par{`fmt`}},
-		Chk:   &cli.Lint{Bin: `terraform`, Docker: cli.DockerCmd{Image: terraformImg}, FrontPar: cli.Par{`fmt`, `-check=true`}}},
+		Fmt:   &cli.Lint{Bin: `terraform`, Docker: cli.DockerCmd{Image: imgTerraform}, FrontPar: cli.Par{`fmt`}},
+		Chk:   &cli.Lint{Bin: `terraform`, Docker: cli.DockerCmd{Image: imgTerraform}, FrontPar: cli.Par{`fmt`, `-check=true`}},
+	},
 
 	// https://blog.jetbrains.com/webstorm/2017/01/webstorm-2017-1-eap-171-2272/
 	// https://github.com/standard/standard
 	{
 		Name:  `javascript`,
 		Match: regexp.MustCompile(`\.js$|\.jsx$`),
-		Fmt:   &cli.Lint{Bin: `standard`, FrontPar: cli.Par{`--fix`}},
-		Chk:   &cli.Lint{Bin: `standard`}},
+		Fmt:   &cli.Lint{Bin: `standard`, FrontPar: cli.Par{`--fix`}, Docker: cli.DockerCmd{Image: imgCrieNpm}},
+		Chk:   &cli.Lint{Bin: `standard`, Docker: cli.DockerCmd{Image: imgCrieNpm}},
+	},
 
 	// https://golang.org/cmd/gofmt/
 	{
@@ -96,20 +96,22 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `markdown`,
 		Match: regexp.MustCompile(`\.md$`),
-		Fmt:   &cli.Lint{Bin: `remark`, FrontPar: cli.Par{`--use`, `remark-preset-lint-recommended`}, EndPar: cli.Par{`-o`}, Docker: cli.DockerCmd{Image: remarkImg}},
-		Chk:   vale2.NewValeLint(confDir + `/markdown/.vale.ini`)},
+		Fmt:   &cli.Lint{Bin: `remark`, FrontPar: cli.Par{`--use`, `remark-preset-lint-recommended`}, EndPar: cli.Par{`-o`}, Docker: cli.DockerCmd{Image: imgCrieNpm}},
+		Chk:   &cli.Lint{Bin: `vale`, FrontPar: cli.Par{`--config='/home/standards/.config/.vale.ini`}, EndPar: cli.Par{`-o`}, Docker: cli.DockerCmd{Image: imgCrieGo}},
+	},
 
 	{
 		Name:  `asciidoctor`,
 		Match: regexp.MustCompile(`\.adoc$`),
-		Chk:   vale2.NewValeLint(confDir + `/markdown/.vale.ini`)},
+		Chk:   &cli.Lint{Bin: `vale`, FrontPar: cli.Par{`--config='/home/standards/.config/.vale.ini`}, EndPar: cli.Par{`-o`}, Docker: cli.DockerCmd{Image: imgCrieGo}},
+	},
 
 	// https://github.com/zaach/jsonlint
 	{
 		Name:  `json`,
 		Match: regexp.MustCompile(`\.json$|\.JSON$`),
-		Fmt:   &cli.Lint{Bin: `jsonlint`, FrontPar: cli.Par{`-i`, `-s`, `-c`, `-q`}},
-		Chk:   &cli.Lint{Bin: `jsonlint`, FrontPar: cli.Par{`-q`}}},
+		Fmt:   &cli.Lint{Bin: `jsonlint`, FrontPar: cli.Par{`-i`, `-s`, `-c`, `-q`}, Docker: cli.DockerCmd{Image: imgCrieNpm}},
+		Chk:   &cli.Lint{Bin: `jsonlint`, FrontPar: cli.Par{`-q`}, Docker: cli.DockerCmd{Image: imgCrieNpm}}},
 
 	// noExplicitConstructor and noConstructor unfortunately have problems with CUDA_CALLABLE
 	{
@@ -132,7 +134,7 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `cmake`,
 		Match: regexp.MustCompile(`CMakeLists.txt$|\.cmake$`),
-		Chk:   &cli.Lint{Bin: `cmakelint`, FrontPar: cli.Par{`--config=` + confDir + `/cmake/.cmakelintrc`}}},
+		Chk:   &cli.Lint{Bin: `cmakelint`, FrontPar: cli.Par{"--config=/home/standards/.config/cmakelintrc"}, Docker: cli.DockerCmd{Image: imgCriePip}}},
 
 	// TODO Review tools that parse child files - ansiblelint needs to install dependencies similiar to how clang-tidy does
 	{

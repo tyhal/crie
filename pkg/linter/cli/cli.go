@@ -3,18 +3,23 @@ package cli
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"errors"
+	"fmt"
+	"github.com/containerd/containerd/platforms"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
-	linter "github.com/tyhal/crie/pkg/crie/linter"
+	"github.com/tyhal/crie/pkg/crie/linter"
 	"io"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -52,8 +57,8 @@ func (e *Lint) WillRun() error {
 		if err := e.startDocker(); err != nil {
 			return err
 		}
-
-		log.Warn("it's more efficient to have " + e.Bin + " installed locally")
+	} else {
+		log.Debug("using local binary")
 	}
 	return nil
 }
@@ -61,7 +66,7 @@ func (e *Lint) WillRun() error {
 // working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 	ctx := context.Background()
-	cmd := append([]string{"/bin/" + e.Bin}, params...)
+	cmd := append([]string{e.Bin}, params...)
 	log.Trace(cmd)
 	config := types.ExecConfig{
 		Cmd:          cmd,
@@ -75,12 +80,21 @@ func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 		return err
 	}
 
-	attach, err := e.Docker.client.ContainerExecAttach(ctx, execResp.ID, config)
+	startConfig := types.ExecStartCheck{
+		Detach: false,
+		Tty:    false,
+	}
+	attach, err := e.Docker.client.ContainerExecAttach(ctx, execResp.ID, startConfig)
 	if err != nil {
 		return err
 	}
 	defer attach.Close()
-	go io.Copy(stdout, attach.Reader)
+	go func() {
+		_, err := io.Copy(stdout, attach.Reader)
+		if err != nil {
+			log.Error(err)
+		}
+	}()
 
 	timeout := time.After(5 * time.Second)
 	check := time.Tick(100 * time.Millisecond)
@@ -128,7 +142,7 @@ func (e *Lint) startDocker() error {
 
 	// Add our client
 	{
-		c, err := client.NewEnvClient()
+		c, err := client.NewClientWithOpts()
 		if err != nil {
 			return err
 		}
@@ -152,37 +166,46 @@ func (e *Lint) startDocker() error {
 		return err
 	}
 
+	// Ensure linux path (will error anyway about platform mismatch)
+	splitPath := strings.Split(dir, ":")
+	linuxDir := filepath.ToSlash(splitPath[len(splitPath)-1])
+
+	currPlatform := platforms.DefaultSpec()
+
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, 4)
+	rand.Read(b)
+	shortid := hex.EncodeToString(b)
+
 	resp, err := e.Docker.client.ContainerCreate(ctx,
 		&container.Config{
-			Entrypoint: []string{"/bin/sleep"},
-			Cmd:        []string{"3600"},
+			Entrypoint: []string{},
+			Cmd:        []string{"/bin/sh", "-c", "tail -f /dev/null"},
 			Image:      e.Docker.Image,
-			WorkingDir: dir,
+			WorkingDir: linuxDir,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
 				{
 					Type:   mount.TypeBind,
 					Source: dir,
-					Target: dir,
+					Target: linuxDir,
 				},
 			},
 		}, nil,
-		"crie-"+e.Name())
+		&currPlatform,
+		fmt.Sprintf("crie-%s-%s", e.Name(), shortid))
 	if err != nil {
 		return err
 	}
-
-	if err := e.Docker.client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		return err
-	}
 	e.Docker.id = resp.ID
-	return nil
+
+	return e.Docker.client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 }
 
 // DidRun should be called after all other Runs to clean up
 func (e *Lint) DidRun() {
-	if e.useDocker {
+	if e.useDocker && e.Docker.id != "" {
 		ctx := context.Background()
 		var timeout time.Duration
 		timeout = time.Second * 3
