@@ -30,6 +30,7 @@ type Lint struct {
 	EndPar    Par
 	Docker    DockerCmd
 	useDocker bool
+	cleanedUp chan error
 }
 
 // Par represents cli parameters
@@ -50,6 +51,13 @@ func (e *Lint) Name() string {
 // WillRun does preflight checks for the 'Run'
 func (e *Lint) WillRun() error {
 	e.useDocker = exec.Command("which", e.Bin).Run() != nil
+
+	// Ensure cleanup channel is created
+	if e.cleanedUp == nil {
+		e.cleanedUp = make(chan error)
+	}
+
+	// Startup sidecar container if needed
 	if e.useDocker {
 		if e.Docker.Image == "" {
 			return errors.New("could not find " + e.Bin + ", possibly not installed")
@@ -60,6 +68,7 @@ func (e *Lint) WillRun() error {
 	} else {
 		log.Debug("using local binary")
 	}
+
 	return nil
 }
 
@@ -203,8 +212,14 @@ func (e *Lint) startDocker() error {
 	return e.Docker.client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 }
 
-// DidRun should be called after all other Runs to clean up
-func (e *Lint) DidRun() {
+// Cleanup remove any additional resources created in the process
+func (e *Lint) Cleanup() {
+	var err error = nil
+	defer func() {
+		e.cleanedUp <- err
+		close(e.cleanedUp)
+	}()
+
 	if e.useDocker && e.Docker.id != "" {
 		ctx := context.Background()
 		var timeout time.Duration
@@ -213,13 +228,25 @@ func (e *Lint) DidRun() {
 		d := log.WithFields(log.Fields{"dockerId": e.Docker.id})
 
 		d.Debug("stopping container")
-		if err := e.Docker.client.ContainerStop(ctx, e.Docker.id, &timeout); err != nil {
-			log.Error(err)
+		if err = e.Docker.client.ContainerStop(ctx, e.Docker.id, &timeout); err != nil {
+			return
 		}
 		d.Debug("removing container")
-		if err := e.Docker.client.ContainerRemove(ctx, e.Docker.id, types.ContainerRemoveOptions{}); err != nil {
-			log.Fatal(err)
+		if err = e.Docker.client.ContainerRemove(ctx, e.Docker.id, types.ContainerRemoveOptions{}); err != nil {
+			return
 		}
+	}
+}
+
+// WaitForCleanup Useful for when Cleanup is running in the background
+func (e *Lint) WaitForCleanup() error {
+	var timeout time.Duration = 10
+
+	select {
+	case err := <-e.cleanedUp:
+		return err
+	case <-time.After(time.Second * timeout):
+		return fmt.Errorf("timeout waiting for cleanup for %s (%d seconds)", e.Name(), timeout)
 	}
 }
 

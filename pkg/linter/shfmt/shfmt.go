@@ -20,12 +20,17 @@ func (e *Lint) Name() string {
 
 // WillRun do nothing as there are no external deps
 func (e *Lint) WillRun() (err error) {
+	return nil
+}
+
+// Cleanup remove any additional resources created in the process
+func (e *Lint) Cleanup() {
 	return
 }
 
-// DidRun cleanup funtion
-func (e *Lint) DidRun() {
-	return
+// WaitForCleanup Useful for when Cleanup is running in the background
+func (e *Lint) WaitForCleanup() (err error) {
+	return nil
 }
 
 // MaxConcurrency return max amount of parallel files to fmt

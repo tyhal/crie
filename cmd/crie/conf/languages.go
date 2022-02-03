@@ -140,7 +140,7 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `ansible`,
 		Match: regexp.MustCompile(`playbook.yml$`),
-		//Chk:   &imp.Lint{Bin: `ansible-lint`}
+		Chk:   &cli.Lint{Bin: `ansible-lint`, Docker: cli.DockerCmd{Image: imgCriePip}},
 	},
 
 	{

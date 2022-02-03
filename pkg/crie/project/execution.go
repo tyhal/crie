@@ -91,13 +91,13 @@ func (s *LintConfiguration) NoStandards() {
 	table.Render()
 }
 
-func (s *LintConfiguration) tryLint(l linter.Language) error {
-	selectedLinter := l.GetLinter(s.lintType)
+func (s *LintConfiguration) tryLint(l linter.Language) (selectedLinter linter.Linter, err error) {
+	selectedLinter = l.GetLinter(s.lintType)
 	toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.lintType})
 
 	if selectedLinter == nil {
 		toLog.Debug("there are no configurations associated for this action")
-		return nil
+		return
 	}
 
 	// Get the match for this formatter's files.
@@ -108,25 +108,19 @@ func (s *LintConfiguration) tryLint(l linter.Language) error {
 
 	// Skip language as no files found
 	if len(filteredFilepaths) == 0 {
-		return nil
+		return nil, err
 	}
 
-	defer selectedLinter.DidRun()
-
-	err := selectedLinter.WillRun()
+	defer func() { go selectedLinter.Cleanup() }()
+	err = selectedLinter.WillRun()
 	if err != nil {
 		toLog.Error(err.Error())
-		return err
+		return
 	}
 
 	toLog.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info("running")
 	err = linter.LintFileList(selectedLinter, filteredFilepaths)
-	if err != nil {
-		toLog.Error(err.Error())
-		return err
-	}
-
-	return nil
+	return
 }
 
 // Run is the generic way to run everything based on the packages configuration
@@ -153,8 +147,20 @@ func (s *LintConfiguration) Run(lintType string) error {
 
 	// Run every linter.
 	for _, l := range currentLangs {
-		err := s.tryLint(l)
+		cleanupLinter, err := s.tryLint(l)
+
+		// If tryLint returns a non nil linter reference then we should call WaitForCleanup later
+		if cleanupLinter != nil {
+			defer func() {
+				err := cleanupLinter.WaitForCleanup()
+				if err != nil {
+					log.Error(err)
+				}
+			}()
+		}
+
 		if err != nil {
+			log.Error(err.Error())
 			errCount++
 			if !s.ContinueOnError {
 				break
