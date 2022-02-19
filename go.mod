@@ -15,5 +15,5 @@ require (
 	github.com/spf13/cobra v1.3.0
 	github.com/tyhal/flint v0.1.4-crie
 	gopkg.in/yaml.v2 v2.4.0
-	mvdan.cc/sh/v3 v3.4.2
+	mvdan.cc/sh/v3 v3.4.3
 )
