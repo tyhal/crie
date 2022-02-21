@@ -1,4 +1,4 @@
 
-FROM	python:3.9.7-alpine
+FROM	python:3.10.2-alpine
 COPY	src/	/src/
 CMD	["python","/src/gol.py"]
