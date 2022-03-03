@@ -25,11 +25,6 @@ var LanguageList = []linter.Language{
 		Chk:   &cli.Lint{Bin: `pylint`, Docker: cli.DockerCmd{Image: imgCriePip}},
 	},
 	{
-		Name:  `pythondeps`,
-		Match: regexp.MustCompile(`requirements.txt$`),
-		Fmt:   &cli.Lint{Bin: `pur`, FrontPar: cli.Par{`-r`}},
-	},
-	{
 		Name:  `proto`,
 		Match: regexp.MustCompile(`.proto$`),
 		Chk:   &cli.Lint{Bin: `protolint`, Docker: cli.DockerCmd{Image: imgCrieNpm}},
@@ -140,7 +135,7 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `ansible`,
 		Match: regexp.MustCompile(`playbook.yml$`),
-		//Chk:   &imp.Lint{Bin: `ansible-lint`}
+		Chk:   &cli.Lint{Bin: `ansible-lint`, Docker: cli.DockerCmd{Image: imgCriePip}},
 	},
 
 	{

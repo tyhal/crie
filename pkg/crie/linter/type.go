@@ -18,9 +18,10 @@ type Report struct {
 type Linter interface {
 	Name() string
 	WillRun() error
-	DidRun()
+	Cleanup()
 	MaxConcurrency() int
 	Run(filepath string, rep chan Report)
+	WaitForCleanup() error
 }
 
 // Language is used to associate a file pattern to the relevant tools to check and format
@@ -33,7 +34,7 @@ type Language struct {
 
 // GetLinter allows for string indexing to get fmt or chk...
 // TODO remove requirement for this function
-func (l Language) GetLinter(which string) Linter {
+func (l *Language) GetLinter(which string) Linter {
 	if which == "fmt" {
 		return l.Fmt
 	} else if which == "chk" {
