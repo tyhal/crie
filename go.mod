@@ -4,12 +4,9 @@ go 1.13
 
 require (
 	github.com/containerd/containerd v1.6.1
-	github.com/docker/docker v20.10.12+incompatible
-	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/docker/docker v20.10.13+incompatible
 	github.com/google/renameio v1.0.1
-	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
