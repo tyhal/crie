@@ -3,5 +3,5 @@ docker-compose==1.29.2
 yamllint==1.26.3
 pylint==2.12.2
 autopep8==1.6.0
-ansible-lint==5.4.0
+ansible-lint==6.0.0
 ansible==5.4.0
