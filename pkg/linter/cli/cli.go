@@ -79,7 +79,6 @@ func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 	log.Trace(cmd)
 	config := types.ExecConfig{
 		Cmd:          cmd,
-		Env:          os.Environ(),
 		AttachStderr: true,
 		AttachStdout: true,
 		Tty:          false,
@@ -141,9 +140,15 @@ func (e *Lint) pullDocker(ctx context.Context) error {
 
 	var pullOut bytes.Buffer
 	_, err = io.Copy(&pullOut, pullstat)
-	log.Debug(pullOut.String())
-
+	if log.IsLevelEnabled(log.TraceLevel) {
+		fmt.Print(pullOut.String())
+	}
 	return err
+}
+
+func toLinuxPath(dir string) string {
+	splitPath := strings.Split(dir, ":")
+	return filepath.ToSlash(splitPath[len(splitPath)-1])
 }
 
 func (e *Lint) startDocker() error {
@@ -175,11 +180,10 @@ func (e *Lint) startDocker() error {
 		return err
 	}
 
-	// Ensure linux path (will error anyway about platform mismatch)
-	splitPath := strings.Split(dir, ":")
-	linuxDir := filepath.ToSlash(splitPath[len(splitPath)-1])
+	linuxDir := toLinuxPath(dir)
 
 	currPlatform := platforms.DefaultSpec()
+	currPlatform.OS = "linux"
 
 	rand.Seed(time.Now().UnixNano())
 	b := make([]byte, 4)
@@ -253,7 +257,7 @@ func (e *Lint) WaitForCleanup() error {
 // Run does the work required to lint the given filepath
 func (e *Lint) Run(filepath string, rep chan linter.Report) {
 
-	params := append(e.FrontPar, filepath)
+	params := append(e.FrontPar, toLinuxPath(filepath))
 	params = append(params, e.EndPar...)
 
 	// Format any file received as input.
