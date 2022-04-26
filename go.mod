@@ -3,7 +3,7 @@ module github.com/tyhal/crie
 go 1.13
 
 require (
-	github.com/containerd/containerd v1.6.2
+	github.com/containerd/containerd v1.6.3
 	github.com/docker/docker v20.10.14+incompatible
 	github.com/google/renameio v1.0.1
 	github.com/gorilla/mux v1.8.0 // indirect
