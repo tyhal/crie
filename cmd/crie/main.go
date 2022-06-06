@@ -41,10 +41,14 @@ var rootCmd = &cobra.Command{
 
 var quiet = false
 var verbose = false
+var trace = false
 var json = false
 var state project.LintConfiguration
 
 func setLogging() {
+	if trace {
+		log.SetLevel(log.TraceLevel)
+	}
 	if verbose {
 		log.SetLevel(log.DebugLevel)
 	}
@@ -78,6 +82,12 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", verbose, "turn on verbose printing for reports")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "config file location")
+
+	rootCmd.PersistentFlags().BoolVarP(&trace, "trace", "t", trace, "turn on trace printing for reports")
+	err := rootCmd.PersistentFlags().MarkHidden("trace")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	addLintCommand(cmd.ChkCmd)
 	addLintCommand(cmd.FmtCmd)

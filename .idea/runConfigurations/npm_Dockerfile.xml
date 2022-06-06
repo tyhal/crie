@@ -3,7 +3,7 @@
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="docker.io/tyhal/crie-dep-npm:latest" />
-        <option name="buildOnly" value="true" />
+        <option name="buildKitEnabled" value="true" />
         <option name="containerName" value="" />
         <option name="sourceFilePath" value="img/npm/Dockerfile" />
       </settings>
