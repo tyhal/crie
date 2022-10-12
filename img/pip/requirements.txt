@@ -4,4 +4,4 @@ yamllint==1.28.0
 pylint==2.15.4
 autopep8==1.7.0
 ansible-lint==6.0.2
-ansible==6.4.0
+ansible==6.5.0
