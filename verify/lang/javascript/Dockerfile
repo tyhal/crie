@@ -1,4 +1,4 @@
-FROM node:19.0.1
+FROM node:19.2.0
 COPY src/ /src/
 WORKDIR /src
 RUN npm install
