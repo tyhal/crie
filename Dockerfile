@@ -13,7 +13,7 @@ COPY pkg /crie/pkg
 RUN --mount=type=cache,target=/root/.cache/go-build go build ./cmd/crie
 
 # Alpine :ok_hand:
-FROM alpine:3.17.0
+FROM alpine:3.17.1
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
