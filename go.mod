@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/containerd/containerd v1.6.15
-	github.com/docker/docker v20.10.22+incompatible
+	github.com/docker/docker v20.10.23+incompatible
 	github.com/google/renameio v1.0.1
 	github.com/google/renameio/v2 v2.0.0
 	github.com/olekukonko/tablewriter v0.0.5
