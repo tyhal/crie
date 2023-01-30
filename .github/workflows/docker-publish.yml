@@ -28,7 +28,7 @@ jobs:
 
       - name: Crie
         id: crie_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
@@ -38,7 +38,7 @@ jobs:
 
       - name: Apk
         id: crie_apk_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/apk
           builder: ${{ steps.buildx.outputs.name }}
@@ -48,7 +48,7 @@ jobs:
 
       - name: Go
         id: crie_go_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/go
           builder: ${{ steps.buildx.outputs.name }}
@@ -58,7 +58,7 @@ jobs:
 
       - name: Npm
         id: crie_npm_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/npm
           builder: ${{ steps.buildx.outputs.name }}
@@ -68,7 +68,7 @@ jobs:
 
       - name: Pip
         id: crie_pip_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/pip
           builder: ${{ steps.buildx.outputs.name }}
@@ -113,7 +113,7 @@ jobs:
 
       - name: Crie
         id: crie_push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
@@ -124,7 +124,7 @@ jobs:
 
       - name: Apk
         id: crie_apk_push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/apk
           builder: ${{ steps.buildx.outputs.name }}
@@ -135,7 +135,7 @@ jobs:
 
       - name: Go
         id: crie_go_push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/go
           builder: ${{ steps.buildx.outputs.name }}
@@ -146,7 +146,7 @@ jobs:
 
       - name: Npm
         id: crie_npm_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/go
           builder: ${{ steps.buildx.outputs.name }}
@@ -157,7 +157,7 @@ jobs:
 
       - name: Pip
         id: crie_pip_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./img/pip
           builder: ${{ steps.buildx.outputs.name }}
