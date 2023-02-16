@@ -3,7 +3,7 @@ module github.com/tyhal/crie
 go 1.19
 
 require (
-	github.com/containerd/containerd v1.6.17
+	github.com/containerd/containerd v1.6.18
 	github.com/docker/docker v20.10.23+incompatible
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v0.0.5
