@@ -7,7 +7,7 @@ require (
 	github.com/docker/docker v20.10.25+incompatible
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/sirupsen/logrus v1.9.1
+	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/cobra v1.7.0
 	github.com/tyhal/flint v0.1.4-crie
 	gopkg.in/yaml.v2 v2.4.0
