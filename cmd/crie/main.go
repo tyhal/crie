@@ -7,12 +7,7 @@ import (
 	"github.com/tyhal/crie/cmd/crie/conf"
 	"github.com/tyhal/crie/pkg/crie/project"
 	"os"
-	"strconv"
 )
-
-var majorNum = "0"
-var minorOffset = 0
-var patchNum = "166"
 
 //`
 //	|> crie: the act of crying and dying at the same time
@@ -32,7 +27,6 @@ var patchNum = "166"
 var rootCmd = &cobra.Command{
 	Use:     "crie",
 	Short:   "crie is a formatter for many languages.",
-	Version: majorNum + "." + strconv.Itoa(len(conf.LanguageList)-minorOffset) + "." + patchNum,
 	Example: "check all python files in the last commit 'crie chk --git-diff 1 --lang python'",
 	Long: `
 	crie brings together a vast collection of formatters and linters

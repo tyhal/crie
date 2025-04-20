@@ -8,20 +8,20 @@ import (
 	"regexp"
 )
 
-var imgHadolint = "docker.io/tyhal/hadolint:latest" // TODO versioning + renovatebot
+var imgHadolint = "docker.io/tyhal/hadolint:latest"
 var imgTerraform = "docker.io/hashicorp/terraform:1.0.1"
 
 var imgCrieNpm = "docker.io/tyhal/crie-dep-npm:latest"
 var imgCriePip = "docker.io/tyhal/crie-dep-pip:latest"
-var imgCrieGo = "docker.io/tyhal/crie-dep-go:0.0.2"
-var imgCrieApk = "docker.io/tyhal/crie-dep-apk:0.0.2"
+var imgCrieGo = "docker.io/tyhal/crie-dep-go:latest"
+var imgCrieApk = "docker.io/tyhal/crie-dep-apk:latest"
 
 // LanguageList is a monolithic configuration of all cries standard linters
 var LanguageList = []linter.Language{
 	{
 		Name:  `python`,
 		Match: regexp.MustCompile(`\.py$`),
-		Fmt:   &cli.Lint{Bin: `autopep8`, FrontPar: cli.Par{`--in-place`, `--aggressive`, `--aggressive`}, Docker: cli.DockerCmd{Image: imgCriePip}},
+		Fmt:   &cli.Lint{Bin: `black`, FrontPar: cli.Par{`--quiet`}, Docker: cli.DockerCmd{Image: imgCriePip}},
 		Chk:   &cli.Lint{Bin: `pylint`, Docker: cli.DockerCmd{Image: imgCriePip}},
 	},
 	{
@@ -70,8 +70,7 @@ var LanguageList = []linter.Language{
 		Chk:   &cli.Lint{Bin: `terraform`, Docker: cli.DockerCmd{Image: imgTerraform}, FrontPar: cli.Par{`fmt`, `-check=true`}},
 	},
 
-	// https://blog.jetbrains.com/webstorm/2017/01/webstorm-2017-1-eap-171-2272/
-	// https://github.com/standard/standard
+	// TODO switch to eslint
 	{
 		Name:  `javascript`,
 		Match: regexp.MustCompile(`\.js$|\.jsx$`),
@@ -112,19 +111,31 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `cpp`,
 		Match: regexp.MustCompile(`\.cc$|\.cpp$`),
-		Fmt:   &cli.Lint{Bin: `clang-format`, FrontPar: cli.Par{`-style=file`, `-i`}},
-		Chk:   &cli.Lint{Bin: `cppcheck`, FrontPar: cli.Par{`--enable=all`, `--language=c++`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`}}},
+		Fmt:   &cli.Lint{Bin: `clang-format`, FrontPar: cli.Par{`-style=file`, `-i`}, Docker: cli.DockerCmd{Image: imgCrieApk}},
+		Chk: &cli.Lint{
+			Bin: `cppcheck`,
+			FrontPar: cli.Par{
+				`--enable=all`, `--language=c++`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`,
+			},
+			Docker: cli.DockerCmd{Image: imgCrieApk},
+		}},
 
 	{
 		Name:  `cppheaders`,
 		Match: regexp.MustCompile(`\.h$|\.hpp$`),
-		Fmt:   &cli.Lint{Bin: `clang-format`, FrontPar: cli.Par{`-style=file`, `-i`}}},
+		Fmt:   &cli.Lint{Bin: `clang-format`, FrontPar: cli.Par{`-style=file`, `-i`}, Docker: cli.DockerCmd{Image: imgCrieApk}}},
 
 	{
 		Name:  `c`,
 		Match: regexp.MustCompile(`\.c$`),
-		Fmt:   &cli.Lint{Bin: `clang-format`, FrontPar: cli.Par{`-style=file`, `-i`}},
-		Chk:   &cli.Lint{Bin: `cppcheck`, FrontPar: cli.Par{`--enable=all`, `--language=c`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`}}},
+		Fmt:   &cli.Lint{Bin: `clang-format`, FrontPar: cli.Par{`-style=file`, `-i`}, Docker: cli.DockerCmd{Image: imgCrieApk}},
+		Chk: &cli.Lint{
+			Bin: `cppcheck`,
+			FrontPar: cli.Par{
+				`--enable=all`, `--language=c`, `--suppress=operatorEqRetRefThis`, `--suppress=operatorEq`, `--suppress=noExplicitConstructor`, `--suppress=unmatchedSuppression`, `--suppress=missingInclude`, `--suppress=unusedFunction`, `--suppress=noConstructor`, `--inline-suppr`, `--error-exitcode=1`,
+			},
+			Docker: cli.DockerCmd{Image: imgCrieApk},
+		}},
 
 	{
 		Name:  `cmake`,

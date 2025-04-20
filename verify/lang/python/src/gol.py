@@ -20,9 +20,11 @@ class Solution:
         count = 0
         for i in range(-1, 2):
             for j in range(-1, 2):
-                if not (j == 0 and i == 0) \
-                        and 0 <= ypos + i < self.ylen \
-                        and 0 <= xpos + j < self.xlen:
+                if (
+                    not (j == 0 and i == 0)
+                    and 0 <= ypos + i < self.ylen
+                    and 0 <= xpos + j < self.xlen
+                ):
                     count += self.board[ypos + i][xpos + j] % 2
         return count
 
@@ -44,15 +46,11 @@ class Solution:
 
         for ypos in range(self.ylen):
             for xpos in range(self.xlen):
-                self.board[ypos][xpos] = 1 if self.board[ypos][xpos] in [
-                    1, 2] else 0
+                self.board[ypos][xpos] = 1 if self.board[ypos][xpos] in [1, 2] else 0
 
 
-if __name__ == '__main__':
-    INP = [[0, 0, 0],
-           [0, 0, 1],
-           [1, 1, 1],
-           [0, 0, 0]]
+if __name__ == "__main__":
+    INP = [[0, 0, 0], [0, 0, 1], [1, 1, 1], [0, 0, 0]]
     GOL = Solution(INP)
     for _ in range(5):
         GOL.iter()
