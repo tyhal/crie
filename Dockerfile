@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
-FROM golang:1.17-alpine3.13 as go_layer
+FROM golang:1.23-alpine3.21 as go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 COPY go.mod /crie/go.mod
