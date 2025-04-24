@@ -1,6 +1,6 @@
 module github.com/tyhal/crie
 
-go 1.23
+go 1.24
 
 require (
 	github.com/containerd/containerd v1.7.11

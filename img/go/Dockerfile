@@ -9,8 +9,6 @@ RUN go install golang.org/x/lint/golint@latest
 RUN go install github.com/errata-ai/vale@latest
 # hadolint ignore=DL3059
 RUN go install github.com/yoheimuta/protolint/cmd/protolint@latest
-# hadolint ignore=DL3059
-RUn go install github.com/docker/compose/cmd@latest
 
 
 FROM alpine:3.13.0
