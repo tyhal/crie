@@ -226,13 +226,12 @@ func (e *Lint) Cleanup() {
 
 	if e.useDocker && e.Docker.id != "" {
 		ctx := context.Background()
-		var timeout time.Duration
-		timeout = time.Second * 3
+		timeoutSeconds := 3
 
 		d := log.WithFields(log.Fields{"dockerId": e.Docker.id})
 
 		d.Debug("stopping container")
-		if err = e.Docker.client.ContainerStop(ctx, e.Docker.id, &timeout); err != nil {
+		if err = e.Docker.client.ContainerStop(ctx, e.Docker.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
 			return
 		}
 		d.Debug("removing container")

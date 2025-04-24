@@ -2,11 +2,12 @@
   <configuration default="false" name="crie chk" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="crie" />
     <working_directory value="$PROJECT_DIR$" />
-    <parameters value="chk -t" />
+    <parameters value="chk" />
     <kind value="PACKAGE" />
     <package value="github.com/tyhal/crie/cmd/crie" />
     <directory value="$PROJECT_DIR$/" />
     <filePath value="$PROJECT_DIR$/crie.go" />
+    <pty_enabled value="true" />
     <method v="2" />
   </configuration>
 </component>

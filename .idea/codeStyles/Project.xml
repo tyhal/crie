@@ -1,5 +1,6 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <option name="LINE_SEPARATOR" value="&#10;" />
     <codeStyleSettings language="yaml">
       <option name="SPACE_WITHIN_BRACES" value="false" />
     </codeStyleSettings>

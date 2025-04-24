@@ -3,8 +3,8 @@ package settings
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
+	"gopkg.in/yaml.v3"
+	"os"
 )
 
 // FileSettings simply adjusts what we include in a normal lint
@@ -21,7 +21,7 @@ func CreateNewFileSettings(confpath string) {
 		log.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(confpath, yamlOut, 0666)
+	err = os.WriteFile(confpath, yamlOut, 0666)
 
 	if err != nil {
 		log.Fatal(err)
