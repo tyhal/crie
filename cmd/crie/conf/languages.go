@@ -149,7 +149,9 @@ var LanguageList = []linter.Language{
 		Chk:   &cli.Lint{Bin: `ansible-lint`, Docker: cli.DockerCmd{Image: imgCriePip}},
 	},
 
-	{
-		Name:  `dockercompose`,
-		Match: regexp.MustCompile(`docker-compose.yml$|docker-compose.yaml$`),
-		Chk:   &cli.Lint{Bin: `docker-compose`, FrontPar: cli.Par{`-f`}, EndPar: cli.Par{`config`, `-q`}}}}
+	// TODO use v2 with go
+	//{
+	//	Name:  `dockercompose`,
+	//	Match: regexp.MustCompile(`docker-compose.yml$|docker-compose.yaml$`),
+	//	Chk:   &cli.Lint{Bin: `docker-compose`, FrontPar: cli.Par{`-f`}, EndPar: cli.Par{`config`, `-q`}}}
+}
