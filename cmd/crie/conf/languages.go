@@ -27,8 +27,8 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `proto`,
 		Match: regexp.MustCompile(`.proto$`),
-		Chk:   &cli.Lint{Bin: `protolint`, Docker: cli.DockerCmd{Image: imgCrieNpm}},
-		Fmt:   &cli.Lint{Bin: `protolint`, Docker: cli.DockerCmd{Image: imgCrieNpm}},
+		Chk:   &cli.Lint{Bin: `protolint`, Docker: cli.DockerCmd{Image: imgCrieGo}},
+		Fmt:   &cli.Lint{Bin: `protolint`, Docker: cli.DockerCmd{Image: imgCrieGo}},
 	},
 
 	// https://github.com/mvdan/sh/releases/download/v1.3.0/shfmt_v1.3.0_linux_amd64
@@ -82,8 +82,8 @@ var LanguageList = []linter.Language{
 	{
 		Name:  `golang`,
 		Match: regexp.MustCompile(`\.go$`),
-		Fmt:   &cli.Lint{Bin: `gofmt`, FrontPar: cli.Par{`-l`, `-w`}},
-		Chk:   &cli.Lint{Bin: `golint`, FrontPar: cli.Par{`-set_exit_status`}},
+		Fmt:   &cli.Lint{Bin: `gofmt`, FrontPar: cli.Par{`-l`, `-w`}, Docker: cli.DockerCmd{Image: imgCrieGo}},
+		Chk:   &cli.Lint{Bin: `golint`, FrontPar: cli.Par{`-set_exit_status`}, Docker: cli.DockerCmd{Image: imgCrieGo}},
 	},
 
 	// https://github.com/wooorm/remark-lint
