@@ -143,11 +143,11 @@ var LanguageList = []linter.Language{
 		Chk:   &cli.Lint{Bin: `cmakelint`, FrontPar: cli.Par{"--config=/home/standards/.config/cmakelintrc"}, Docker: cli.DockerCmd{Image: imgCriePip}}},
 
 	// TODO Review tools that parse child files - ansiblelint needs to install dependencies similiar to how clang-tidy does
-	{
-		Name:  `ansible`,
-		Match: regexp.MustCompile(`playbook.yml$`),
-		Chk:   &cli.Lint{Bin: `ansible-lint`, Docker: cli.DockerCmd{Image: imgCriePip}},
-	},
+	//{
+	//	Name:  `ansible`,
+	//	Match: regexp.MustCompile(`playbook.yml$`),
+	//	Chk:   &cli.Lint{Bin: `ansible-lint`, Docker: cli.DockerCmd{Image: imgCriePip}},
+	//},
 
 	// TODO use v2 with go
 	//{
