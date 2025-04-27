@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/containerd/containerd v1.7.27
-	github.com/docker/docker v25.0.6+incompatible
+	github.com/docker/docker v25.0.8+incompatible
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/sirupsen/logrus v1.9.3
