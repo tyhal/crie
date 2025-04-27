@@ -131,8 +131,8 @@ func (s *LintConfiguration) Run(lintType string) error {
 	// Get initial list of files to use
 	s.loadFileList()
 
-	// XXX Set separate a separate packages setting based on our configuration
 	linter.ShowPass = s.ShowPasses
+	linter.StrictLogging = s.StrictLogging
 
 	errCount := 0
 
