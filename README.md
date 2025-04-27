@@ -12,16 +12,12 @@
 
 #### This tool enables teams of developers to use static-analysis where they normally wouldn't:
 
-* Avoid remembering multiple run configurations
-* Avoid various install instructions
+This tool is ideal for teams who want:
 
-#### Quality of Life:
-
-* Git friendly - Only check changed files in the last few commits
-* Extendable for more languages
-* Fast and clean output
-* Batteries included but swappable - Swap any implementation with another linter
-* Identify files lacking any static-analysis
+    Immediate code quality checks without extensive setup
+    Consistent linting across multiple languages
+    Container-based isolation for tools
+    A solution that "just works" out of the box
 
 ## Install
 
