@@ -8,8 +8,9 @@ import (
 	"regexp"
 )
 
-var imgHadolint = "docker.io/tyhal/hadolint:latest"
+var imgHadolint = "docker.io/hadolint/hadolint:latest-alpine"
 var imgTerraform = "docker.io/hashicorp/terraform:1.0.1"
+var imgShellCheck = "docker.io/koalaman/shellcheck-alpine:stable"
 
 var imgCrieNpm = "docker.io/tyhal/crie-dep-npm:latest"
 var imgCriePip = "docker.io/tyhal/crie-dep-pip:latest"
@@ -37,13 +38,12 @@ var LanguageList = []linter.Language{
 		Name:  `bash`,
 		Match: regexp.MustCompile(`\.bash$`),
 		Fmt:   &shfmt.Lint{Language: syntax.LangBash},
-		Chk:   &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`}, Docker: cli.DockerCmd{Image: imgHadolint}}},
+		Chk:   &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`}, Docker: cli.DockerCmd{Image: imgShellCheck}}},
 	{
 		Name:  `sh`,
 		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$|^script/[^.]*$`),
 		Fmt:   &shfmt.Lint{Language: syntax.LangPOSIX},
-		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`},
-			Docker: cli.DockerCmd{Image: imgHadolint}}},
+		Chk:   &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`}, Docker: cli.DockerCmd{Image: imgShellCheck}}},
 
 	// https://github.com/lukasmartinelli/hadolint
 	// TODO use config file when it can be mounted into the docker cmd too

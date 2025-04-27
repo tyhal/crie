@@ -9,6 +9,7 @@ RUN adduser -D standards
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # [ OS pkgs] - We pull clang-format out specifically because we don't need the rest of clang
+# hadolint ignore=DL3059
 RUN apk --no-cache add gmp libxml2
 COPY --from=clang_layer /usr/lib/libclang-cpp.so.10 /usr/lib/libclang-cpp.so.10
 COPY --from=clang_layer /usr/lib/libffi.so.7 /usr/lib/libffi.so.7
