@@ -81,11 +81,7 @@ var LntCmd = &cobra.Command{
 	Short:   "Run everything",
 	Long:    `Runs both format and then check`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		stage("fmt")
 		stage("chk")
-
-		log.Info("❨ proj ❩")
-		Config.CheckProjects()
 	},
 }

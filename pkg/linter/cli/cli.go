@@ -3,10 +3,11 @@ package cli
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/containerd/containerd/platforms"
+	"github.com/containerd/platforms"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -14,7 +15,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"io"
-	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -185,7 +185,6 @@ func (e *Lint) startDocker() error {
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
 
-	rand.Seed(time.Now().UnixNano())
 	b := make([]byte, 4)
 	rand.Read(b)
 	shortid := hex.EncodeToString(b)
@@ -207,16 +206,16 @@ func (e *Lint) startDocker() error {
 			},
 		}, nil,
 		&currPlatform,
-		fmt.Sprintf("crie-%s-%s", e.Name(), shortid))
+		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name()), shortid))
 	if err != nil {
 		return err
 	}
 	e.Docker.id = resp.ID
 
-	return e.Docker.client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+	return e.Docker.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 }
 
-// Cleanup remove any additional resources created in the process
+// Cleanup removes any additional resources created in the process
 func (e *Lint) Cleanup() {
 	var err error = nil
 	defer func() {
@@ -235,7 +234,7 @@ func (e *Lint) Cleanup() {
 			return
 		}
 		d.Debug("removing container")
-		if err = e.Docker.client.ContainerRemove(ctx, e.Docker.id, types.ContainerRemoveOptions{}); err != nil {
+		if err = e.Docker.client.ContainerRemove(ctx, e.Docker.id, container.RemoveOptions{}); err != nil {
 			return
 		}
 	}
@@ -259,7 +258,7 @@ func (e *Lint) Run(filepath string, rep chan linter.Report) {
 	params := append(e.FrontPar, toLinuxPath(filepath))
 	params = append(params, e.EndPar...)
 
-	// Format any file received as input.
+	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 	var err error
 	if e.useDocker {

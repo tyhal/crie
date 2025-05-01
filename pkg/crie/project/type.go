@@ -12,6 +12,7 @@ type LintConfiguration struct {
 	ConfPath        string
 	lintType        string
 	ContinueOnError bool
+	StrictLogging   bool
 	ShowPasses      bool
 	Languages       []linter.Language
 	GitDiff         int
