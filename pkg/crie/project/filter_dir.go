@@ -36,10 +36,6 @@ func (s *LintConfiguration) processFilesWithConfig(files []string) []string {
 		files = helper.RemoveIgnored(files, reg.MatchString)
 	}
 
-	// Add more project roots
-	projDirs = m.ProjDirs
-	projDirs = append(projDirs, ".")
-
 	return files
 }
 
