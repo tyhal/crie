@@ -7,6 +7,7 @@ import (
 	"github.com/tyhal/crie/cmd/crie/conf"
 	"github.com/tyhal/crie/pkg/crie/project"
 	"os"
+	"sort"
 )
 
 //`
@@ -39,6 +40,18 @@ var trace = false
 var json = false
 var state project.LintConfiguration
 
+func msgLast(fields []string) {
+	sort.Slice(fields, func(i, j int) bool {
+		if fields[i] == "msg" {
+			return false
+		}
+		if fields[j] == "msg" {
+			return true
+		}
+		return fields[i] < fields[j]
+	})
+}
+
 func setLogging() {
 	if trace {
 		log.SetLevel(log.TraceLevel)
@@ -51,10 +64,13 @@ func setLogging() {
 	}
 	if json {
 		log.SetFormatter(&log.JSONFormatter{})
+		state.StrictLogging = true
 	} else {
 		log.SetFormatter(&log.TextFormatter{
+			SortingFunc:      msgLast,
+			DisableQuote:     true,
 			DisableTimestamp: true,
-			DisableSorting:   true,
+			DisableSorting:   false,
 		})
 	}
 }
@@ -75,6 +91,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", json, "turn on json output")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", verbose, "turn on verbose printing for reports")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
+	rootCmd.PersistentFlags().BoolVarP(&state.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
 	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "config file location")
 
 	rootCmd.PersistentFlags().BoolVarP(&trace, "trace", "t", trace, "turn on trace printing for reports")

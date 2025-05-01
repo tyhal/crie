@@ -3,9 +3,9 @@
 : "${DIR:=/}"
 
 stat_it() {
-	echo "hyphen $1 $(tree $DIR | grep - | grep -cE "\\.$1$")"
-	echo "unscor $1 $(tree $DIR | grep _ | grep -cE "\\.$1$")"
-	echo "neithe $1 $(tree $DIR | grep -vE "_|-" | grep -cE "\\.$1$")"
+	echo "hyphen $1 $(tree "$DIR" | grep - | grep -cE "\\.$1$")"
+	echo "unscor $1 $(tree "$DIR" | grep _ | grep -cE "\\.$1$")"
+	echo "neithe $1 $(tree "$DIR" | grep -vE "_|-" | grep -cE "\\.$1$")"
 }
 
 stat_it sh
