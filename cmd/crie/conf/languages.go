@@ -8,8 +8,9 @@ import (
 	"regexp"
 )
 
-var imgHadolint = "docker.io/tyhal/hadolint:latest"
+var imgHadolint = "docker.io/hadolint/hadolint:latest-alpine"
 var imgTerraform = "docker.io/hashicorp/terraform:1.0.1"
+var imgShellCheck = "docker.io/koalaman/shellcheck-alpine:stable"
 
 var imgCrieNpm = "docker.io/tyhal/crie-dep-npm:latest"
 var imgCriePip = "docker.io/tyhal/crie-dep-pip:latest"
@@ -37,13 +38,12 @@ var LanguageList = []linter.Language{
 		Name:  `bash`,
 		Match: regexp.MustCompile(`\.bash$`),
 		Fmt:   &shfmt.Lint{Language: syntax.LangBash},
-		Chk:   &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`}, Docker: cli.DockerCmd{Image: imgHadolint}}},
+		Chk:   &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=bash`, `-Calways`}, Docker: cli.DockerCmd{Image: imgShellCheck}}},
 	{
 		Name:  `sh`,
 		Match: regexp.MustCompile(`\.sh$|/script/[^.]*$|^script/[^.]*$`),
 		Fmt:   &shfmt.Lint{Language: syntax.LangPOSIX},
-		Chk: &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`},
-			Docker: cli.DockerCmd{Image: imgHadolint}}},
+		Chk:   &cli.Lint{Bin: `shellcheck`, FrontPar: cli.Par{`-x`, `--shell=sh`, `-Calways`}, Docker: cli.DockerCmd{Image: imgShellCheck}}},
 
 	// https://github.com/lukasmartinelli/hadolint
 	// TODO use config file when it can be mounted into the docker cmd too
@@ -143,11 +143,11 @@ var LanguageList = []linter.Language{
 		Chk:   &cli.Lint{Bin: `cmakelint`, FrontPar: cli.Par{"--config=/home/standards/.config/cmakelintrc"}, Docker: cli.DockerCmd{Image: imgCriePip}}},
 
 	// TODO Review tools that parse child files - ansiblelint needs to install dependencies similiar to how clang-tidy does
-	{
-		Name:  `ansible`,
-		Match: regexp.MustCompile(`playbook.yml$`),
-		Chk:   &cli.Lint{Bin: `ansible-lint`, Docker: cli.DockerCmd{Image: imgCriePip}},
-	},
+	//{
+	//	Name:  `ansible`,
+	//	Match: regexp.MustCompile(`playbook.yml$`),
+	//	Chk:   &cli.Lint{Bin: `ansible-lint`, Docker: cli.DockerCmd{Image: imgCriePip}},
+	//},
 
 	// TODO use v2 with go
 	//{

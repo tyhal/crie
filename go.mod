@@ -4,14 +4,14 @@ go 1.24
 
 require (
 	github.com/containerd/containerd v1.7.27
-	github.com/docker/docker v25.0.6+incompatible
+	github.com/docker/docker v25.0.8+incompatible
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	github.com/tyhal/flint v0.1.4-crie
 	gopkg.in/yaml.v3 v3.0.1
-	mvdan.cc/sh/v3 v3.7.0
+	mvdan.cc/sh/v3 v3.11.0
 )
 
 require (
