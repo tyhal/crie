@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.16
 
 FROM golang:1.24-alpine3.21 as go_layer
 RUN apk --no-cache add git wget
