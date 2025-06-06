@@ -1,7 +1,7 @@
-FROM alpine:3.13.0 as clang_layer
+FROM alpine:3.22.0 as clang_layer
 RUN apk --no-cache add clang
 
-FROM alpine:3.13.0
+FROM alpine:3.22.0
 
 # hadolint ignore=DL3059
 RUN adduser -D standards
