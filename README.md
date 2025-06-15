@@ -15,7 +15,8 @@
 * No more config chaos - one simple setup for all your tools
 * Quality checks that just work, right out of the box
 * Container-based isolation for consistent tool execution
-* Zero setup required - drop in and get coding
+* Container runtime flexibility - supports both Docker and Podman
+* Drop in and get coding - minimal setup required
 * Catch every blind spot with full coverage detection
 
 ## Install
