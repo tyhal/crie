@@ -27,14 +27,20 @@ func (rep *Report) Log() error {
 
 	if StrictLogging {
 		log.Printf("fail %v", rep.File)
+		log.WithFields(log.Fields{"type": "toolerr"}).Debug(rep.Err)
 		log.WithFields(log.Fields{"type": "stdout"}).Info(rep.StdOut)
-		log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
+		if rep.StdErr != nil {
+			log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
+		}
 	} else {
 		fmt.Printf("\u274C %v\n\n", rep.File)
+		log.WithFields(log.Fields{"type": "toolerr"}).Debug(rep.Err)
 		log.WithFields(log.Fields{"type": "stdout"}).Info()
 		fmt.Println(rep.StdOut)
-		log.WithFields(log.Fields{"type": "stderr"}).Error()
-		fmt.Println(rep.StdErr)
+		if rep.StdErr != nil {
+			log.WithFields(log.Fields{"type": "stderr"}).Error()
+			fmt.Println(rep.StdErr)
+		}
 	}
 
 	return rep.Err
