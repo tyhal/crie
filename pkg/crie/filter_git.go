@@ -1,4 +1,4 @@
-package project
+package crie
 
 import (
 	"bytes"
@@ -9,13 +9,19 @@ import (
 	"strings"
 )
 
-func (s *LintConfiguration) loadFilesGit(args []string) ([]string, error) {
+func (s *RunConfiguration) loadFilesGit(args []string) ([]string, error) {
 	var outB, errB bytes.Buffer
-	c := exec.Command("git", args...)
+
+	gitCmd, err := exec.LookPath("podman")
+	if err != nil {
+		return nil, err
+	}
+
+	c := exec.Command(gitCmd, args...)
 	c.Env = os.Environ()
 	c.Stdout = &outB
 	c.Stderr = &errB
-	err := c.Run()
+	err = c.Run()
 	if err != nil {
 		log.WithFields(log.Fields{"type": "stdout"}).Debug(&outB)
 		log.WithFields(log.Fields{"type": "stderr"}).Debug(&errB)
@@ -36,15 +42,20 @@ func (s *LintConfiguration) loadFilesGit(args []string) ([]string, error) {
 }
 
 // IsRepo checks for a .git folder
-func (s *LintConfiguration) IsRepo() bool {
+func (s *RunConfiguration) IsRepo() bool {
 	_, err := os.Stat(".git")
 	return err == nil
 }
 
-func (s *LintConfiguration) fileListRepoChanged() ([]string, error) {
+func (s *RunConfiguration) fileListRepoChanged() ([]string, error) {
 	var outB bytes.Buffer
 
-	c := exec.Command("git",
+	gitCmd, err := exec.LookPath("podman")
+	if err != nil {
+		return nil, err
+	}
+
+	c := exec.Command(gitCmd,
 		[]string{"rev-list",
 			"--no-merges",
 			"--max-count",
@@ -59,6 +70,6 @@ func (s *LintConfiguration) fileListRepoChanged() ([]string, error) {
 	return s.loadFilesGit([]string{"diff", "--name-only", commitSlice, "."})
 }
 
-func (s *LintConfiguration) fileListRepoAll() ([]string, error) {
+func (s *RunConfiguration) fileListRepoAll() ([]string, error) {
 	return s.loadFilesGit([]string{"ls-files"})
 }

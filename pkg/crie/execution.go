@@ -1,10 +1,9 @@
-package project
+package crie
 
 import (
 	"errors"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/internal/helper"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"os"
 	"path/filepath"
@@ -13,12 +12,12 @@ import (
 )
 
 // SetLanguages is used to load in implemented linters from other packages
-func (s *LintConfiguration) SetLanguages(l []linter.Language) {
+func (s *RunConfiguration) SetLanguages(l []linter.Language) {
 	s.Languages = l
 }
 
 // List to print all languages chkConf fmt and always commands
-func (s *LintConfiguration) List() {
+func (s *RunConfiguration) List() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"language", "checker", "formatter", "associated files"})
 	for _, l := range s.Languages {
@@ -28,7 +27,7 @@ func (s *LintConfiguration) List() {
 }
 
 // GetLanguage lets us query a language that might be in our projects configuration
-func (s *LintConfiguration) GetLanguage(lang string) (linter.Language, error) {
+func (s *RunConfiguration) GetLanguage(lang string) (linter.Language, error) {
 	for _, standardizer := range s.Languages {
 		if standardizer.Name == lang {
 			return standardizer, nil
@@ -38,13 +37,13 @@ func (s *LintConfiguration) GetLanguage(lang string) (linter.Language, error) {
 }
 
 // NoStandards runs all fmt exec commands in languages and in always fmt
-func (s *LintConfiguration) NoStandards() {
+func (s *RunConfiguration) NoStandards() {
 	s.loadFileList()
 
 	// Get files not used
 	files := s.fileList
 	for _, standardizer := range s.Languages {
-		files = helper.Filter(files, false, standardizer.Match.MatchString)
+		files = Filter(files, false, standardizer.Match.MatchString)
 	}
 
 	// Get extensions or Filename(if no extension) and count occurrences
@@ -91,7 +90,7 @@ func (s *LintConfiguration) NoStandards() {
 	table.Render()
 }
 
-func (s *LintConfiguration) tryLint(l linter.Language) (selectedLinter linter.Linter, err error) {
+func (s *RunConfiguration) tryLint(l linter.Language) (selectedLinter linter.Linter, err error) {
 	selectedLinter = l.GetLinter(s.lintType)
 	toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.lintType})
 
@@ -104,7 +103,7 @@ func (s *LintConfiguration) tryLint(l linter.Language) (selectedLinter linter.Li
 	reg := l.Match
 
 	// filter the files to format based on given match and format them.
-	filteredFilepaths := helper.Filter(s.fileList, true, reg.MatchString)
+	filteredFilepaths := Filter(s.fileList, true, reg.MatchString)
 
 	// Skip language as no files found
 	if len(filteredFilepaths) == 0 {
@@ -124,11 +123,11 @@ func (s *LintConfiguration) tryLint(l linter.Language) (selectedLinter linter.Li
 }
 
 // Run is the generic way to run everything based on the packages configuration
-func (s *LintConfiguration) Run(lintType string) error {
+func (s *RunConfiguration) Run(lintType string) error {
 
 	s.lintType = lintType
 
-	// Get initial list of files to use
+	// Get an initial list of files to use
 	s.loadFileList()
 
 	linter.ShowPass = s.ShowPasses

@@ -3,11 +3,11 @@ package cmd
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/pkg/crie/project"
+	"github.com/tyhal/crie/pkg/crie"
 )
 
-// Config is a reference to an all ready setup configuration that these commands will utilise
-var Config *project.LintConfiguration
+// Config is the configuration for the current run of Crie
+var Config *crie.RunConfiguration
 
 // FmtCmd Format code command
 var FmtCmd = &cobra.Command{
@@ -62,6 +62,17 @@ Find the file extensions that dont have an associated regex match within crie`,
 	},
 }
 
+// InitCmd command will create a project settings file for Crie, this is used to list extra ignored files but will be used to override any other settings including the Language Settings themselves
+var InitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Create a new project settings file",
+	Long:  `Create a new project settings file`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		crie.CreateNewProjectSettings(Config.ConfPath)
+	},
+}
+
 func stage(stageName string) {
 	log.Info("❨ " + stageName + " ❩")
 	err := Config.Run(stageName)
@@ -81,6 +92,7 @@ var LntCmd = &cobra.Command{
 	Short:   "Run everything",
 	Long:    `Runs both format and then check`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO run project requirements check
 		stage("fmt")
 		stage("chk")
 	},

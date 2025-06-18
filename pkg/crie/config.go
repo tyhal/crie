@@ -1,36 +1,19 @@
-package project
+package crie
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/internal/settings"
-	"github.com/tyhal/crie/pkg/crie/linter"
+	"gopkg.in/yaml.v3"
 	"os"
 )
 
-// LintConfiguration is what is required for an entire project to be linted
-type LintConfiguration struct {
-	ConfPath        string
-	lintType        string
-	ContinueOnError bool
-	StrictLogging   bool
-	ShowPasses      bool
-	Languages       []linter.Language
-	GitDiff         int
-	SingleLang      string
-	fileList        []string
-}
-
 // loadFileList returns all valid files that have also been filtered by the config
-func (s *LintConfiguration) loadFileList() {
+func (s *RunConfiguration) loadFileList() {
 
 	var fileList []string
 	var err error
 
 	if s.IsRepo() {
-		// If we are a repo without a configuration then force it upon the project
-		if _, err := os.Stat(s.ConfPath); err != nil {
-			settings.CreateNewFileSettings(s.ConfPath)
-		}
 
 		if s.GitDiff > 0 {
 			// Get files changed in last s.GitDiff commits
@@ -54,4 +37,21 @@ func (s *LintConfiguration) loadFileList() {
 	} else {
 		s.fileList = fileList
 	}
+}
+
+// CreateNewProjectSettings Creates the settings file locally
+func CreateNewProjectSettings(confpath string) {
+	yamlOut, err := yaml.Marshal(ProjectSettings{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.WriteFile(confpath, yamlOut, 0666)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("New languages file created: %s\nPlease view this and configure for your repo\n", confpath)
 }

@@ -34,7 +34,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Apk
         id: crie_apk_build
@@ -44,7 +43,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Go
         id: crie_go_build
@@ -54,7 +52,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Npm
         id: crie_npm_build
@@ -64,7 +61,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Pip
         id: crie_pip_build
@@ -74,8 +70,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
-
 
   push-dockerhub:
     runs-on: ubuntu-latest
