@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.17
 
-FROM golang:1.24-alpine3.21 as go_layer
+FROM golang:1.24-alpine3.21 AS go_layer
 RUN apk --no-cache add git wget gcc gpgme-dev musl-dev btrfs-progs-dev
 ENV CGO_ENABLED=1
 COPY go.mod /crie/go.mod
@@ -19,7 +19,7 @@ FROM alpine:3.22
 RUN apk --no-cache add git wget ca-certificates \
     && update-ca-certificates
 
-# hadolint ignore=DL3059
+
 RUN adduser -D standards
 
 # [ Run Scripts ]

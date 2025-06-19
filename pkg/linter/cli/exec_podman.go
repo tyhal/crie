@@ -27,13 +27,17 @@ import (
 	"time"
 )
 
+type podmanExecutor struct {
+	Name   string
+	Image  string
+	client *context.Context
+	id     string
+}
+
 var podmanInstalled = false
 
-func (e *Lint) willPodman() error {
+func willPodman() error {
 
-	if e.Container.Image == "" {
-		return errors.New("no image specified for configuration " + e.Name() + "")
-	}
 	if podmanInstalled {
 		return nil
 	}
@@ -47,7 +51,8 @@ func (e *Lint) willPodman() error {
 	return nil
 }
 
-func (e *Lint) startPodman() error {
+func (e *podmanExecutor) setup() error {
+
 	ctx := context.Background()
 
 	{
@@ -60,15 +65,15 @@ func (e *Lint) startPodman() error {
 		if err != nil {
 			return err
 		}
-		e.Container.clientPodman = &c
+		e.client = &c
 	}
 
-	exists, err := images.Exists(*e.Container.clientPodman, e.Container.Image, &images.ExistsOptions{})
+	exists, err := images.Exists(*e.client, e.Image, &images.ExistsOptions{})
 	if err != nil {
-		return fmt.Errorf("failed to check if image exists: %v", err)
+		return fmt.Errorf("failed to check if Image exists: %v", err)
 	}
 	if !exists {
-		if err := e.pullPodman(); err != nil {
+		if err := e.pull(); err != nil {
 			return err
 		}
 	}
@@ -77,63 +82,76 @@ func (e *Lint) startPodman() error {
 	rand.Read(b)
 	shortid := hex.EncodeToString(b)
 
-	// Ensure we can mount our filesystem to the same path inside the container
-	wd, err := os.Getwd()
+	wdHost, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	dir, err := filepath.Abs(wd)
+	wdContainer, err := getwdContainer()
 	if err != nil {
 		return err
 	}
-	linuxDir := toLinuxPath(dir)
 
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
 
-	log.Debugf("using image %s", e.Container.Image)
+	log.Debugf("using image %s", e.Image)
 
-	s := specgen.NewSpecGenerator(e.Container.Image, false)
-	s.Name = fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name()), shortid)
-	s.Entrypoint = []string{}
-	s.Command = []string{"/bin/sh", "-c", "tail -f /dev/null"}
-	s.WorkDir = linuxDir
+	s := specgen.NewSpecGenerator(e.Image, false)
+	s.Name = fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name), shortid)
+	s.Entrypoint = []string{"/bin/sh", "-c"}
+	s.Command = []string{"tail -f /dev/null"}
+	s.WorkDir = wdContainer
 	s.UserNS = specgen.Namespace{
 		NSMode: "keep-id",
 	}
 	s.Mounts = []spec.Mount{
 		{
 			Type:        "bind",
-			Source:      dir,
-			Destination: linuxDir,
+			Source:      wdHost,
+			Destination: wdContainer,
 			Options:     []string{"rbind", "rw", "Z"},
 		},
 	}
 
-	createResponse, err := containers.CreateWithSpec(*e.Container.clientPodman, s, nil)
+	createResponse, err := containers.CreateWithSpec(*e.client, s, nil)
 	if err != nil {
 		return err
 	}
-	e.Container.id = createResponse.ID
+	e.id = createResponse.ID
 
 	startOptions := containers.StartOptions{}
-	if err := containers.Start(*e.Container.clientPodman, createResponse.ID, &startOptions); err != nil {
+	if err := containers.Start(*e.client, e.id, &startOptions); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (e *Lint) pullPodman() error {
-	_, err := images.Pull(*e.Container.clientPodman, e.Container.Image, nil)
+func (e *podmanExecutor) pull() error {
+	_, err := images.Pull(*e.client, e.Image, nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (e *Lint) execPodman(params []string, stdout io.Writer) error {
-	cmd := append([]string{e.Bin}, params...)
+func (e *podmanExecutor) exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, _ io.Writer) error {
+
+	wdContainer, err := getwdContainer()
+	if err != nil {
+		return err
+	}
+	if chdir {
+		wdContainer = filepath.Join(wdContainer, filepath.Dir(filePath))
+	}
+	targetFile := filePath
+	if chdir {
+		targetFile = filepath.Base(filePath)
+	}
+
+	cmd := append([]string{bin}, frontParams...)
+	cmd = append(cmd, targetFile)
+	cmd = append(cmd, backParams...)
 
 	log.Debug(cmd)
 	currentUser, err := user.Current()
@@ -145,6 +163,7 @@ func (e *Lint) execPodman(params []string, stdout io.Writer) error {
 		ExecOptions: container.ExecOptions{
 			User:         currentUser.Uid,
 			Cmd:          cmd,
+			WorkingDir:   wdContainer,
 			Privileged:   false,
 			AttachStdin:  false,
 			AttachStderr: true,
@@ -152,12 +171,13 @@ func (e *Lint) execPodman(params []string, stdout io.Writer) error {
 			Tty:          false,
 		},
 	}
-	execID, err := containers.ExecCreate(*e.Container.clientPodman, e.Container.id, &execCreateConfig)
+
+	execID, err := containers.ExecCreate(*e.client, e.id, &execCreateConfig)
 	if err != nil {
 		return err
 	}
 
-	logs, err := attachedExecStart(*e.Container.clientPodman, execID, &containers.ExecStartOptions{})
+	logs, err := attachedExecStart(*e.client, execID, &containers.ExecStartOptions{})
 	if err != nil {
 		return err
 	}
@@ -171,7 +191,7 @@ func (e *Lint) execPodman(params []string, stdout io.Writer) error {
 		if err != nil {
 			log.Error(err)
 		}
-		_ = containers.ExecRemove(*e.Container.clientPodman, execID, &containers.ExecRemoveOptions{})
+		_ = containers.ExecRemove(*e.client, execID, &containers.ExecRemoveOptions{})
 	}()
 
 	timeout := time.After(5 * time.Second)
@@ -182,7 +202,7 @@ func (e *Lint) execPodman(params []string, stdout io.Writer) error {
 		case <-timeout:
 			return errors.New("exec timed out")
 		case <-check:
-			inspect, err := containers.ExecInspect(*e.Container.clientPodman, execID, &containers.ExecInspectOptions{})
+			inspect, err := containers.ExecInspect(*e.client, execID, &containers.ExecInspectOptions{})
 			if err != nil {
 				return err
 			}
@@ -196,22 +216,22 @@ func (e *Lint) execPodman(params []string, stdout io.Writer) error {
 	}
 }
 
-func (e *Lint) cleanupPodman() error {
+func (e *podmanExecutor) cleanup() error {
 
 	// TODO cleanup based on labels (project, language)
 
-	if e.Container.id != "" {
+	if e.id != "" {
 		var timeoutSeconds uint = 3
 		var ignore = false
 
-		d := log.WithFields(log.Fields{"podmanId": e.Container.id})
+		d := log.WithFields(log.Fields{"podmanId": e.id})
 
 		d.Debug("stopping container")
 		stopOptions := containers.StopOptions{
 			Timeout: &timeoutSeconds,
 			Ignore:  &ignore,
 		}
-		err := containers.Stop(*e.Container.clientPodman, e.Container.id, &stopOptions)
+		err := containers.Stop(*e.client, e.id, &stopOptions)
 		if err != nil {
 			return err
 		}
@@ -220,7 +240,10 @@ func (e *Lint) cleanupPodman() error {
 		removeOptions := containers.RemoveOptions{
 			Timeout: &timeoutSeconds,
 		}
-		containers.Remove(*e.Container.clientPodman, e.Container.id, &removeOptions)
+		_, err = containers.Remove(*e.client, e.id, &removeOptions)
+		if err != nil {
+			return err
+		}
 
 	}
 

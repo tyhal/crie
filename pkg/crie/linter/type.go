@@ -20,7 +20,7 @@ type Linter interface {
 	WillRun() error
 	Cleanup()
 	MaxConcurrency() int
-	Run(filepath string, rep chan Report)
+	Run(filePath string, rep chan Report)
 	WaitForCleanup() error
 }
 
