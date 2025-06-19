@@ -12,7 +12,7 @@ import (
 func (s *RunConfiguration) loadFilesGit(args []string) ([]string, error) {
 	var outB, errB bytes.Buffer
 
-	gitCmd, err := exec.LookPath("podman")
+	gitCmd, err := exec.LookPath("git")
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (s *RunConfiguration) IsRepo() bool {
 func (s *RunConfiguration) fileListRepoChanged() ([]string, error) {
 	var outB bytes.Buffer
 
-	gitCmd, err := exec.LookPath("podman")
+	gitCmd, err := exec.LookPath("git")
 	if err != nil {
 		return nil, err
 	}
