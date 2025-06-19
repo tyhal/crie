@@ -1,4 +1,4 @@
-FROM alpine:3.13.0 as clang_layer
+FROM alpine:3.13.0 AS clang_layer
 RUN apk --no-cache add clang
 
 FROM alpine:3.13.0

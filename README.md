@@ -10,7 +10,7 @@
 
 ## Features
 
-#### This tool enables teams of developers to use static-analysis where they normally wouldn't:
+#### This tool enables teams of developers to use static-analysis where they wouldn't:
 
 * No more config chaos - one simple setup for all your tools
 * Quality checks that just work, right out of the box

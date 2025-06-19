@@ -20,12 +20,16 @@ import (
 	"time"
 )
 
+type dockerExecutor struct {
+	Name   string
+	Image  string
+	client *client.Client
+	id     string
+}
+
 var dockerInstalled = false
 
-func (e *Lint) willDocker() error {
-	if e.Container.Image == "" {
-		return errors.New("no image specified for configuration " + e.Name() + "")
-	}
+func willDocker() error {
 	if dockerInstalled {
 		return nil
 	}
@@ -37,7 +41,7 @@ func (e *Lint) willDocker() error {
 	return nil
 }
 
-func (e *Lint) startDocker() error {
+func (e *dockerExecutor) setup() error {
 	ctx := context.Background()
 
 	// Add our clientDocker
@@ -46,27 +50,24 @@ func (e *Lint) startDocker() error {
 		if err != nil {
 			return err
 		}
-		e.Container.clientDocker = c
+		e.client = c
 	}
 
-	_, err := e.Container.clientDocker.ImageHistory(ctx, e.Container.Image)
+	_, err := e.client.ImageHistory(ctx, e.Image)
 	if err != nil {
-		if err := e.pullDocker(ctx); err != nil {
+		if err := e.pull(ctx); err != nil {
 			return err
 		}
 	}
 
-	// Ensure we can mount our filesystem to the same path inside the container
-	wd, err := os.Getwd()
+	wdHost, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	dir, err := filepath.Abs(wd)
+	wdContainer, err := getwdContainer()
 	if err != nil {
 		return err
 	}
-
-	linuxDir := toLinuxPath(dir)
 
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
@@ -75,40 +76,40 @@ func (e *Lint) startDocker() error {
 	rand.Read(b)
 	shortid := hex.EncodeToString(b)
 
-	resp, err := e.Container.clientDocker.ContainerCreate(ctx,
+	resp, err := e.client.ContainerCreate(ctx,
 		&container.Config{
 			Entrypoint: []string{},
 			Cmd:        []string{"/bin/sh", "-c", "tail -f /dev/null"},
-			Image:      e.Container.Image,
-			WorkingDir: linuxDir,
+			Image:      e.Image,
+			WorkingDir: wdContainer,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
 				{
 					Type:   mount.TypeBind,
-					Source: dir,
-					Target: linuxDir,
+					Source: wdHost,
+					Target: wdContainer,
 				},
 			},
 		}, nil,
 		&currPlatform,
-		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name()), shortid))
+		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name), shortid))
 	if err != nil {
 		return err
 	}
-	e.Container.id = resp.ID
+	e.id = resp.ID
 
-	return e.Container.clientDocker.ContainerStart(ctx, resp.ID, container.StartOptions{})
+	return e.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 }
 
-func (e *Lint) pullDocker(ctx context.Context) error {
+func (e *dockerExecutor) pull(ctx context.Context) error {
 
-	// Ensure we have the image downloaded
-	pullstat, err := e.Container.clientDocker.ImagePull(ctx, e.Container.Image, image.PullOptions{})
+	// Ensure we have the Image downloaded
+	pullstat, err := e.client.ImagePull(ctx, e.Image, image.PullOptions{})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"stage": "docker pull",
-			"image": e.Container.Image,
+			"Image": e.Image,
 		}).Fatal(err)
 		return err
 	}
@@ -121,20 +122,38 @@ func (e *Lint) pullDocker(ctx context.Context) error {
 	return err
 }
 
-func (e *Lint) execDocker(params []string, stdout io.Writer) error {
+func (e *dockerExecutor) exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, _ io.Writer) error {
 
 	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 
 	ctx := context.Background()
-	cmd := append([]string{e.Bin}, params...)
+
+	// Ensure we can mount our filesystem to the same path inside the container
+	containerWD, err := getwdContainer()
+	if err != nil {
+		return err
+	}
+	if chdir {
+		containerWD = filepath.Join(containerWD, filepath.Dir(filePath))
+	}
+	targetFile := filePath
+	if chdir {
+		targetFile = filepath.Base(filePath)
+	}
+
+	cmd := append([]string{bin}, frontParams...)
+	cmd = append(cmd, targetFile)
+	cmd = append(cmd, backParams...)
+
 	log.Trace(cmd)
 	config := container.ExecOptions{
 		Cmd:          cmd,
+		WorkingDir:   containerWD,
 		AttachStderr: true,
 		AttachStdout: true,
 		Tty:          false,
 	}
-	execResp, err := e.Container.clientDocker.ContainerExecCreate(ctx, e.Container.id, config)
+	execResp, err := e.client.ContainerExecCreate(ctx, e.id, config)
 	if err != nil {
 		return err
 	}
@@ -143,7 +162,7 @@ func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 		Detach: false,
 		Tty:    false,
 	}
-	attach, err := e.Container.clientDocker.ContainerExecAttach(ctx, execResp.ID, startConfig)
+	attach, err := e.client.ContainerExecAttach(ctx, execResp.ID, startConfig)
 	if err != nil {
 		return err
 	}
@@ -163,7 +182,7 @@ func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 		case <-timeout:
 			return errors.New("exec timed out")
 		case <-check:
-			inspect, err := e.Container.clientDocker.ContainerExecInspect(ctx, execResp.ID)
+			inspect, err := e.client.ContainerExecInspect(ctx, execResp.ID)
 			if err != nil {
 				return err
 			}
@@ -177,22 +196,22 @@ func (e *Lint) execDocker(params []string, stdout io.Writer) error {
 	}
 }
 
-func (e *Lint) cleanupDocker() error {
+func (e *dockerExecutor) cleanup() error {
 
 	// TODO cleanup based on labels (project, language)
 
-	if e.Container.id != "" {
+	if e.id != "" {
 		ctx := context.Background()
 		timeoutSeconds := 3
 
-		d := log.WithFields(log.Fields{"dockerId": e.Container.id})
+		d := log.WithFields(log.Fields{"dockerId": e.id})
 
 		d.Debug("stopping container")
-		if err := e.Container.clientDocker.ContainerStop(ctx, e.Container.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
+		if err := e.client.ContainerStop(ctx, e.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
 			return err
 		}
 		d.Debug("removing container")
-		if err := e.Container.clientDocker.ContainerRemove(ctx, e.Container.id, container.RemoveOptions{}); err != nil {
+		if err := e.client.ContainerRemove(ctx, e.id, container.RemoveOptions{}); err != nil {
 			return err
 		}
 	}

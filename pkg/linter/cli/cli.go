@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/crie/linter"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 )
 
+func (e *Lint) isContainer() bool {
+	return e.ContainerImage != ""
+}
+
+// toLinuxPath ensures windows paths can be mapped to linux container paths
 func toLinuxPath(dir string) string {
 	splitPath := strings.Split(dir, ":")
 	return filepath.ToSlash(splitPath[len(splitPath)-1])
@@ -25,33 +28,25 @@ func (e *Lint) Name() string {
 // WillRun does preflight checks for the 'Run'
 func (e *Lint) WillRun() error {
 
-	// Ensure cleanup channel is created
+	// Ensure a cleanup channel is created
 	if e.cleanedUp == nil {
 		e.cleanedUp = make(chan error)
 	}
 
-	if e.execMode != auto {
-		return errors.New("Crie doesn't support forcing a specific execution mode yet")
-	}
-
 	switch {
-	case e.willPodman() == nil:
-		e.execMode = podman
-		if err := e.startPodman(); err != nil {
-			return err
-		}
-	case e.willDocker() == nil:
-		e.execMode = docker
-		if err := e.startDocker(); err != nil {
-			return err
-		}
-	case e.willHost() == nil:
-		e.execMode = host
+	case e.isContainer() && willPodman() == nil:
+		e.executor = &podmanExecutor{Name: e.Bin, Image: e.ContainerImage}
+	case e.isContainer() && willDocker() == nil:
+		e.executor = &dockerExecutor{Name: e.Bin, Image: e.ContainerImage}
+	case willHost(e.Bin) == nil:
+		e.executor = &hostExecutor{}
 	default:
 		return errors.New("could not determine execution mode")
 	}
 
-	log.Debugf("Using %s for %s", e.Name(), e.execMode)
+	if err := e.executor.setup(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -64,56 +59,28 @@ func (e *Lint) Cleanup() {
 		close(e.cleanedUp)
 	}()
 
-	switch e.execMode {
-	case podman:
-		err = e.cleanupPodman()
-	case docker:
-		err = e.cleanupDocker()
-	default:
-	}
+	err = e.executor.cleanup()
 }
 
 // WaitForCleanup Useful for when Cleanup is running in the background
 func (e *Lint) WaitForCleanup() error {
-	// TODO wait for cleanup should be the same for all linters
-
 	var timeout time.Duration = 10
 
 	select {
 	case err := <-e.cleanedUp:
 		return err
 	case <-time.After(time.Second * timeout):
-		return fmt.Errorf("timeout waiting for cleanup for %s (%d seconds)", e.Name(), timeout)
+		return fmt.Errorf("timeout waiting for cleanup for %s (%d seconds)", e.Bin, timeout)
 	}
 }
 
 // Run does the work required to lint the given filepath
-func (e *Lint) Run(filepath string, rep chan linter.Report) {
-
-	params := append(e.FrontPar, toLinuxPath(filepath))
-	params = append(params, e.EndPar...)
+func (e *Lint) Run(filePath string, rep chan linter.Report) {
 
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer
-	var err error
 
-	switch e.execMode {
-	case podman:
-		err = e.execPodman(params, &outB)
-	case docker:
-		err = e.execDocker(params, &outB)
-	case host:
-		c := exec.Command(e.Bin, params...)
-		c.Stdout = &outB
-		c.Stderr = &errB
-		err = c.Run()
-	default:
-		log.Error("Somehow we ran without determining the execution mode, doing nothing :(")
-	}
+	err := e.executor.exec(e.Bin, e.FrontPar, toLinuxPath(filePath), e.EndPar, e.ChDir, &outB, &errB)
 
-	if e.execMode == podman || e.execMode == docker {
-		rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: nil}
-	} else {
-		rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
-	}
+	rep <- linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }

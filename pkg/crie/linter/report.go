@@ -14,14 +14,16 @@ var StrictLogging = false
 // Log simple takes all fields and pushes them to our using the default logger
 func (rep *Report) Log() error {
 
-	if rep.Err == nil {
-		if ShowPass {
-			if StrictLogging {
-				log.Printf("pass %v", rep.File)
-			} else {
-				fmt.Printf("\u2714 %v\n", rep.File)
-			}
+	if rep.Err == nil && ShowPass {
+		if StrictLogging {
+			log.Printf("pass %v", rep.File)
+		} else {
+			fmt.Printf("\u2714 %v\n", rep.File)
 		}
+		if log.GetLevel() == log.DebugLevel {
+			log.WithFields(log.Fields{"type": "stdout"}).Info(rep.StdOut)
+		}
+
 		return nil
 	}
 
@@ -29,18 +31,17 @@ func (rep *Report) Log() error {
 		log.Printf("fail %v", rep.File)
 		log.WithFields(log.Fields{"type": "toolerr"}).Debug(rep.Err)
 		log.WithFields(log.Fields{"type": "stdout"}).Info(rep.StdOut)
-		if rep.StdErr != nil {
-			log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
-		}
+		log.WithFields(log.Fields{"type": "stderr"}).Error(rep.StdErr)
 	} else {
 		fmt.Printf("\u274C %v\n\n", rep.File)
+
 		log.WithFields(log.Fields{"type": "toolerr"}).Debug(rep.Err)
+
 		log.WithFields(log.Fields{"type": "stdout"}).Info()
 		fmt.Println(rep.StdOut)
-		if rep.StdErr != nil {
-			log.WithFields(log.Fields{"type": "stderr"}).Error()
-			fmt.Println(rep.StdErr)
-		}
+
+		log.WithFields(log.Fields{"type": "stderr"}).Error()
+		fmt.Println(rep.StdErr)
 	}
 
 	return rep.Err
