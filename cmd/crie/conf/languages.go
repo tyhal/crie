@@ -11,7 +11,7 @@ import (
 // TODO Move out: this isn't actually part of the CLI and is an example
 
 var imgHadolint = "docker.io/hadolint/hadolint:latest-alpine"
-var imgTerraform = "docker.io/hashicorp/terraform:1.0.1"
+var imgTerraform = "docker.io/hashicorp/terraform:1.3.5"
 var imgShellCheck = "docker.io/koalaman/shellcheck-alpine:stable"
 
 var imgCrieNpm = "docker.io/tyhal/crie-dep-npm:latest"
@@ -65,12 +65,12 @@ var LanguageList = []linter.Language{
 		Match: regexp.MustCompile(`\.yml$|\.yaml$`),
 		Chk:   &cli.Lint{Bin: `yamllint`, Container: cli.Container{Image: imgCriePip}}},
 
-	//{
-	//	Name:  `terraform`,
-	//	Match: regexp.MustCompile(`\.tf$`),
-	//	Fmt:   &cli.Lint{Bin: `terraform`, Container: cli.Container{Image: imgTerraform}, FrontPar: cli.Par{`fmt`}},
-	//	Chk:   &cli.Lint{Bin: `terraform`, Container: cli.Container{Image: imgTerraform}, FrontPar: cli.Par{`fmt`, `-check=true`}},
-	//},
+	{
+		Name:  `terraform`,
+		Match: regexp.MustCompile(`\.tf$`),
+		Fmt:   &cli.Lint{Bin: `terraform`, Container: cli.Container{Image: imgTerraform}, FrontPar: cli.Par{`fmt`}},
+		Chk:   &cli.Lint{Bin: `terraform`, Container: cli.Container{Image: imgTerraform}, FrontPar: cli.Par{`fmt`, `-check=true`}},
+	},
 
 	// TODO switch to eslint
 	{

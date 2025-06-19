@@ -91,11 +91,16 @@ func (e *Lint) startPodman() error {
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
 
+	log.Debugf("using image %s", e.Container.Image)
+
 	s := specgen.NewSpecGenerator(e.Container.Image, false)
 	s.Name = fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name()), shortid)
 	s.Entrypoint = []string{}
 	s.Command = []string{"/bin/sh", "-c", "tail -f /dev/null"}
 	s.WorkDir = linuxDir
+	s.UserNS = specgen.Namespace{
+		NSMode: "keep-id",
+	}
 	s.Mounts = []spec.Mount{
 		{
 			Type:        "bind",
