@@ -1,19 +1,11 @@
-package helper
+package crie
 
 import (
 	"io"
 	"os"
 )
 
-// GOAL: Remove this package
-
-// Min min
-func Min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
+// TODO remove helper package
 
 // IsEmpty IsEmpty
 func IsEmpty(name string) (bool, error) {

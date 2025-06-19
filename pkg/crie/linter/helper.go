@@ -3,10 +3,9 @@ package linter
 import (
 	"errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/internal/helper"
 )
 
-// GetName GetName
+// GetName getter method for any Linter's name
 func GetName(l Linter) string {
 	if l == nil {
 		return ""
@@ -34,7 +33,7 @@ func reporter(maxCon int, fileList []string, didRepErr chan bool, linterReport c
 func LintFileList(l Linter, fileList []string) error {
 	linterReport := make(chan Report)
 	didRepErr := make(chan bool)
-	maxCon := helper.Min(l.MaxConcurrency(), len(fileList))
+	maxCon := min(l.MaxConcurrency(), len(fileList))
 
 	go reporter(maxCon, fileList, didRepErr, linterReport)
 

@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/cmd/crie/cmd"
 	"github.com/tyhal/crie/cmd/crie/conf"
-	"github.com/tyhal/crie/pkg/crie/project"
+	"github.com/tyhal/crie/pkg/crie"
 	"os"
 	"sort"
 )
@@ -38,7 +38,7 @@ var quiet = false
 var verbose = false
 var trace = false
 var json = false
-var state project.LintConfiguration
+var state crie.RunConfiguration
 
 func msgLast(fields []string) {
 	sort.Slice(fields, func(i, j int) bool {
@@ -92,7 +92,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", verbose, "turn on verbose printing for reports")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().BoolVarP(&state.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
-	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "config file location")
+	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "project config file location")
 
 	rootCmd.PersistentFlags().BoolVarP(&trace, "trace", "t", trace, "turn on trace printing for reports")
 	err := rootCmd.PersistentFlags().MarkHidden("trace")
@@ -104,6 +104,7 @@ func init() {
 	addLintCommand(cmd.FmtCmd)
 	addLintCommand(cmd.LntCmd)
 
+	rootCmd.AddCommand(cmd.InitCmd)
 	rootCmd.AddCommand(cmd.NonCmd)
 	rootCmd.AddCommand(cmd.LsCmd)
 
@@ -112,7 +113,6 @@ func init() {
 
 func main() {
 
-	// You could change this to your own implementation of standards
 	state.Languages = conf.LanguageList
 
 	if err := rootCmd.Execute(); err != nil {

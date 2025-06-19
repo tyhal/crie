@@ -8,6 +8,8 @@ import (
 	"regexp"
 )
 
+// TODO Move out: this isn't actually part of the CLI and is an example
+
 var imgHadolint = "docker.io/hadolint/hadolint:latest-alpine"
 var imgTerraform = "docker.io/hashicorp/terraform:1.0.1"
 var imgShellCheck = "docker.io/koalaman/shellcheck-alpine:stable"

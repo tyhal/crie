@@ -1,4 +1,4 @@
-package runflint
+package crie
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -6,14 +6,14 @@ import (
 	"os"
 )
 
-// RunFlint RunFlint
-func RunFlint(path string) {
+// CheckProjectRequirements Ensures the project is Licensed and has the minimal documentation
+func (s *RunConfiguration) CheckProjectRequirements(path string) {
 	flags := flint.Flags{
 		RunReadme:        true,
 		RunContributing:  true,
 		RunLicense:       true,
-		RunBootstrap:     true,
-		RunTestScript:    true,
+		RunBootstrap:     false,
+		RunTestScript:    false,
 		RunChangelog:     false,
 		RunCodeOfConduct: false,
 	}
