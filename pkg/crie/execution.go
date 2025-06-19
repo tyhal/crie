@@ -19,7 +19,7 @@ func (s *RunConfiguration) SetLanguages(l []linter.Language) {
 // List to print all languages chkConf fmt and always commands
 func (s *RunConfiguration) List() {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"language", "checker", "formatter", "associated files"})
+	table.Header([]string{"language", "checker", "formatter", "associated files"})
 	for _, l := range s.Languages {
 		table.Append([]string{l.Name, linter.GetName(l.Chk), linter.GetName(l.Fmt), l.Match.String()})
 	}
@@ -75,7 +75,7 @@ func (s *RunConfiguration) NoStandards() {
 
 	// Print the top 10
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"extension", "count"})
+	table.Header([]string{"extension", "count"})
 	count := 10
 	for _, i := range values {
 		for _, s := range output[i] {
