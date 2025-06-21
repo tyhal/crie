@@ -13,7 +13,9 @@ func (s *RunConfiguration) processFilesWithConfig(files []string) []string {
 
 	m := ProjectSettings{}
 
-	if _, err := os.Stat(s.ConfPath); err != nil {
+	statInfo, err := os.Stat(s.ConfPath)
+
+	if err != nil && statInfo != nil {
 		f, err := os.Open(s.ConfPath)
 		if err != nil {
 			log.Fatal(err)
