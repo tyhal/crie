@@ -32,3 +32,5 @@ The suggested way to start running crie is to run `chk` at the top of your proje
 ```bash
     crie chk --continue
 ```
+
+[install autocompletion](doc/completion.md)

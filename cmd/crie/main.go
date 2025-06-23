@@ -18,7 +18,7 @@ import (
 //	|> Its more important about picking a standard than it is to pick any certain one.
 //
 //	>>-
-//		Does a good farmer neglect a crop he has planted?
+//		Does a good farmer neglect a crop they have planted?
 //		Does a good teacher overlook even the most humble student?
 //		Does a good father allow a single child to starve?
 //		Does a good programmer refuse to maintain his code?
@@ -27,7 +27,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:     "crie",
-	Short:   "crie is a formatter for many languages.",
+	Short:   "crie is a formatter and linter for many languages.",
 	Example: "check all python files in the last commit 'crie chk --git-diff 1 --lang python'",
 	Long: `
 	crie brings together a vast collection of formatters and linters

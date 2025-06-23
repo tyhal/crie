@@ -65,8 +65,8 @@ Find the file extensions that dont have an associated regex match within crie`,
 // InitCmd command will create a project settings file for Crie, this is used to list extra ignored files but will be used to override any other settings including the Language Settings themselves
 var InitCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Create a new project settings file",
-	Long:  `Create a new project settings file`,
+	Short: "Create an optional project settings file",
+	Long:  `Create an optional project settings file`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		crie.CreateNewProjectSettings(Config.ConfPath)
