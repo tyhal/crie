@@ -2,7 +2,6 @@ package shfmt
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"math"
 	"mvdan.cc/sh/v3/syntax"
@@ -56,10 +55,6 @@ func (e *Lint) Run(filepath string, rep chan linter.Report) {
 	syntax.FunctionNextLine(false)(currFmt.printer)
 
 	err := currFmt.formatPath(filepath, true)
-
-	if err != nil {
-		fmt.Fprintf(&errB, err.Error())
-	}
 
 	rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
 }
