@@ -184,7 +184,7 @@ func (e *podmanExecutor) exec(bin string, frontParams []string, filePath string,
 
 	defer func() {
 		if _, err := io.Copy(stdout, logs); err != nil {
-			log.Error("Error during reading logs: %v\n", err)
+			log.Errorf("Error during reading logs: %v\n", err)
 			return
 		}
 		err := logs.Close()

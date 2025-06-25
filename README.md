@@ -2,10 +2,10 @@
     crie.
 </h1>
 <p align="center">
-    <img src="https://raw.githubusercontent.com/tyhal/crie/main/doc/demo.svg?sanitize=true" width="572" alt="crie cli demo">
+    Universal code formatting and linting
 </p>
 <p align="center">
-    Effectively format and lint code for a variety of languages
+    <img src="https://raw.githubusercontent.com/tyhal/crie/main/doc/demo.svg?sanitize=true" width="572" alt="crie cli demo">
 </p>
 
 ## Features
@@ -33,4 +33,14 @@ The suggested way to start running crie is to run `chk` at the top of your proje
     crie chk --continue
 ```
 
-[install autocompletion](doc/completion.md)
+## Docs
+
+- [Autocompletion](doc/completion.md) - Setup tab completion for your shell
+
+---
+
+<div align="center">
+    <a href="https://codecov.io/gh/tyhal/crie"> 
+        <img alt="coverage" src="https://codecov.io/gh/tyhal/crie/graph/badge.svg?token=SSAG0W1TZB"/> 
+    </a>
+</div>
