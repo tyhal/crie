@@ -1,0 +1,20 @@
+name: docker-img-go
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+    paths: ['img/go/*']
+
+jobs:
+  build:
+    uses: ./.github/workflows/docker-build-template.yml
+    with:
+      img: 'go'
+
+  push:
+    uses: ./.github/workflows/docker-push-template.yml
+    with:
+      img: 'go'

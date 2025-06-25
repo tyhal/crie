@@ -1,14 +1,20 @@
 queue_rules:
   - name: default
     conditions:
-      - status-success=docker-build-test
+      - status-success=docker-img-apk
+      - status-success=docker-img-go
+      - status-success=docker-img-npm
+      - status-success=docker-img-pip
 
 pull_request_rules:
   - name: automatic merge for Dependabot pull requests
     conditions:
       - base=main
       - author~=^dependabot(|-preview)\[bot\]$
-      - status-success=docker-build-test
+      - status-success=docker-img-apk
+      - status-success=docker-img-go
+      - status-success=docker-img-npm
+      - status-success=docker-img-pip
     actions:
       queue:
         name: default
@@ -16,7 +22,10 @@ pull_request_rules:
     conditions:
       - base=main
       - author=renovate[bot]
-      - status-success=docker-build-test
+      - status-success=docker-img-apk
+      - status-success=docker-img-go
+      - status-success=docker-img-npm
+      - status-success=docker-img-pip
     actions:
       queue:
         name: default
@@ -26,7 +35,10 @@ pull_request_rules:
       - title~=^\[Snyk\]
       - head~=^snyk-fix
       - check-success~=^security/snyk
-      - status-success=docker-build-test
+      - status-success=docker-img-apk
+      - status-success=docker-img-go
+      - status-success=docker-img-npm
+      - status-success=docker-img-pip
     actions:
       queue:
         name: default
@@ -34,7 +46,10 @@ pull_request_rules:
     conditions:
       - base=main
       - author=imgbot[bot]
-      - status-success=docker-build-test
+      - status-success=docker-img-apk
+      - status-success=docker-img-go
+      - status-success=docker-img-npm
+      - status-success=docker-img-pip
     actions:
       queue:
         name: default
