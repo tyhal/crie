@@ -5,6 +5,11 @@ on:
       img:
         required: true
         type: string
+    secrets:
+      DOCKER_HUB_USERNAME:
+        required: true
+      DOCKER_HUB_ACCESS_TOKEN:
+        required: true
 
 jobs:
   push-dockerhub:
