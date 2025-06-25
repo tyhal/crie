@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/containerd/platforms v1.0.0-rc.1
 	github.com/containers/podman/v5 v5.5.2
-	github.com/docker/docker v28.2.2+incompatible
+	github.com/docker/docker v28.3.0+incompatible
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v1.0.7
 	github.com/opencontainers/runtime-spec v1.2.1
