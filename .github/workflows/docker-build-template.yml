@@ -1,0 +1,28 @@
+name: docker-build-template
+on:
+  workflow_call:
+    inputs:
+      img:
+        required: true
+        type: string
+
+jobs:
+  docker-build-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ inputs.img }}
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./img/${{ inputs.img }}
+          builder: ${{ steps.buildx.outputs.name }}
+          push: false
+          cache-from: type=gha
