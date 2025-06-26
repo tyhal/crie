@@ -2,7 +2,7 @@
     crie.
 </h1>
 <p align="center">
-    Universal code formatting and linting
+    Universal meta-linter using containerized execution
 </p>
 <p align="center">
     <img src="https://raw.githubusercontent.com/tyhal/crie/main/doc/demo.svg?sanitize=true" width="572" alt="crie cli demo">
