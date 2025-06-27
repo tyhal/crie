@@ -2,41 +2,21 @@ package crie
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
-	"regexp"
 )
 
-func (s *RunConfiguration) processFilesWithConfig(files []string) []string {
-
-	m := ProjectSettings{}
-
-	statInfo, err := os.Stat(s.ConfPath)
-
-	if err != nil && statInfo != nil {
-		f, err := os.Open(s.ConfPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = yaml.NewDecoder(f).Decode(&m)
-		if err != nil {
-			log.Fatal("Failed to parse (" + s.ConfPath + "): " + err.Error())
+// RemoveIgnored Narrows down the list by returning only results that do not match the match in the settings file
+func RemoveIgnored(list []string, f func(string) bool) []string {
+	filteredLists := make([]string, 0)
+	for _, entry := range list {
+		result := f(entry)
+		_, err := os.Stat(entry)
+		if !result && err == nil {
+			filteredLists = append(filteredLists, entry)
 		}
 	}
-
-	for _, ignReg := range m.Ignore {
-		reg, err := regexp.Compile(ignReg)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		files = RemoveIgnored(files, reg.MatchString)
-	}
-
-	return files
+	return filteredLists
 }
 
 func (s *RunConfiguration) fileListAll() ([]string, error) {
@@ -69,10 +49,9 @@ func (s *RunConfiguration) fileListAll() ([]string, error) {
 		return nil, errors.New("this is an empty folder")
 	}
 
-	// If there is a config then parse the files through it
-	if _, err := os.Stat(s.ConfPath); err != nil {
-		return allFiles, nil
+	for _, reg := range s.IgnoreFiles {
+		allFiles = RemoveIgnored(allFiles, reg.MatchString)
 	}
 
-	return s.processFilesWithConfig(allFiles), nil
+	return allFiles, nil
 }

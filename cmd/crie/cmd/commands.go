@@ -3,11 +3,8 @@ package cmd
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/pkg/crie"
+	"github.com/tyhal/crie/cmd/crie/settings"
 )
-
-// Config is the configuration for the current run of Crie
-var Config *crie.RunConfiguration
 
 // FmtCmd Format code command
 var FmtCmd = &cobra.Command{
@@ -15,7 +12,7 @@ var FmtCmd = &cobra.Command{
 	Short: "Run formatters",
 	Long:  `Run all formatters in the list`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := Config.Run("fmt")
+		err := settings.Cli.Crie.Run("fmt")
 
 		if err != nil {
 			log.Fatal(err)
@@ -30,7 +27,7 @@ var LsCmd = &cobra.Command{
 	Short:   "List languages",
 	Long:    `List all languages available and the commands run when used`,
 	Run: func(cmd *cobra.Command, args []string) {
-		Config.List()
+		settings.Cli.Crie.List()
 	},
 }
 
@@ -41,7 +38,7 @@ var ChkCmd = &cobra.Command{
 	Short:   "Run checkers",
 	Long:    `Check all code standards for coding conventions`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := Config.Run("chk")
+		err := settings.Cli.Crie.Run("chk")
 
 		if err != nil {
 			log.Fatal(err)
@@ -58,26 +55,26 @@ var NonCmd = &cobra.Command{
 
 Find the file extensions that dont have an associated regex match within crie`,
 	Run: func(cmd *cobra.Command, args []string) {
-		Config.NoStandards()
+		settings.Cli.Crie.NoStandards()
 	},
 }
 
-// InitCmd command will create a project settings file for Crie, this is used to list extra ignored files but will be used to override any other settings including the Language Settings themselves
+// InitCmd command will create a project settings file for Crie, this is used to list extra ignored files but will be used to override any other settings including the Language CliSettings themselves
 var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Create an optional project settings file",
 	Long:  `Create an optional project settings file`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		crie.CreateNewProjectSettings(Config.ConfPath)
+		settings.Cli.CreateNewProjectSettings()
 	},
 }
 
 func stage(stageName string) {
 	log.Info("❨ " + stageName + " ❩")
-	err := Config.Run(stageName)
+	err := settings.Cli.Crie.Run(stageName)
 	if err != nil {
-		if Config.ContinueOnError {
+		if settings.Cli.Crie.ContinueOnError {
 			log.Error(err)
 		} else {
 			log.Fatal(err)
