@@ -14,7 +14,7 @@ type Report struct {
 	StdErr io.Reader
 }
 
-// Linter is a simple inteface to enable a setup and check using WillRun before executing multiple Run's
+// Linter is a simple interface to enable a setup and check using WillRun before executing multiple Run's
 type Linter interface {
 	Name() string
 	WillRun() error
@@ -24,12 +24,13 @@ type Linter interface {
 	WaitForCleanup() error
 }
 
-// Language is used to associate a file pattern to the relevant tools to check and format
+// Language is used to associate a file pattern with the relevant tools to check and format
 type Language struct {
-	Name  string
-	Match *regexp.Regexp // Regex to identify files
-	Fmt   Linter         // Formatting tool
-	Chk   Linter         // Convention linting tool - Errors on any problem
+	Name  string   `yaml:"name"`
+	Match []string `yaml:"match"`
+	Regex *regexp.Regexp
+	Fmt   Linter `yaml:"fmt,omitempty"`   // Formatting tool
+	Chk   Linter `yaml:"check,omitempty"` // Convention linting tool - Errors on any problem
 }
 
 // GetLinter allows for string indexing to get fmt or chk...

@@ -38,7 +38,11 @@ func (s *RunConfiguration) loadFilesGit(args []string) ([]string, error) {
 		}
 	}
 
-	return s.processFilesWithConfig(finallist), nil
+	for _, reg := range s.IgnoreFiles {
+		finallist = RemoveIgnored(finallist, reg.MatchString)
+	}
+
+	return finallist, nil
 }
 
 // IsRepo checks for a .git folder

@@ -1,0 +1,10 @@
+languages:
+  - name: "python"
+    match: '\.py$'
+    fmt:
+      bin: "black"
+      front_params: ["--quiet"]
+      container_image: "docker.io/tyhal/crie-dep-pip:latest"
+    check:
+      bin: "pylint"
+      container_image: "docker.io/tyhal/crie-dep-pip:latest"

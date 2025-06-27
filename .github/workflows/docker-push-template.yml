@@ -59,4 +59,3 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/crie-dep-${{ inputs.img }}:${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-

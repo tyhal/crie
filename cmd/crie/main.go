@@ -4,8 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/cmd/crie/cmd"
-	"github.com/tyhal/crie/cmd/crie/conf"
-	"github.com/tyhal/crie/pkg/crie"
+	"github.com/tyhal/crie/cmd/crie/settings"
 	"os"
 	"sort"
 )
@@ -34,12 +33,6 @@ var rootCmd = &cobra.Command{
 	to create a handy tool that can prettify any codebase.`,
 }
 
-var quiet = false
-var verbose = false
-var trace = false
-var json = false
-var state crie.RunConfiguration
-
 func msgLast(fields []string) {
 	sort.Slice(fields, func(i, j int) bool {
 		if fields[i] == "msg" {
@@ -53,18 +46,18 @@ func msgLast(fields []string) {
 }
 
 func setLogging() {
-	if trace {
+	if settings.Cli.Trace {
 		log.SetLevel(log.TraceLevel)
 	}
-	if verbose {
+	if settings.Cli.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
-	if quiet {
+	if settings.Cli.Quiet {
 		log.SetLevel(log.FatalLevel)
 	}
-	if json {
+	if settings.Cli.JSON {
 		log.SetFormatter(&log.JSONFormatter{})
-		state.StrictLogging = true
+		settings.Cli.Crie.StrictLogging = true
 	} else {
 		log.SetFormatter(&log.TextFormatter{
 			SortingFunc:      msgLast,
@@ -76,25 +69,23 @@ func setLogging() {
 }
 
 func addLintCommand(cmd *cobra.Command) {
-	cmd.PersistentFlags().BoolVarP(&state.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
-	cmd.PersistentFlags().BoolVarP(&state.ShowPasses, "passes", "p", false, "show files that passed")
-	cmd.PersistentFlags().IntVarP(&state.GitDiff, "git-diff", "g", 0, "check files that changed in the last X commits")
-	cmd.PersistentFlags().StringVar(&state.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
+	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
+	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.ShowPasses, "passes", "p", false, "show files that passed")
+	cmd.PersistentFlags().IntVarP(&settings.Cli.Crie.GitDiff, "git-diff", "g", 0, "check files that changed in the last X commits")
+	cmd.PersistentFlags().StringVar(&settings.Cli.Crie.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
 
 	rootCmd.AddCommand(cmd)
 }
 
 func init() {
 
-	cmd.Config = &state
+	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.JSON, "json", "j", settings.Cli.JSON, "turn on json output")
+	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Verbose, "verbose", "v", settings.Cli.Verbose, "turn on verbose printing for reports")
+	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Quiet, "quiet", "q", settings.Cli.Quiet, "turn off extra prints from failures (suppresses verbose)")
+	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
+	rootCmd.PersistentFlags().StringVar(&settings.Cli.ConfigPath, "settings", "crie.yml", "project settings file location")
 
-	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", json, "turn on json output")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", verbose, "turn on verbose printing for reports")
-	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", quiet, "turn off extra prints from failures (suppresses verbose)")
-	rootCmd.PersistentFlags().BoolVarP(&state.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
-	rootCmd.PersistentFlags().StringVar(&state.ConfPath, "config", "crie.yml", "project config file location")
-
-	rootCmd.PersistentFlags().BoolVarP(&trace, "trace", "t", trace, "turn on trace printing for reports")
+	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Trace, "trace", "t", settings.Cli.Trace, "turn on trace printing for reports")
 	err := rootCmd.PersistentFlags().MarkHidden("trace")
 	if err != nil {
 		log.Fatal(err)
@@ -112,9 +103,6 @@ func init() {
 }
 
 func main() {
-
-	state.Languages = conf.LanguageList
-
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
