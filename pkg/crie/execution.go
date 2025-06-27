@@ -11,17 +11,12 @@ import (
 	"strconv"
 )
 
-// SetLanguages is used to load in implemented linters from other packages
-func (s *RunConfiguration) SetLanguages(l []linter.Language) {
-	s.Languages = l
-}
-
 // List to print all languages chkConf fmt and always commands
 func (s *RunConfiguration) List() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Header([]string{"language", "checker", "formatter", "associated files"})
 	for _, l := range s.Languages {
-		table.Append([]string{l.Name, linter.GetName(l.Chk), linter.GetName(l.Fmt), l.Match.String()})
+		table.Append([]string{l.Name, linter.GetName(l.Chk), linter.GetName(l.Fmt), l.Regex.String()})
 	}
 	table.Render()
 }
@@ -43,7 +38,7 @@ func (s *RunConfiguration) NoStandards() {
 	// Get files not used
 	files := s.fileList
 	for _, standardizer := range s.Languages {
-		files = Filter(files, false, standardizer.Match.MatchString)
+		files = Filter(files, false, standardizer.Regex.MatchString)
 	}
 
 	// Get extensions or Filename(if no extension) and count occurrences
@@ -100,7 +95,7 @@ func (s *RunConfiguration) tryLint(l linter.Language) (selectedLinter linter.Lin
 	}
 
 	// Get the match for this formatter's files.
-	reg := l.Match
+	reg := l.Regex
 
 	// filter the files to format based on given match and format them.
 	filteredFilepaths := Filter(s.fileList, true, reg.MatchString)

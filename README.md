@@ -35,9 +35,9 @@ The suggested way to start running crie is to run `chk` at the top of your proje
 
 ## Docs
 
-- [Autocompletion](doc/completion.md) - Setup tab completion for your shell
+* [Autocompletion](doc/completion.md) - Setup tab completion for your shell
 
----
+***
 
 <div align="center">
     <a href="https://codecov.io/gh/tyhal/crie"> 
