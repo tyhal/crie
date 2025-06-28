@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine3.21 AS go_layer
+FROM golang:1.24-alpine3.22 AS go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
@@ -11,7 +11,7 @@ RUN go install github.com/errata-ai/vale@latest
 RUN go install github.com/yoheimuta/protolint/cmd/protolint@latest
 
 
-FROM alpine:3.13.0
+FROM alpine:3.22.0
 
 RUN adduser -D standards
 

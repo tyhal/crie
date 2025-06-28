@@ -6,7 +6,7 @@ on:
     tags:
       - v*
   pull_request:
-    paths: ['img/go/*']
+    paths: ['img/go/*','.github/workflows/docker-build-template.yml','.github/workflows/docker-img-go.yml']
 
 jobs:
   build:
