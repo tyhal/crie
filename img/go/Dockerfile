@@ -11,7 +11,7 @@ RUN go install github.com/errata-ai/vale@latest
 RUN go install github.com/yoheimuta/protolint/cmd/protolint@latest
 
 
-FROM alpine:3.13.0
+FROM alpine:3.22.0
 
 RUN adduser -D standards
 
