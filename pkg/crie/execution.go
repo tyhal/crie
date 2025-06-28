@@ -15,20 +15,18 @@ import (
 func (s *RunConfiguration) List() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Header([]string{"language", "checker", "formatter", "associated files"})
-	for _, l := range s.Languages {
-		table.Append([]string{l.Name, linter.GetName(l.Chk), linter.GetName(l.Fmt), l.Regex.String()})
+	for langName, l := range s.Languages {
+		table.Append([]string{langName, linter.GetName(l.Chk), linter.GetName(l.Fmt), l.Regex.String()})
 	}
 	table.Render()
 }
 
-// GetLanguage lets us query a language that might be in our projects configuration
-func (s *RunConfiguration) GetLanguage(lang string) (linter.Language, error) {
-	for _, standardizer := range s.Languages {
-		if standardizer.Name == lang {
-			return standardizer, nil
-		}
+// GetLanguage lets us query a language that might be in our projects' configuration
+func (s *RunConfiguration) GetLanguage(lang string) (*linter.Language, error) {
+	if language, exists := s.Languages[lang]; exists {
+		return language, nil
 	}
-	return linter.Language{}, errors.New("language not found in configuration")
+	return nil, errors.New("language not found in configuration")
 }
 
 // NoStandards runs all fmt exec commands in languages and in always fmt
@@ -85,9 +83,12 @@ func (s *RunConfiguration) NoStandards() {
 	table.Render()
 }
 
-func (s *RunConfiguration) tryLint(l linter.Language) (selectedLinter linter.Linter, err error) {
-	selectedLinter = l.GetLinter(s.lintType)
-	toLog := log.WithFields(log.Fields{"lang": l.Name, "type": s.lintType})
+func (s *RunConfiguration) tryLint(name string, lang *linter.Language) (selectedLinter linter.Linter, err error) {
+	selectedLinter, err = lang.GetLinter(s.lintType)
+	if err != nil {
+		return
+	}
+	toLog := log.WithFields(log.Fields{"lang": name, "type": s.lintType})
 
 	if selectedLinter == nil {
 		toLog.Debug("there are no configurations associated for this action")
@@ -95,14 +96,14 @@ func (s *RunConfiguration) tryLint(l linter.Language) (selectedLinter linter.Lin
 	}
 
 	// Get the match for this formatter's files.
-	reg := l.Regex
+	reg := lang.Regex
 
 	// filter the files to format based on given match and format them.
 	filteredFilepaths := Filter(s.fileList, true, reg.MatchString)
 
 	// Skip language as no files found
 	if len(filteredFilepaths) == 0 {
-		return nil, err
+		return
 	}
 
 	defer func() { go selectedLinter.Cleanup() }()
@@ -136,12 +137,12 @@ func (s *RunConfiguration) Run(lintType string) error {
 		if err != nil {
 			return err
 		}
-		currentLangs = []linter.Language{lang}
+		currentLangs = map[string]*linter.Language{s.SingleLang: lang}
 	}
 
 	// Run every linter.
-	for _, l := range currentLangs {
-		cleanupLinter, err := s.tryLint(l)
+	for name, lang := range currentLangs {
+		cleanupLinter, err := s.tryLint(name, lang)
 
 		// If tryLint returns a non nil linter reference then we should call WaitForCleanup later
 		if cleanupLinter != nil {

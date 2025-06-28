@@ -11,8 +11,8 @@ type RunConfiguration struct {
 	ContinueOnError bool
 	StrictLogging   bool
 	ShowPasses      bool
-	Languages       []linter.Language
-	IgnoreFiles     []*regexp.Regexp
+	Languages       map[string]*linter.Language
+	Ignore          *regexp.Regexp
 	GitDiff         int
 	SingleLang      string
 	fileList        []string
