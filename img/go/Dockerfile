@@ -2,7 +2,7 @@ FROM golang:1.24-alpine3.22 AS go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
-# TODO implement imp/golint.go
+# TODO implement pkg/linter/golint
 FROM go_layer AS golint_layer
 RUN go install golang.org/x/lint/golint@latest
 # hadolint ignore=DL3059

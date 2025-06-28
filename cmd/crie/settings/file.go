@@ -2,41 +2,45 @@ package settings
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"os"
-	"regexp"
-	"strings"
 )
 
-func unmarshalProjectSettings(data []byte, projectSettings *ProjectConfigFile) {
-	if err := yaml.Unmarshal(data, projectSettings); err != nil {
-		panic(fmt.Sprintf("failed to parse internal language settings: %v", err))
-	}
-	for i := range projectSettings.Languages {
-		lang := &projectSettings.Languages[i]
-		lang.Regex = regexp.MustCompile(strings.Join(lang.Match, "|"))
-	}
-}
-
 // CreateNewProjectSettings Creates the settings file locally
-func (cli *CliSettings) CreateNewProjectSettings() {
-	yamlOut, err := yaml.Marshal(ProjectConfigFile{})
+func (cli *CliSettings) CreateNewProjectSettings() error {
+	yamlOut, err := yaml.Marshal(ConfigProject{})
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	err = os.WriteFile(cli.ConfigPath, yamlOut, 0666)
+	err = os.WriteFile(cli.ConfigPath, yamlOut, 0644)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Printf("New languages file created: %s\nPlease view this and configure for your repo\n", cli.ConfigPath)
+	return nil
 }
 
 // LoadConfigFile load overrides for our projects' settings
-func (cli *CliSettings) LoadConfigFile() {
-	// TODO
+func (cli *CliSettings) LoadConfigFile() error {
+	if _, err := os.Stat(cli.ConfigPath); os.IsNotExist(err) {
+		return nil
+	}
+
+	configData, err := os.ReadFile(cli.ConfigPath)
+	if err != nil {
+		return fmt.Errorf("failed to read config file %s: %w", cli.ConfigPath, err)
+	}
+
+	var userConfig ConfigProject
+	if err := yaml.Unmarshal(configData, &userConfig); err != nil {
+		return fmt.Errorf("failed to parse config file %s: %w", cli.ConfigPath, err)
+	}
+
+	cli.ConfigProject.merge(userConfig)
+
+	return nil
 }

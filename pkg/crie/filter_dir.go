@@ -6,19 +6,6 @@ import (
 	"path/filepath"
 )
 
-// RemoveIgnored Narrows down the list by returning only results that do not match the match in the settings file
-func RemoveIgnored(list []string, f func(string) bool) []string {
-	filteredLists := make([]string, 0)
-	for _, entry := range list {
-		result := f(entry)
-		_, err := os.Stat(entry)
-		if !result && err == nil {
-			filteredLists = append(filteredLists, entry)
-		}
-	}
-	return filteredLists
-}
-
 func (s *RunConfiguration) fileListAll() ([]string, error) {
 
 	// Work out where we are
@@ -49,9 +36,12 @@ func (s *RunConfiguration) fileListAll() ([]string, error) {
 		return nil, errors.New("this is an empty folder")
 	}
 
-	for _, reg := range s.IgnoreFiles {
-		allFiles = RemoveIgnored(allFiles, reg.MatchString)
+	var finalFiles []string
+	for _, file := range allFiles {
+		if s.Ignore.MatchString(file) {
+			finalFiles = append(finalFiles, file)
+		}
 	}
 
-	return allFiles, nil
+	return finalFiles, nil
 }
