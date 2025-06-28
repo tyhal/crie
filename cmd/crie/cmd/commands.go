@@ -66,7 +66,10 @@ var InitCmd = &cobra.Command{
 	Long:  `Create an optional project settings file`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		settings.Cli.CreateNewProjectSettings()
+		err := settings.Cli.CreateNewProjectSettings()
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 

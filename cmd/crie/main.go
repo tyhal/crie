@@ -31,6 +31,12 @@ var rootCmd = &cobra.Command{
 	Long: `
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can prettify any codebase.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if err := settings.Cli.LoadConfigFile(); err != nil {
+			log.Fatalf("Failed to load config: %v", err)
+		}
+		settings.Cli.SaveConfiguration()
+	},
 }
 
 func msgLast(fields []string) {

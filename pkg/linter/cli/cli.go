@@ -11,7 +11,7 @@ import (
 )
 
 func (e *Lint) isContainer() bool {
-	return e.ContainerImage != ""
+	return e.Img != ""
 }
 
 // toLinuxPath ensures windows paths can be mapped to linux container paths
@@ -35,9 +35,9 @@ func (e *Lint) WillRun() error {
 
 	switch {
 	case e.isContainer() && willPodman() == nil:
-		e.executor = &podmanExecutor{Name: e.Bin, Image: e.ContainerImage}
+		e.executor = &podmanExecutor{Name: e.Bin, Image: e.Img}
 	case e.isContainer() && willDocker() == nil:
-		e.executor = &dockerExecutor{Name: e.Bin, Image: e.ContainerImage}
+		e.executor = &dockerExecutor{Name: e.Bin, Image: e.Img}
 	case willHost(e.Bin) == nil:
 		e.executor = &hostExecutor{}
 	default:
@@ -80,7 +80,7 @@ func (e *Lint) Run(filePath string, rep chan linter.Report) {
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 
-	err := e.executor.exec(e.Bin, e.FrontPar, toLinuxPath(filePath), e.EndPar, e.ChDir, &outB, &errB)
+	err := e.executor.exec(e.Bin, e.Start, toLinuxPath(filePath), e.End, e.ChDir, &outB, &errB)
 
 	rep <- linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }
