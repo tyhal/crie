@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM python:3-alpine3.22
 
 # [ Pips ]
 ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1

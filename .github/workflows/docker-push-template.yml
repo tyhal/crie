@@ -13,8 +13,12 @@ on:
 
 jobs:
   push-dockerhub:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     if: github.event_name == 'push'
+
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
 
     permissions:
       contents: read
