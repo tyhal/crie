@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"sync"
 )
 
 // List to print all languages chkConf fmt and always commands
@@ -83,8 +84,8 @@ func (s *RunConfiguration) NoStandards() {
 	table.Render()
 }
 
-func (s *RunConfiguration) tryLint(name string, lang *linter.Language) (selectedLinter linter.Linter, err error) {
-	selectedLinter, err = lang.GetLinter(s.lintType)
+func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, lang *linter.Language) (err error) {
+	selectedLinter, err := lang.GetLinter(s.lintType)
 	if err != nil {
 		return
 	}
@@ -106,20 +107,22 @@ func (s *RunConfiguration) tryLint(name string, lang *linter.Language) (selected
 		return
 	}
 
-	defer func() { go selectedLinter.Cleanup() }()
+	cleanupGroup.Add(1)
+	defer func() { go selectedLinter.Cleanup(cleanupGroup) }()
+
 	err = selectedLinter.WillRun()
 	if err != nil {
-		toLog.Error(err.Error())
+		toLog.Error(err)
 		return
 	}
 
-	toLog.WithFields(log.Fields{"files": len(filteredFilepaths)}).Info("running")
+	toLog.WithFields(log.Fields{"files": len(filteredFilepaths)}).Infof("running %s", name)
 	err = linter.LintFileList(selectedLinter, filteredFilepaths)
 	return
 }
 
 // Run is the generic way to run everything based on the packages configuration
-func (s *RunConfiguration) Run(lintType string) error {
+func (s *RunConfiguration) Run(lintType string) (err error) {
 
 	s.lintType = lintType
 
@@ -140,22 +143,13 @@ func (s *RunConfiguration) Run(lintType string) error {
 		currentLangs = map[string]*linter.Language{s.SingleLang: lang}
 	}
 
+	var cleanupGroup sync.WaitGroup
+	defer func() { cleanupGroup.Wait() }()
 	// Run every linter.
 	for name, lang := range currentLangs {
-		cleanupLinter, err := s.tryLint(name, lang)
-
-		// If tryLint returns a non nil linter reference then we should call WaitForCleanup later
-		if cleanupLinter != nil {
-			defer func() {
-				err := cleanupLinter.WaitForCleanup()
-				if err != nil {
-					log.Error(err)
-				}
-			}()
-		}
-
+		err := s.runLinter(&cleanupGroup, name, lang)
 		if err != nil {
-			log.Error(err.Error())
+			log.Error(err)
 			errCount++
 			if !s.ContinueOnError {
 				break
@@ -164,9 +158,9 @@ func (s *RunConfiguration) Run(lintType string) error {
 	}
 
 	if errCount > 0 {
-		return errors.New("found " + strconv.Itoa(errCount) + " language(s) failed while " + s.lintType + "'ing \u26c8")
+		return errors.New(strconv.Itoa(errCount) + " language(s) failed while " + s.lintType + "'ing \u26c8")
 	}
 
-	log.Println(s.lintType + "'ing passed \u26c5")
+	log.Println("\u26c5  " + s.lintType + "'ing passed")
 	return nil
 }

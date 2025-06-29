@@ -10,13 +10,12 @@ type executor interface {
 
 // Lint defines a predefined command to run against a file
 type Lint struct {
-	Bin       string `yaml:"bin"`
-	Start     Par    `yaml:"start,flow"`
-	End       Par    `yaml:"end,flow"`
-	Img       string `yaml:"img,omitempty"`
-	ChDir     bool   `yaml:"chdir,omitempty"`
-	executor  executor
-	cleanedUp chan error
+	Bin      string `yaml:"bin"`
+	Start    Par    `yaml:"start,flow"`
+	End      Par    `yaml:"end,flow"`
+	Img      string `yaml:"img,omitempty"`
+	ChDir    bool   `yaml:"chdir,omitempty"`
+	executor executor
 }
 
 // Par represents cli parameters
