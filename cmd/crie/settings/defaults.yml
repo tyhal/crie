@@ -148,7 +148,9 @@ languages:
         "--suppress=operatorEq", "--suppress=noExplicitConstructor",
         "--suppress=unRegexedSuppression", "--suppress=missingInclude",
         "--suppress=unusedFunction", "--suppress=noConstructor",
-        "--inline-suppr", "--suppress=unmatchedSuppression", "--error-exitcode=1"
+        "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem",
+        "--inline-suppr", "--error-exitcode=1"
+
       ]
       img: "docker.io/tyhal/crie-dep-apk:latest"
 
@@ -174,7 +176,8 @@ languages:
         "--enable=all", "--language=c",
         "--suppress=unRegexedSuppression", "--suppress=missingInclude",
         "--suppress=unusedFunction",
-        "--inline-suppr", "--suppress=unmatchedSuppression", "--error-exitcode=1"
+        "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem",
+        "--inline-suppr", "--error-exitcode=1"
       ]
       img: "docker.io/tyhal/crie-dep-apk:latest"
 

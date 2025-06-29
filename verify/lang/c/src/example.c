@@ -8,8 +8,6 @@ int main()
     double c;
     double determinant;
     double root1;
-    double realPart;
-    double imaginaryPart;
 
     printf( "Enter coefficients a, b and c: " );
     scanf( "%lf %lf %lf", &a, &b, &c );
@@ -37,8 +35,8 @@ int main()
     // if roots are not real
     else
     {
-        realPart = -b / ( 2 * a );
-        imaginaryPart = sqrt( -determinant ) / ( 2 * a );
+        double realPart = -b / ( 2 * a );
+        double imaginaryPart = sqrt( -determinant ) / ( 2 * a );
         printf( "root1 = %.2lf+%.2lfi and root2 = %.2f-%.2fi", realPart, imaginaryPart, realPart, imaginaryPart );
     }
 

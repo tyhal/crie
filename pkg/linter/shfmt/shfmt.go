@@ -8,6 +8,7 @@ import (
 	"math"
 	"mvdan.cc/sh/v3/syntax"
 	"strings"
+	"sync"
 )
 
 // Lint contains all the information needed to configure shfmt
@@ -50,13 +51,8 @@ func (l *Lint) WillRun() (err error) {
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *Lint) Cleanup() {
+func (l *Lint) Cleanup(_ *sync.WaitGroup) {
 	return
-}
-
-// WaitForCleanup Useful for when Cleanup is running in the background
-func (l *Lint) WaitForCleanup() (err error) {
-	return nil
 }
 
 // MaxConcurrency return max number of parallel files to fmt

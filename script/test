@@ -3,7 +3,9 @@ set -e
 
 cd "$(dirname "${0}")/.."
 
-# TESTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+go test -coverprofile=coverage.out ./...
+
+# E2E TESTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 set -x
 go run ./cmd/crie --help
 go run ./cmd/crie chk -v

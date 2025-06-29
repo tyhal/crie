@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"sync"
 )
 
 // Report is used to state what issues a given file has
@@ -18,10 +19,9 @@ type Report struct {
 type Linter interface {
 	Name() string
 	WillRun() error
-	Cleanup()
+	Cleanup(wg *sync.WaitGroup)
 	MaxConcurrency() int
 	Run(filePath string, rep chan Report)
-	WaitForCleanup() error
 }
 
 // Language is used to associate a file pattern with the relevant tools to check and format

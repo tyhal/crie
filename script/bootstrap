@@ -1,24 +1,10 @@
 #!/bin/sh
 set -xe
 
-: "${GOROOT:=/usr/local/go}"
-
-docker_inst() {
-	curl -fsSL https://get.docker.com | sh
+has_command() {
+	command -v "$1" >/dev/null 2>&1
 }
 
-go_inst() {
-	version=1.14.6
-	file="go$version.$(uname -s)-amd64.tar.gz"
-	curl "https://dl.google.com/go/$file" -o "/tmp/$file"
-	tar -C "$(dirname "$GOROOT")" -xzf "/tmp/$file"
-}
-
-if ! command -v "$GOROOT/bin/go"; then
-	go_inst
+if has_command brew; then
+	brew install pkg-config gpgme gnupg
 fi
-if ! command -v docker; then
-	docker_inst
-fi
-
-pip3 install -r "$(dirname "$0")/../requirements.txt"
