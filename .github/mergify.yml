@@ -6,16 +6,16 @@ queue_rules:
       - status-success=GitGuardian Security Checks
       - or:
           - check-success=img-apk-test / docker-build
-          - check-skipped=img-apk-test / docker-build
+          - -files~=^img/apk/
       - or:
           - check-success=img-go-test / docker-build
-          - check-skipped=img-go-test / docker-build
+          - -files~=^img/go/
       - or:
           - check-success=img-npm-test / docker-build
-          - check-skipped=img-npm-test / docker-build
+          - -files~=^img/npm/
       - or:
           - check-success=img-pip-test / docker-build
-          - check-skipped=img-pip-test / docker-build
+          - -files~=^img/pip/
 
 pull_request_rules:
   - name: automatic merge for Dependabot pull requests
