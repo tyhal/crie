@@ -7,7 +7,7 @@ on:
         type: string
 
 jobs:
-  docker-build-test:
+  docker-build:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 

@@ -1,4 +1,4 @@
-name: docker-img-npm
+name: img-npm
 on:
   push:
     branches:
@@ -6,18 +6,18 @@ on:
     tags:
       - v*
   pull_request:
-    paths: ['img/pip/*','.github/workflows/docker-build-template.yml','.github/workflows/docker-img-pip.yml']
+    paths: [ 'img/npm/*','.github/workflows/docker-build-template.yml','img-npm.yml' ]
 
 jobs:
-  build:
+  img-npm-test:
     uses: ./.github/workflows/docker-build-template.yml
     with:
-      img: 'pip'
+      img: 'npm'
 
-  push:
+  img-npm-push:
     uses: ./.github/workflows/docker-push-template.yml
     with:
-      img: 'pip'
+      img: 'npm'
     secrets:
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}

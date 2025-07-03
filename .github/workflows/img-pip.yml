@@ -1,4 +1,4 @@
-name: docker-img-go
+name: img-pip
 on:
   push:
     branches:
@@ -6,18 +6,18 @@ on:
     tags:
       - v*
   pull_request:
-    paths: ['img/go/*','.github/workflows/docker-build-template.yml','.github/workflows/docker-img-go.yml']
+    paths: [ 'img/pip/*','.github/workflows/docker-build-template.yml','img-pip.yml' ]
 
 jobs:
-  build:
+  img-pip-test:
     uses: ./.github/workflows/docker-build-template.yml
     with:
-      img: 'go'
+      img: 'pip'
 
-  push:
+  img-pip-push:
     uses: ./.github/workflows/docker-push-template.yml
     with:
-      img: 'go'
+      img: 'pip'
     secrets:
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
