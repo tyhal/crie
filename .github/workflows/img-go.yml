@@ -1,4 +1,4 @@
-name: docker-img-apk
+name: img-go
 on:
   push:
     branches:
@@ -6,18 +6,18 @@ on:
     tags:
       - v*
   pull_request:
-    paths: ['img/npm/*','.github/workflows/docker-build-template.yml','.github/workflows/docker-img-npm.yml']
+    paths: [ 'img/go/*','.github/workflows/docker-build-template.yml','img-go.yml' ]
 
 jobs:
-  build:
+  img-go-test:
     uses: ./.github/workflows/docker-build-template.yml
     with:
-      img: 'npm'
+      img: 'go'
 
-  push:
+  img-go-push:
     uses: ./.github/workflows/docker-push-template.yml
     with:
-      img: 'npm'
+      img: 'go'
     secrets:
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
