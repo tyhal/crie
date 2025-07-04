@@ -7,7 +7,7 @@ require (
 	github.com/containers/podman/v5 v5.5.2
 	github.com/docker/docker v28.3.1+incompatible
 	github.com/google/renameio v1.0.1
-	github.com/olekukonko/tablewriter v1.0.7
+	github.com/olekukonko/tablewriter v1.0.8
 	github.com/opencontainers/runtime-spec v1.2.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
