@@ -27,6 +27,6 @@ func (cli *CliSettings) SaveConfiguration() {
 
 	cli.Crie.Languages = make(map[string]*linter.Language)
 	for langName, lang := range cli.ConfigProject.Languages {
-		cli.Crie.Languages[langName] = lang.toLinter()
+		cli.Crie.Languages[langName] = lang.toLanguage()
 	}
 }
