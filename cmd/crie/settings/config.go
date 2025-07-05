@@ -11,7 +11,7 @@ type ConfigLanguage struct {
 	Chk   ConfigLinter `yaml:"chk,omitempty"`
 }
 
-func (l ConfigLanguage) toLinter() *linter.Language {
+func (l ConfigLanguage) toLanguage() *linter.Language {
 	return &linter.Language{
 		Regex: l.Regex.Regexp,
 		Fmt:   l.Fmt.Linter,
