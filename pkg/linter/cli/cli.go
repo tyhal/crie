@@ -3,15 +3,15 @@ package cli
 import (
 	"bytes"
 	"errors"
-	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"path/filepath"
 	"strings"
-	"time"
+	"sync"
 )
 
 func (e *Lint) isContainer() bool {
-	return e.ContainerImage != ""
+	return e.Img != ""
 }
 
 // toLinuxPath ensures windows paths can be mapped to linux container paths
@@ -28,20 +28,15 @@ func (e *Lint) Name() string {
 // WillRun does preflight checks for the 'Run'
 func (e *Lint) WillRun() error {
 
-	// Ensure a cleanup channel is created
-	if e.cleanedUp == nil {
-		e.cleanedUp = make(chan error)
-	}
-
 	switch {
 	case e.isContainer() && willPodman() == nil:
-		e.executor = &podmanExecutor{Name: e.Bin, Image: e.ContainerImage}
+		e.executor = &podmanExecutor{Name: e.Bin, Image: e.Img}
 	case e.isContainer() && willDocker() == nil:
-		e.executor = &dockerExecutor{Name: e.Bin, Image: e.ContainerImage}
+		e.executor = &dockerExecutor{Name: e.Bin, Image: e.Img}
 	case willHost(e.Bin) == nil:
 		e.executor = &hostExecutor{}
 	default:
-		return errors.New("could not determine execution mode")
+		return errors.New("could not determine execution mode [podman, docker, local]")
 	}
 
 	if err := e.executor.setup(); err != nil {
@@ -52,25 +47,11 @@ func (e *Lint) WillRun() error {
 }
 
 // Cleanup removes any additional resources created in the process
-func (e *Lint) Cleanup() {
-	var err error = nil
-	defer func() {
-		e.cleanedUp <- err
-		close(e.cleanedUp)
-	}()
-
-	err = e.executor.cleanup()
-}
-
-// WaitForCleanup Useful for when Cleanup is running in the background
-func (e *Lint) WaitForCleanup() error {
-	var timeout time.Duration = 10
-
-	select {
-	case err := <-e.cleanedUp:
-		return err
-	case <-time.After(time.Second * timeout):
-		return fmt.Errorf("timeout waiting for cleanup for %s (%d seconds)", e.Bin, timeout)
+func (e *Lint) Cleanup(group *sync.WaitGroup) {
+	defer group.Done()
+	err := e.executor.cleanup()
+	if err != nil {
+		log.Error(err)
 	}
 }
 
@@ -80,7 +61,7 @@ func (e *Lint) Run(filePath string, rep chan linter.Report) {
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 
-	err := e.executor.exec(e.Bin, e.FrontPar, toLinuxPath(filePath), e.EndPar, e.ChDir, &outB, &errB)
+	err := e.executor.exec(e.Bin, e.Start, toLinuxPath(filePath), e.End, e.ChDir, &outB, &errB)
 
 	rep <- linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }

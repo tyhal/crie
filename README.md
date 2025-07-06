@@ -21,11 +21,15 @@
 
 ## Install
 
-Getting the tool
+Installing Crie
 
 ```bash
     go install github.com/tyhal/crie/cmd/crie@latest
 ```
+
+Install either [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/)
+
+## Usage
 
 The suggested way to start running crie is to run `chk` at the top of your project and add `--continue` to see every error in the project (this will not change any code)
 
@@ -35,9 +39,9 @@ The suggested way to start running crie is to run `chk` at the top of your proje
 
 ## Docs
 
-- [Autocompletion](doc/completion.md) - Setup tab completion for your shell
+* [Autocompletion](doc/completion.md) - Setup tab completion for your shell
 
----
+***
 
 <div align="center">
     <a href="https://codecov.io/gh/tyhal/crie"> 

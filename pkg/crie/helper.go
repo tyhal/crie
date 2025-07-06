@@ -22,19 +22,6 @@ func IsEmpty(name string) (bool, error) {
 	return false, err // Either not empty or error, suits both cases
 }
 
-// RemoveIgnored Narrows down the list by returning only results that do not match the match in the config file
-func RemoveIgnored(list []string, f func(string) bool) []string {
-	filteredLists := make([]string, 0)
-	for _, entry := range list {
-		result := f(entry)
-		_, err := os.Stat(entry)
-		if !result && err == nil {
-			filteredLists = append(filteredLists, entry)
-		}
-	}
-	return filteredLists
-}
-
 // Filter Filters
 func Filter(list []string, expect bool, f func(string) bool) []string {
 	filteredLists := make([]string, 0)

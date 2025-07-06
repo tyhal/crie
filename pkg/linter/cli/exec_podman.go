@@ -13,6 +13,10 @@ import (
 	"github.com/containers/podman/v5/pkg/bindings"
 	"github.com/containers/podman/v5/pkg/bindings/containers"
 	"github.com/containers/podman/v5/pkg/bindings/images"
+	"github.com/containers/podman/v5/pkg/machine/define"
+	"github.com/containers/podman/v5/pkg/machine/env"
+	"github.com/containers/podman/v5/pkg/machine/provider"
+	"github.com/containers/podman/v5/pkg/machine/vmconfigs"
 	"github.com/containers/podman/v5/pkg/specgen"
 	"github.com/docker/docker/api/types/container"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
@@ -51,17 +55,50 @@ func willPodman() error {
 	return nil
 }
 
+func getPodmanMachineSocket() (socketPath string, err error) {
+	currProvider, err := provider.Get()
+	if err != nil {
+		return
+	}
+	dirs, err := env.GetMachineDirs(currProvider.VMType())
+	if err != nil {
+		return
+	}
+	mc, err := vmconfigs.LoadMachineByName(define.DefaultMachineName, dirs)
+	if err != nil {
+		return
+	}
+	podmanSocket, _, err := mc.ConnectionInfo(currProvider.VMType())
+	if err != nil {
+		return
+	}
+	socketPath = podmanSocket.Path
+	return
+}
+
 func (e *podmanExecutor) setup() error {
 
 	ctx := context.Background()
 
 	{
-		currentUser, err := user.Current()
-		if err != nil {
-			return err
+		var uri string
+		if _, found := os.LookupEnv("CONTAINER_HOST"); found {
+			uri = ""
+		} else {
+			socketPath, err := getPodmanMachineSocket()
+			if err != nil {
+				log.Debug(err)
+				currentUser, err := user.Current()
+				if err != nil {
+					return err
+				}
+				uri = fmt.Sprintf("unix:///run/user/%s/podman/podman.sock", currentUser.Uid)
+			} else {
+				uri = fmt.Sprintf("unix://%s", socketPath)
+			}
 		}
 
-		c, err := bindings.NewConnection(ctx, fmt.Sprintf("unix:///run/user/%s/podman/podman.sock", currentUser.Uid))
+		c, err := bindings.NewConnection(ctx, uri)
 		if err != nil {
 			return err
 		}

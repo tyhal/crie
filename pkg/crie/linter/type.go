@@ -1,9 +1,10 @@
 package linter
 
 import (
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"io"
 	"regexp"
+	"sync"
 )
 
 // Report is used to state what issues a given file has
@@ -14,33 +15,32 @@ type Report struct {
 	StdErr io.Reader
 }
 
-// Linter is a simple inteface to enable a setup and check using WillRun before executing multiple Run's
+// Linter is a simple interface to enable a setup and check using WillRun before executing multiple Run's
 type Linter interface {
 	Name() string
 	WillRun() error
-	Cleanup()
+	Cleanup(wg *sync.WaitGroup)
 	MaxConcurrency() int
 	Run(filePath string, rep chan Report)
-	WaitForCleanup() error
 }
 
-// Language is used to associate a file pattern to the relevant tools to check and format
+// Language is used to associate a file pattern with the relevant tools to check and format
 type Language struct {
-	Name  string
-	Match *regexp.Regexp // Regex to identify files
-	Fmt   Linter         // Formatting tool
-	Chk   Linter         // Convention linting tool - Errors on any problem
+	Regex *regexp.Regexp
+	Fmt   Linter
+	Chk   Linter
 }
 
 // GetLinter allows for string indexing to get fmt or chk...
 // TODO remove requirement for this function
-func (l *Language) GetLinter(which string) Linter {
-	if which == "fmt" {
-		return l.Fmt
-	} else if which == "chk" {
-		return l.Chk
+func (l *Language) GetLinter(which string) (Linter, error) {
+
+	switch which {
+	case "fmt":
+		return l.Fmt, nil
+	case "chk":
+		return l.Chk, nil
 	}
-	// XXX should really pass back down
-	log.Fatal("No linter found '" + which + "'")
-	return nil
+
+	return nil, fmt.Errorf("no linter found %s", which)
 }
