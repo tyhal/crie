@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestConfigProjectMerge(t *testing.T) {
+func TestConfigProject_merge(t *testing.T) {
 	tests := []struct {
 		name     string
 		base     ConfigProject

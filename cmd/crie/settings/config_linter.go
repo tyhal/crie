@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"github.com/tyhal/crie/pkg/linter/cli"
+	"github.com/tyhal/crie/pkg/linter/noop"
 	"github.com/tyhal/crie/pkg/linter/shfmt"
 	"gopkg.in/yaml.v3"
 )
@@ -12,6 +13,15 @@ import (
 type ConfigLinter struct {
 	Type string `yaml:"type"`
 	linter.Linter
+}
+
+func decodeLinter[T linter.Linter](value *yaml.Node, dst *linter.Linter) error {
+	var src T
+	if err := value.Decode(&src); err != nil {
+		return err
+	}
+	*dst = src
+	return nil
 }
 
 // UnmarshalYAML implements custom YAML unmarshalling
@@ -27,23 +37,12 @@ func (cl *ConfigLinter) UnmarshalYAML(value *yaml.Node) error {
 
 	switch typeOnly.Type {
 	case "cli":
-
-		var cliLinter cli.Lint
-		if err := value.Decode(&cliLinter); err != nil {
-			return err
-		}
-		cl.Linter = &cliLinter
-
+		return decodeLinter[*cli.Lint](value, &cl.Linter)
 	case "shfmt":
-		var shfmtLinter shfmt.Lint
-		if err := value.Decode(&shfmtLinter); err != nil {
-			return err
-		}
-		cl.Linter = &shfmtLinter
-
+		return decodeLinter[*shfmt.Lint](value, &cl.Linter)
+	case "noop":
+		return decodeLinter[*noop.Lint](value, &cl.Linter)
 	default:
 		return fmt.Errorf("unknown linter type: %s", typeOnly.Type)
 	}
-
-	return nil
 }

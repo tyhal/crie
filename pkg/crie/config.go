@@ -2,7 +2,22 @@ package crie
 
 import (
 	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/crie/linter"
+	"regexp"
 )
+
+// RunConfiguration is the entire working set of information to process a project
+type RunConfiguration struct {
+	lintType        string
+	ContinueOnError bool
+	StrictLogging   bool
+	ShowPasses      bool
+	Languages       map[string]*linter.Language
+	Ignore          *regexp.Regexp
+	GitDiff         int
+	SingleLang      string
+	fileList        []string
+}
 
 // loadFileList returns all valid files that have also been filtered by the settings
 func (s *RunConfiguration) loadFileList() {
