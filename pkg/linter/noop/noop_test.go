@@ -24,6 +24,7 @@ func TestLint_Cleanup(t *testing.T) {
 	l := &Lint{}
 	var wg sync.WaitGroup
 	// Should not panic
+	wg.Add(1)
 	l.Cleanup(&wg)
 }
 

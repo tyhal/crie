@@ -36,12 +36,14 @@ func (s *RunConfiguration) fileListAll() ([]string, error) {
 		return nil, errors.New("this is an empty folder")
 	}
 
-	var finalFiles []string
-	for _, file := range allFiles {
-		if s.Ignore.MatchString(file) {
-			finalFiles = append(finalFiles, file)
+	var filteredFiles []string
+	if s.Ignore != nil {
+		for _, file := range allFiles {
+			if s.Ignore.MatchString(file) {
+				filteredFiles = append(filteredFiles, file)
+			}
 		}
 	}
 
-	return finalFiles, nil
+	return filteredFiles, nil
 }
