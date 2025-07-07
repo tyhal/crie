@@ -19,8 +19,8 @@ func (l *Lint) WillRun() (err error) {
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *Lint) Cleanup(_ *sync.WaitGroup) {
-	return
+func (l *Lint) Cleanup(group *sync.WaitGroup) {
+	group.Done()
 }
 
 // MaxConcurrency return max number of parallel files to fmt
