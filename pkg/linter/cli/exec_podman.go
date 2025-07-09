@@ -64,8 +64,13 @@ func getPodmanMachineSocket() (socketPath string, err error) {
 	if err != nil {
 		return
 	}
-	mc, err := vmconfigs.LoadMachineByName(define.DefaultMachineName, dirs)
-	if err != nil {
+	mc, vmErr := vmconfigs.LoadMachineByName(define.DefaultMachineName, dirs)
+	if vmErr != nil {
+		currentUser, userErr := user.Current()
+		if userErr != nil {
+			return socketPath, userErr
+		}
+		socketPath = fmt.Sprintf("/run/user/%s/podman/podman.sock", currentUser.Uid)
 		return
 	}
 	podmanSocket, _, err := mc.ConnectionInfo(currProvider.VMType())
@@ -87,15 +92,9 @@ func (e *podmanExecutor) setup() error {
 		} else {
 			socketPath, err := getPodmanMachineSocket()
 			if err != nil {
-				log.Debug(err)
-				currentUser, err := user.Current()
-				if err != nil {
-					return err
-				}
-				uri = fmt.Sprintf("unix:///run/user/%s/podman/podman.sock", currentUser.Uid)
-			} else {
-				uri = fmt.Sprintf("unix://%s", socketPath)
+				return err
 			}
+			uri = fmt.Sprintf("unix://%s", socketPath)
 		}
 
 		c, err := bindings.NewConnection(ctx, uri)
