@@ -24,7 +24,7 @@ func convertLimit(limit uint64) int {
 }
 
 // MaxConcurrency returns the max concurrency name
-func (e *Lint) MaxConcurrency() int {
+func (e *LintCli) MaxConcurrency() int {
 	var limit syscall.Rlimit
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &limit)
 	if err != nil {

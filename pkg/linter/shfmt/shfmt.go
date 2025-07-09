@@ -11,13 +11,13 @@ import (
 	"sync"
 )
 
-// Lint contains all the information needed to configure shfmt
-type Lint struct {
+// LintShfmt contains all the information needed to configure shfmt
+type LintShfmt struct {
 	Language syntax.LangVariant `yaml:"language"`
 }
 
 // UnmarshalYAML implements custom YAML unmarshalling
-func (l *Lint) UnmarshalYAML(value *yaml.Node) error {
+func (l *LintShfmt) UnmarshalYAML(value *yaml.Node) error {
 	var temp struct {
 		Language string `yaml:"language"`
 	}
@@ -41,27 +41,27 @@ func (l *Lint) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // Name returns the name of the linter
-func (l *Lint) Name() string {
+func (l *LintShfmt) Name() string {
 	return "shfmt"
 }
 
 // WillRun do nothing as there are no external deps
-func (l *Lint) WillRun() (err error) {
+func (l *LintShfmt) WillRun() (err error) {
 	return nil
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *Lint) Cleanup(wg *sync.WaitGroup) {
+func (l *LintShfmt) Cleanup(wg *sync.WaitGroup) {
 	wg.Done()
 }
 
 // MaxConcurrency return max number of parallel files to fmt
-func (l *Lint) MaxConcurrency() int {
+func (l *LintShfmt) MaxConcurrency() int {
 	return math.MaxInt32
 }
 
 // Run shfmt -w
-func (l *Lint) Run(filepath string, rep chan linter.Report) {
+func (l *LintShfmt) Run(filepath string, rep chan linter.Report) {
 	var outB, errB bytes.Buffer
 
 	currFmt := shfmt{

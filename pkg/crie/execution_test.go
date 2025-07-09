@@ -13,8 +13,8 @@ func TestRunConfiguration_GetLanguage(t *testing.T) {
 	config := &RunConfiguration{
 		Languages: map[string]*linter.Language{
 			"test": {
-				Chk:   &noop.Lint{},
-				Fmt:   &noop.Lint{},
+				Chk:   &noop.LintNoop{},
+				Fmt:   &noop.LintNoop{},
 				Regex: regexp.MustCompile(`\.test$`),
 			},
 		},
@@ -37,7 +37,7 @@ func TestRunConfiguration_runLinter(t *testing.T) {
 		fileList: []string{"test.go"},
 		Languages: map[string]*linter.Language{
 			"go": {
-				Chk:   &noop.Lint{},
+				Chk:   &noop.LintNoop{},
 				Regex: regexp.MustCompile(`\.go$`),
 			},
 		},
@@ -55,7 +55,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 	config := &RunConfiguration{
 		Languages: map[string]*linter.Language{
 			"go": {
-				Chk:   &noop.Lint{},
+				Chk:   &noop.LintNoop{},
 				Regex: regexp.MustCompile(`\.go$`),
 			},
 		},
@@ -72,11 +72,11 @@ func TestRunConfiguration_Run_WithSingleLang(t *testing.T) {
 	config := &RunConfiguration{
 		Languages: map[string]*linter.Language{
 			"go": {
-				Chk:   &noop.Lint{},
+				Chk:   &noop.LintNoop{},
 				Regex: regexp.MustCompile(`\.go$`),
 			},
 			"test": {
-				Chk:   &noop.Lint{},
+				Chk:   &noop.LintNoop{},
 				Regex: regexp.MustCompile(`\.test$`),
 			},
 		},
@@ -92,7 +92,7 @@ func TestRunConfiguration_Run_NonexistentSingleLang(t *testing.T) {
 	config := &RunConfiguration{
 		Languages: map[string]*linter.Language{
 			"go": {
-				Chk:   &noop.Lint{},
+				Chk:   &noop.LintNoop{},
 				Regex: regexp.MustCompile(`\.go$`),
 			},
 		},

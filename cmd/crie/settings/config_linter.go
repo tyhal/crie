@@ -37,11 +37,11 @@ func (cl *ConfigLinter) UnmarshalYAML(value *yaml.Node) error {
 
 	switch typeOnly.Type {
 	case "cli":
-		return decodeLinter[*cli.Lint](value, &cl.Linter)
+		return decodeLinter[*cli.LintCli](value, &cl.Linter)
 	case "shfmt":
-		return decodeLinter[*shfmt.Lint](value, &cl.Linter)
+		return decodeLinter[*shfmt.LintShfmt](value, &cl.Linter)
 	case "noop":
-		return decodeLinter[*noop.Lint](value, &cl.Linter)
+		return decodeLinter[*noop.LintNoop](value, &cl.Linter)
 	case "":
 		return fmt.Errorf("field missing 'type'")
 	default:
