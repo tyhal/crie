@@ -11,12 +11,12 @@ import (
 )
 
 func TestLint_Name(t *testing.T) {
-	l := &Lint{Bin: "test"}
+	l := &LintCli{Bin: "test"}
 	assert.Equal(t, "test", l.Name())
 }
 
 func TestLint_Cleanup(t *testing.T) {
-	l := &Lint{executor: &noopExecutor{}}
+	l := &LintCli{executor: &noopExecutor{}}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	l.Cleanup(&wg)
@@ -24,7 +24,7 @@ func TestLint_Cleanup(t *testing.T) {
 }
 
 func TestLint_Run(t *testing.T) {
-	l := &Lint{executor: &noopExecutor{}} // TODO test with no executor setup
+	l := &LintCli{executor: &noopExecutor{}} // TODO test with no executor setup
 	rep := make(chan linter.Report, 1)
 
 	l.Run("test.txt", rep)

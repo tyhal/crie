@@ -9,8 +9,8 @@ import (
 
 func TestConfigLanguage_toLanguage(t *testing.T) {
 	regex := &ConfigRegex{Regexp: regexp.MustCompile(`\.go$`)}
-	fmtLinter := ConfigLinter{Type: "noop", Linter: &noop.Lint{}}
-	chkLinter := ConfigLinter{Type: "noop", Linter: &noop.Lint{}}
+	fmtLinter := ConfigLinter{Type: "noop", Linter: &noop.LintNoop{}}
+	chkLinter := ConfigLinter{Type: "noop", Linter: &noop.LintNoop{}}
 
 	config := ConfigLanguage{
 		Regex: regex,

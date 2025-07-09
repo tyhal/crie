@@ -9,8 +9,8 @@ import (
 )
 
 func TestSaveConfiguration(t *testing.T) {
-	fmtLinter := &noop.Lint{}
-	chkLinter := &noop.Lint{}
+	fmtLinter := &noop.LintNoop{}
+	chkLinter := &noop.LintNoop{}
 	regex := regexp.MustCompile(`\.go$`)
 
 	cli := &CliSettings{

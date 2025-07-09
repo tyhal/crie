@@ -10,8 +10,8 @@ import (
 	"sync"
 )
 
-// Lint defines a predefined command to run against a file
-type Lint struct {
+// LintCli defines a predefined command to run against a file
+type LintCli struct {
 	Bin      string `yaml:"bin"`
 	Start    Par    `yaml:"start,flow"`
 	End      Par    `yaml:"end,flow"`
@@ -23,7 +23,7 @@ type Lint struct {
 // Par represents cli parameters
 type Par []string
 
-func (e *Lint) isContainer() bool {
+func (e *LintCli) isContainer() bool {
 	return e.Img != ""
 }
 
@@ -34,12 +34,12 @@ func toLinuxPath(dir string) string {
 }
 
 // Name returns the command name
-func (e *Lint) Name() string {
+func (e *LintCli) Name() string {
 	return e.Bin
 }
 
 // WillRun does preflight checks for the 'Run'
-func (e *Lint) WillRun() error {
+func (e *LintCli) WillRun() error {
 
 	switch {
 	case e.isContainer() && willPodman() == nil:
@@ -60,7 +60,7 @@ func (e *Lint) WillRun() error {
 }
 
 // Cleanup removes any additional resources created in the process
-func (e *Lint) Cleanup(group *sync.WaitGroup) {
+func (e *LintCli) Cleanup(group *sync.WaitGroup) {
 	defer group.Done()
 	err := e.executor.cleanup()
 	if err != nil {
@@ -69,7 +69,7 @@ func (e *Lint) Cleanup(group *sync.WaitGroup) {
 }
 
 // Run does the work required to lint the given filepath
-func (e *Lint) Run(filePath string, rep chan linter.Report) {
+func (e *LintCli) Run(filePath string, rep chan linter.Report) {
 
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer

@@ -11,17 +11,17 @@ import (
 )
 
 func TestLint_Name(t *testing.T) {
-	l := &Lint{}
+	l := &LintNoop{}
 	assert.Equal(t, "noop", l.Name())
 }
 
 func TestLint_WillRun(t *testing.T) {
-	l := &Lint{}
+	l := &LintNoop{}
 	assert.NoError(t, l.WillRun())
 }
 
 func TestLint_Cleanup(t *testing.T) {
-	l := &Lint{}
+	l := &LintNoop{}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	l.Cleanup(&wg)
@@ -29,12 +29,12 @@ func TestLint_Cleanup(t *testing.T) {
 }
 
 func TestLint_MaxConcurrency(t *testing.T) {
-	l := &Lint{}
+	l := &LintNoop{}
 	assert.Equal(t, math.MaxInt32, l.MaxConcurrency())
 }
 
 func TestLint_Run(t *testing.T) {
-	l := &Lint{}
+	l := &LintNoop{}
 	rep := make(chan linter.Report, 1)
 
 	l.Run("test.txt", rep)

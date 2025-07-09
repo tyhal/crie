@@ -4,6 +4,6 @@
 package cli
 
 // MaxConcurrency returns the max concurrency name
-func (e *Lint) MaxConcurrency() int {
+func (e *LintCli) MaxConcurrency() int {
 	return 128
 }

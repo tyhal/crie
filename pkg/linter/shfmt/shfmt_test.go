@@ -51,7 +51,7 @@ func TestLint_UnmarshalYAML(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var sh Lint
+			var sh LintShfmt
 			err := yaml.Unmarshal([]byte(tt.yaml), &sh)
 
 			if tt.wantErr {
@@ -65,17 +65,17 @@ func TestLint_UnmarshalYAML(t *testing.T) {
 }
 
 func TestLint_Name(t *testing.T) {
-	l := &Lint{}
+	l := &LintShfmt{}
 	assert.Equal(t, "shfmt", l.Name())
 }
 
 func TestLint_WillRun(t *testing.T) {
-	l := &Lint{}
+	l := &LintShfmt{}
 	assert.NoError(t, l.WillRun())
 }
 
 func TestLint_Cleanup(t *testing.T) {
-	l := &Lint{}
+	l := &LintShfmt{}
 	var wg sync.WaitGroup
 	wg.Add(1)
 	l.Cleanup(&wg)
@@ -83,13 +83,13 @@ func TestLint_Cleanup(t *testing.T) {
 }
 
 func TestLint_MaxConcurrency(t *testing.T) {
-	l := &Lint{}
+	l := &LintShfmt{}
 	assert.Equal(t, math.MaxInt32, l.MaxConcurrency())
 }
 
 // TODO either mock or make dummy files
 //func TestLint_Run(t *testing.T) {
-//	l := &Lint{}
+//	l := &LintShfmt{}
 //	rep := make(chan linter.Report, 1)
 //
 //	l.Run("test.txt", rep)

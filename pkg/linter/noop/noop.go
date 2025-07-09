@@ -6,30 +6,30 @@ import (
 	"sync"
 )
 
-// Lint performs no operations, as a template implementation of cries' linter.Linter
-type Lint struct{}
+// LintNoop performs no operations, as a template implementation of cries' linter.Linter
+type LintNoop struct{}
 
 // Name returns the name of the linter
-func (l *Lint) Name() string {
+func (l *LintNoop) Name() string {
 	return "noop"
 }
 
 // WillRun do nothing as there are no external deps
-func (l *Lint) WillRun() (err error) {
+func (l *LintNoop) WillRun() (err error) {
 	return nil
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *Lint) Cleanup(group *sync.WaitGroup) {
+func (l *LintNoop) Cleanup(group *sync.WaitGroup) {
 	group.Done()
 }
 
 // MaxConcurrency return max number of parallel files to fmt
-func (l *Lint) MaxConcurrency() int {
+func (l *LintNoop) MaxConcurrency() int {
 	return math.MaxInt32
 }
 
 // Run the linter
-func (l *Lint) Run(filepath string, rep chan linter.Report) {
+func (l *LintNoop) Run(filepath string, rep chan linter.Report) {
 	rep <- linter.Report{File: filepath, Err: nil, StdOut: nil, StdErr: nil}
 }
