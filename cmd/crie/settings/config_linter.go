@@ -42,6 +42,8 @@ func (cl *ConfigLinter) UnmarshalYAML(value *yaml.Node) error {
 		return decodeLinter[*shfmt.Lint](value, &cl.Linter)
 	case "noop":
 		return decodeLinter[*noop.Lint](value, &cl.Linter)
+	case "":
+		return fmt.Errorf("field missing 'type'")
 	default:
 		return fmt.Errorf("unknown linter type: %s", typeOnly.Type)
 	}

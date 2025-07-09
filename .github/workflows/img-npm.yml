@@ -6,14 +6,12 @@ on:
     tags:
       - v*
   pull_request:
-    paths: [ 'img/npm/*','.github/workflows/docker-build-template.yml','img-npm.yml' ]
-
+    paths: ['img/npm/*', '.github/workflows/docker-build-template.yml', 'img-npm.yml']
 jobs:
   img-npm-test:
     uses: ./.github/workflows/docker-build-template.yml
     with:
       img: 'npm'
-
   img-npm-push:
     uses: ./.github/workflows/docker-push-template.yml
     with:

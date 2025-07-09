@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+// Lint performs no operations, as a template implementation of cries' linter.Linter
 type Lint struct{}
 
 // Name returns the name of the linter
@@ -28,7 +29,7 @@ func (l *Lint) MaxConcurrency() int {
 	return math.MaxInt32
 }
 
-// Run shfmt -w
+// Run the linter
 func (l *Lint) Run(filepath string, rep chan linter.Report) {
 	rep <- linter.Report{File: filepath, Err: nil, StdOut: nil, StdErr: nil}
 }

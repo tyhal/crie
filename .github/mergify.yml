@@ -16,7 +16,6 @@ queue_rules:
       - or:
           - check-success=img-pip-test / docker-build
           - -files~=^img/pip/
-
 pull_request_rules:
   - name: automatic merge for Dependabot pull requests
     conditions:

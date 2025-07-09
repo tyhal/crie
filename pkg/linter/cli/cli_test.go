@@ -19,8 +19,8 @@ func TestLint_Cleanup(t *testing.T) {
 	l := &Lint{executor: &noopExecutor{}}
 	var wg sync.WaitGroup
 	wg.Add(1)
-	// Should not panic
 	l.Cleanup(&wg)
+	wg.Wait()
 }
 
 func TestLint_Run(t *testing.T) {
