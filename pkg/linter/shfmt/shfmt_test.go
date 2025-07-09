@@ -4,10 +4,65 @@ package shfmt
 
 import (
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 	"math"
+	"mvdan.cc/sh/v3/syntax"
 	"sync"
 	"testing"
 )
+
+func TestLint_UnmarshalYAML(t *testing.T) {
+	tests := []struct {
+		name       string
+		yaml       string
+		expectLang syntax.LangVariant
+		wantErr    bool
+	}{
+		{
+			name:       "lang bash",
+			yaml:       `language: bash`,
+			expectLang: syntax.LangBash,
+			wantErr:    false,
+		},
+		{
+			name:       "lang sh",
+			yaml:       `language: sh`,
+			expectLang: syntax.LangPOSIX,
+			wantErr:    false,
+		},
+		{
+			name:       "lang posix",
+			yaml:       `language: posix`,
+			expectLang: syntax.LangPOSIX,
+			wantErr:    false,
+		},
+		{
+			name:       "lang mksh",
+			yaml:       `language: mksh`,
+			expectLang: syntax.LangMirBSDKorn,
+			wantErr:    false,
+		},
+		{
+			name:    "err",
+			yaml:    `language: none`,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var sh Lint
+			err := yaml.Unmarshal([]byte(tt.yaml), &sh)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectLang, sh.Language)
+			}
+		})
+	}
+}
 
 func TestLint_Name(t *testing.T) {
 	l := &Lint{}
