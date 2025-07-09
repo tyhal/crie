@@ -6,14 +6,12 @@ on:
     tags:
       - v*
   pull_request:
-    paths: [ 'img/apk/*','.github/workflows/docker-build-template.yml','img-apk.yml' ]
-
+    paths: ['img/apk/*', '.github/workflows/docker-build-template.yml', 'img-apk.yml']
 jobs:
   img-apk-test:
     uses: ./.github/workflows/docker-build-template.yml
     with:
       img: 'apk'
-
   img-apk-push:
     uses: ./.github/workflows/docker-push-template.yml
     with:

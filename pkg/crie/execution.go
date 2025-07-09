@@ -144,7 +144,11 @@ func (s *RunConfiguration) Run(lintType string) (err error) {
 	}
 
 	var cleanupGroup sync.WaitGroup
-	defer func() { cleanupGroup.Wait() }()
+	defer func() {
+		// TODO bad linter implementations can cleanup forever with no timeout
+		cleanupGroup.Wait()
+	}()
+
 	// Run every linter.
 	for name, lang := range currentLangs {
 		err := s.runLinter(&cleanupGroup, name, lang)

@@ -9,10 +9,8 @@ on:
 jobs:
   crie-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -21,14 +19,11 @@ jobs:
           libbtrfs-dev \
           libdevmapper-dev \
           pkg-config
-
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-
       - name: Run tests
         run: go test -coverprofile=coverage.out ./...
-
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:

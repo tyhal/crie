@@ -6,14 +6,12 @@ on:
     tags:
       - v*
   pull_request:
-    paths: [ 'img/go/*','.github/workflows/docker-build-template.yml','img-go.yml' ]
-
+    paths: ['img/go/*', '.github/workflows/docker-build-template.yml', 'img-go.yml']
 jobs:
   img-go-test:
     uses: ./.github/workflows/docker-build-template.yml
     with:
       img: 'go'
-
   img-go-push:
     uses: ./.github/workflows/docker-push-template.yml
     with:
