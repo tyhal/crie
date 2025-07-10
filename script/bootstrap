@@ -5,6 +5,23 @@ has_command() {
 	command -v "$1" >/dev/null 2>&1
 }
 
-if has_command brew; then
-	brew install pkg-config gpgme gnupg
+install_brew() {
+  brew install \
+    pkg-config \
+    gpgme \
+    gnupg
+}
+
+install_apt() {
+  sudo apt-get update
+  sudo apt-get install -y \
+          libgpgme-dev \
+          libbtrfs-dev \
+          libdevmapper-dev \
+          pkg-config
+}
+
+if has_command brew; then install_brew
+elif has_command apt; then install_apt
+else echo "unknown package manager"
 fi

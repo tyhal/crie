@@ -24,6 +24,8 @@ import (
 //	>>-
 //`
 
+var version = "dev"
+
 var rootCmd = &cobra.Command{
 	Use:     "crie",
 	Short:   "crie is a formatter and linter for many languages.",
@@ -31,6 +33,7 @@ var rootCmd = &cobra.Command{
 	Long: `
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can prettify any codebase.`,
+	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if err := settings.Cli.LoadConfigFile(); err != nil {
 			log.Fatalf("Failed to load config: %v", err)
