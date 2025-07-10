@@ -1,0 +1,26 @@
+version: 2
+
+# TODO add goreleaser cross
+
+builds:
+  - main: ./cmd/crie
+    env:
+      - CGO_ENABLED=1
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+    goos:
+      - linux
+#      - darwin
+    goarch:
+      - amd64
+#      - arm64
+
+
+archives:
+  - formats: [ 'tar.gz' ]
+
+release:
+  github:
+    owner: tyhal
+    name: crie

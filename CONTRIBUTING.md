@@ -5,7 +5,10 @@
 ## Building and testing
 
 ```bash
-    sudo -E script/bootstrap
+    # install deps
+    script/bootstrap
+    
+    # run tests
     script/test
 ```
 
