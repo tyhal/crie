@@ -1,82 +1,85 @@
 package crie
 
 import (
-	"bytes"
-	log "github.com/sirupsen/logrus"
-	"os"
-	"os/exec"
-	"strconv"
+	"fmt"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"strings"
 )
 
-func (s *RunConfiguration) loadFilesGit(args []string) ([]string, error) {
-	var outB, errB bytes.Buffer
-
-	gitCmd, err := exec.LookPath("git")
-	if err != nil {
-		return nil, err
-	}
-
-	c := exec.Command(gitCmd, args...)
-	c.Env = os.Environ()
-	c.Stdout = &outB
-	c.Stderr = &errB
-	err = c.Run()
-	if err != nil {
-		log.WithFields(log.Fields{"type": "stdout"}).Debug(&outB)
-		log.WithFields(log.Fields{"type": "stderr"}).Debug(&errB)
-		return nil, err
-	}
-
-	// Skip files that do not exist at head
-	filelist := strings.Split(outB.String(), "\n")
-	var finallist []string
-	for _, file := range filelist {
-		_, err := os.Stat(file)
-		if err == nil {
-			finallist = append(finallist, file)
-		}
-	}
-
-	var finalFiles []string
-	for _, file := range filelist {
-		if s.Ignore.MatchString(file) {
-			finalFiles = append(finalFiles, file)
-		}
-	}
-
-	return finalFiles, nil
-}
-
 // IsRepo checks for a .git folder
 func (s *RunConfiguration) IsRepo() bool {
-	_, err := os.Stat(".git")
+	_, err := git.PlainOpen(".")
 	return err == nil
 }
 
 func (s *RunConfiguration) fileListRepoChanged() ([]string, error) {
-	var outB bytes.Buffer
-
-	gitCmd, err := exec.LookPath("git")
+	repo, err := git.PlainOpen(".")
 	if err != nil {
 		return nil, err
 	}
 
-	c := exec.Command(gitCmd,
-		[]string{"rev-list",
-			"--no-merges",
-			"--max-count",
-			strconv.Itoa(s.GitDiff),
-			"--count",
-			"HEAD"}...)
-	c.Stdout = &outB
-	if err := c.Run(); err != nil {
+	headRef, err := repo.Head()
+	if err != nil {
 		return nil, err
 	}
-	commitSlice := "HEAD~" + strings.Split(outB.String(), "\n")[0]
-	return s.loadFilesGit([]string{"diff", "--name-only", commitSlice, "."})
+	headCommit, err := repo.CommitObject(headRef.Hash())
+	if err != nil {
+		return nil, err
+	}
+	headTree, err := headCommit.Tree()
+	if err != nil {
+		return nil, err
+	}
+
+	splitRef := strings.Split(s.GitTarget, "/")
+	if len(splitRef) != 2 {
+		return nil, fmt.Errorf("invalid git target must be in form remote/branch")
+	}
+	targetRef, err := repo.Reference(plumbing.NewRemoteReferenceName(splitRef[0], splitRef[1]), true)
+	if err != nil {
+		return nil, err
+	}
+	targetCommit, err := repo.CommitObject(targetRef.Hash())
+	if err != nil {
+		return nil, err
+	}
+	targetTree, err := targetCommit.Tree()
+	if err != nil {
+		return nil, err
+	}
+
+	changes, err := object.DiffTree(targetTree, headTree)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, change := range changes {
+		if change.To.Name != "" {
+			files = append(files, change.To.Name)
+		}
+	}
+
+	return files, nil
 }
 
 func (s *RunConfiguration) fileListRepoAll() ([]string, error) {
-	return s.loadFilesGit([]string{"ls-files"})
+	repo, err := git.PlainOpen(".")
+	if err != nil {
+		return nil, err
+	}
+
+	idx, err := repo.Storer.Index()
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, entry := range idx.Entries {
+		files = append(files, entry.Name)
+	}
+
+	return files, nil
 }

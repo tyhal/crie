@@ -80,7 +80,10 @@ func setLogging() {
 func addLintCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
 	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.ShowPasses, "passes", "p", false, "show files that passed")
-	cmd.PersistentFlags().IntVarP(&settings.Cli.Crie.GitDiff, "git-diff", "g", 0, "check files that changed in the last X commits")
+
+	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
+	cmd.PersistentFlags().StringVarP(&settings.Cli.Crie.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files \"remote/branch\"")
+
 	cmd.PersistentFlags().StringVar(&settings.Cli.Crie.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
 
 	rootCmd.AddCommand(cmd)
@@ -94,7 +97,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
 	rootCmd.PersistentFlags().StringVar(&settings.Cli.ConfigPath, "settings", "crie.yml", "project settings file location")
 
-	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Trace, "trace", "t", settings.Cli.Trace, "turn on trace printing for reports")
+	rootCmd.PersistentFlags().BoolVar(&settings.Cli.Trace, "trace", settings.Cli.Trace, "turn on trace printing for reports")
 	err := rootCmd.PersistentFlags().MarkHidden("trace")
 	if err != nil {
 		log.Fatal(err)
