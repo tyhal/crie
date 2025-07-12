@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/refs/heads/main/doc/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/doc/schema.json
 # ^ use the above to have some form of autocomplete when editing
 # please also reference cmd/crie/settings/defaults.yml to see what is used by default and to see a larger config
 languages:
