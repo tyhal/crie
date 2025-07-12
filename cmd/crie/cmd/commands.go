@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/cmd/crie/settings"
@@ -78,7 +80,13 @@ var SchemaCmd = &cobra.Command{
 	Short: "Print jsonschema of the crie project config",
 	Long:  `Print jsonschema of the crie project config`,
 	Run: func(cmd *cobra.Command, args []string) {
-		settings.PrintProjectSchema()
+		schema := settings.ProjectSchema()
+		jsonBytes, err := json.MarshalIndent(schema, "", "  ")
+		if err != nil {
+			return
+		}
+		fmt.Println(string(jsonBytes))
+
 	},
 }
 

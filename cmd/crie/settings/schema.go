@@ -1,8 +1,6 @@
 package settings
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/invopop/jsonschema"
 	"github.com/tyhal/crie/pkg/linter/cli"
 	"github.com/tyhal/crie/pkg/linter/noop"
@@ -10,19 +8,20 @@ import (
 	"maps"
 )
 
-func PrintProjectSchema() {
-	schema := jsonschema.Reflect(&ConfigProject{})
-	cliSchema := jsonschema.Reflect(&cli.LintCli{})
-	shfmtSchema := jsonschema.Reflect(&shfmt.LintShfmt{})
-	noopSchema := jsonschema.Reflect(&noop.LintNoop{})
-	
-	maps.Copy(schema.Definitions, cliSchema.Definitions)
-	maps.Copy(schema.Definitions, shfmtSchema.Definitions)
-	maps.Copy(schema.Definitions, noopSchema.Definitions)
+// these references are used by ConfigLinter to give hints to configuring linter implementations when its only an interface
+var linterRefs = []string{"LintCli", "LintShfmt", "LintNoop"}
 
-	jsonBytes, err := json.MarshalIndent(schema, "", "  ")
-	if err != nil {
-		return
-	}
-	fmt.Println(string(jsonBytes))
+func ProjectSchema() *jsonschema.Schema {
+	schema := jsonschema.Reflect(&ConfigProject{})
+
+	// Add the definitions for each implementation of a crie Linter
+
+	// LintCli
+	maps.Copy(schema.Definitions, jsonschema.Reflect(&cli.LintCli{}).Definitions)
+	// LintShfmt
+	maps.Copy(schema.Definitions, jsonschema.Reflect(&shfmt.LintShfmt{}).Definitions)
+	// LintNoop
+	maps.Copy(schema.Definitions, jsonschema.Reflect(&noop.LintNoop{}).Definitions)
+
+	return schema
 }
