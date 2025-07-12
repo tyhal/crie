@@ -73,6 +73,15 @@ var InitCmd = &cobra.Command{
 	},
 }
 
+var SchemaCmd = &cobra.Command{
+	Use:   "schema",
+	Short: "Print jsonschema of the crie project config",
+	Long:  `Print jsonschema of the crie project config`,
+	Run: func(cmd *cobra.Command, args []string) {
+		settings.PrintProjectSchema()
+	},
+}
+
 func stage(stageName string) {
 	log.Info("❨ " + stageName + " ❩")
 	err := settings.Cli.Crie.Run(stageName)

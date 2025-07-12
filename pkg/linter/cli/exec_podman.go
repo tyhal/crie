@@ -298,7 +298,7 @@ func attachedExecStart(ctx context.Context, sessionID string, options *container
 	}
 
 	body := struct {
-		Detach bool `json:"Detach"`
+		Detach bool `json:"Detach" yaml:"Detach"`
 	}{
 		Detach: false,
 	}
