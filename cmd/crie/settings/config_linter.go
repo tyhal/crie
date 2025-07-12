@@ -20,7 +20,8 @@ func (c ConfigLinter) JSONSchema() *jsonschema.Schema {
 	var schema jsonschema.Schema
 
 	schema.OneOf = make([]*jsonschema.Schema, 3)
-	for i, ref := range []string{"LintCli", "LintShfmt", "LintNoop"} {
+	// linterRefs are manually added from schema.go
+	for i, ref := range linterRefs {
 		schema.OneOf[i] = &jsonschema.Schema{
 			Ref: fmt.Sprintf("#/$defs/%s", ref),
 		}

@@ -37,6 +37,8 @@ func TestLint_MaxConcurrency(t *testing.T) {
 }
 
 func TestLint_Run(t *testing.T) {
+
+	// Don't test shfmt but make sure switching lang works
 	tests := []struct {
 		name     string
 		lang     string
