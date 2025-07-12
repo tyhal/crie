@@ -8,6 +8,8 @@ require (
 	github.com/docker/docker v28.3.2+incompatible
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/renameio v1.0.1
+	github.com/invopop/jsonschema v0.13.0
+	github.com/invopop/yaml v0.3.1
 	github.com/olekukonko/tablewriter v1.0.8
 	github.com/opencontainers/runtime-spec v1.2.1
 	github.com/sirupsen/logrus v1.9.3
@@ -27,7 +29,9 @@ require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
+	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/containerd/cgroups/v3 v3.0.5 // indirect
@@ -165,6 +169,7 @@ require (
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/vbatts/tar-split v0.12.1 // indirect
 	github.com/vbauerster/mpb/v8 v8.9.3 // indirect
+	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.mongodb.org/mongo-driver v1.14.0 // indirect

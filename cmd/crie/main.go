@@ -108,6 +108,7 @@ func init() {
 	addLintCommand(cmd.LntCmd)
 
 	rootCmd.AddCommand(cmd.InitCmd)
+	rootCmd.AddCommand(cmd.SchemaCmd)
 	rootCmd.AddCommand(cmd.NonCmd)
 	rootCmd.AddCommand(cmd.LsCmd)
 

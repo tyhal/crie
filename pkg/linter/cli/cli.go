@@ -12,11 +12,12 @@ import (
 
 // LintCli defines a predefined command to run against a file
 type LintCli struct {
-	Bin      string `yaml:"bin"`
-	Start    Par    `yaml:"start,flow"`
-	End      Par    `yaml:"end,flow"`
-	Img      string `yaml:"img,omitempty"`
-	ChDir    bool   `yaml:"chdir,omitempty"`
+	Type     string `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
+	Bin      string `json:"bin" yaml:"bin" jsonschema_description:"the binary or command to use"`
+	Start    Par    `json:"start,flow,omitempty" yaml:"start,flow,omitempty" jsonschema_description:"parameters that will be put in front of the file path"`
+	End      Par    `json:"end,flow,omitempty" yaml:"end,flow,omitempty" jsonschema_description:"parameters that will be put behind the file path"`
+	Img      string `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
+	ChDir    bool   `json:"chdir,omitempty" yaml:"chdir,omitempty" jsonschema_description:"if true the tool will change directory to where the target file is located"`
 	executor executor
 }
 

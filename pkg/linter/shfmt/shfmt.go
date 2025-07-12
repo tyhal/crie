@@ -4,40 +4,18 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/tyhal/crie/pkg/crie/linter"
-	"gopkg.in/yaml.v3"
 	"math"
 	"mvdan.cc/sh/v3/syntax"
 	"strings"
 	"sync"
 )
 
+const ()
+
 // LintShfmt contains all the information needed to configure shfmt
 type LintShfmt struct {
-	Language syntax.LangVariant `yaml:"language"`
-}
-
-// UnmarshalYAML implements custom YAML unmarshalling
-func (l *LintShfmt) UnmarshalYAML(value *yaml.Node) error {
-	var temp struct {
-		Language string `yaml:"language"`
-	}
-
-	if err := value.Decode(&temp); err != nil {
-		return err
-	}
-
-	switch strings.ToLower(temp.Language) {
-	case "bash":
-		l.Language = syntax.LangBash
-	case "posix", "sh":
-		l.Language = syntax.LangPOSIX
-	case "mksh":
-		l.Language = syntax.LangMirBSDKorn
-	default:
-		return fmt.Errorf("unknown language variant: %s", temp.Language)
-	}
-
-	return nil
+	Type     string `json:"type" yaml:"type" jsonschema:"enum=shfmt" jsonschema_description:"a built in shell formatter thanks to mvdan"`
+	Language string `json:"language" yaml:"language" jsonschema:"enum=bash,enum=posix,enum=sh,enum=mksh"`
 }
 
 // Name returns the name of the linter
@@ -69,7 +47,22 @@ func (l *LintShfmt) Run(filepath string, rep chan linter.Report) {
 		syntax.NewPrinter(),
 	}
 
-	syntax.Variant(l.Language)(currFmt.parser)
+	var lang syntax.LangVariant
+
+	switch strings.ToLower(l.Language) {
+	case "bash":
+		lang = syntax.LangBash
+	case "posix", "sh":
+		lang = syntax.LangPOSIX
+	case "mksh":
+		lang = syntax.LangMirBSDKorn
+	default:
+		err := fmt.Errorf("unknown language variant: %s", l.Language)
+		rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
+		return
+	}
+
+	syntax.Variant(lang)(currFmt.parser)
 	syntax.Indent(0)(currFmt.printer)
 	syntax.BinaryNextLine(false)(currFmt.printer)
 	syntax.SwitchCaseIndent(false)(currFmt.printer)
@@ -78,6 +71,5 @@ func (l *LintShfmt) Run(filepath string, rep chan linter.Report) {
 	syntax.FunctionNextLine(false)(currFmt.printer)
 
 	err := currFmt.formatPath(filepath, true)
-
 	rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
 }

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/tyhal/crie/cmd/crie/settings/config-project",
+  "$ref": "#/$defs/ConfigProject",
+  "$defs": {
+    "ConfigLanguage": {
+      "properties": {
+        "match": {
+          "$ref": "#/$defs/ConfigRegex",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array"
+            }
+          ],
+          "description": "a regex to match files against to know they are the target of this language"
+        },
+        "fmt": {
+          "$ref": "#/$defs/ConfigLinter",
+          "description": "used for the given language when formatting"
+        },
+        "chk": {
+          "$ref": "#/$defs/ConfigLinter",
+          "description": "used for the given language when linting/checking"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ConfigLinter": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LintCli"
+        },
+        {
+          "$ref": "#/$defs/LintShfmt"
+        },
+        {
+          "$ref": "#/$defs/LintNoop"
+        }
+      ]
+    },
+    "ConfigProject": {
+      "properties": {
+        "languages": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ConfigLanguage"
+          },
+          "type": "object",
+          "description": "a map of languages that crie should be able to run"
+        },
+        "ignore": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "list of regexes matched against the file list to ignore them (exact paths also work)"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "languages",
+        "ignore"
+      ]
+    },
+    "ConfigRegex": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "LintCli": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "cli"
+          ],
+          "description": "the most common linter type, a cli tool"
+        },
+        "bin": {
+          "type": "string",
+          "description": "the binary or command to use"
+        },
+        "start": {
+          "$ref": "#/$defs/Par",
+          "description": "parameters that will be put in front of the file path"
+        },
+        "end": {
+          "$ref": "#/$defs/Par",
+          "description": "parameters that will be put behind the file path"
+        },
+        "img": {
+          "type": "string",
+          "description": "the container image to pull and use"
+        },
+        "chdir": {
+          "type": "boolean",
+          "description": "if true the tool will change directory to where the target file is located"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type",
+        "bin"
+      ]
+    },
+    "LintNoop": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "noop"
+          ],
+          "description": "a linter type to do nothing"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type"
+      ]
+    },
+    "LintShfmt": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "shfmt"
+          ],
+          "description": "a built in shell formatter thanks to mvdan"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "bash",
+            "posix",
+            "mksh"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type",
+        "language"
+      ]
+    },
+    "Par": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  }
+}

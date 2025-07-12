@@ -2,6 +2,7 @@ package settings
 
 import (
 	"fmt"
+	"github.com/invopop/jsonschema"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"github.com/tyhal/crie/pkg/linter/cli"
 	"github.com/tyhal/crie/pkg/linter/noop"
@@ -11,8 +12,21 @@ import (
 
 // ConfigLinter attaches a type discriminator field to make a Crie Linter implementation yaml parsable
 type ConfigLinter struct {
-	Type string `yaml:"type"`
 	linter.Linter
+}
+
+func (c ConfigLinter) JSONSchema() *jsonschema.Schema {
+
+	var schema jsonschema.Schema
+
+	schema.OneOf = make([]*jsonschema.Schema, 3)
+	for i, ref := range []string{"LintCli", "LintShfmt", "LintNoop"} {
+		schema.OneOf[i] = &jsonschema.Schema{
+			Ref: fmt.Sprintf("#/$defs/%s", ref),
+		}
+	}
+
+	return &schema
 }
 
 func decodeLinter[T linter.Linter](value *yaml.Node, dst *linter.Linter) error {
@@ -32,8 +46,6 @@ func (cl *ConfigLinter) UnmarshalYAML(value *yaml.Node) error {
 	if err := value.Decode(&typeOnly); err != nil {
 		return err
 	}
-
-	cl.Type = typeOnly.Type
 
 	switch typeOnly.Type {
 	case "cli":

@@ -14,6 +14,7 @@ func (cli *CliSettings) CreateNewProjectSettings() error {
 		return err
 	}
 
+	// TODO output: # yaml-language-server: $schema=./schema.json with the path matching the version of crie being used
 	err = os.WriteFile(cli.ConfigPath, yamlOut, 0644)
 
 	if err != nil {
