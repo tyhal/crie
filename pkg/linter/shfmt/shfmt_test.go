@@ -37,32 +37,70 @@ func TestLint_MaxConcurrency(t *testing.T) {
 }
 
 func TestLint_Run(t *testing.T) {
-
-	smolSh := `#!/bin/sh
+	tests := []struct {
+		name     string
+		lang     string
+		input    string
+		expected string
+		error    bool
+	}{
+		{
+			name: "basic sh",
+			lang: "sh",
+			input: `#!/bin/sh
 set -x
 echo           "hello world"
-`
-	expected := `#!/bin/sh
+`,
+			expected: `#!/bin/sh
 set -x
 echo "hello world"
-`
-
-	tmpDir := t.TempDir()
-	testFilePath := filepath.Join(tmpDir, "test.sh")
-	err := os.WriteFile(testFilePath, []byte(smolSh), 0644)
-	assert.NoError(t, err)
-
-	l := &LintShfmt{
-		Language: "sh",
+`,
+		},
+		{
+			name: "basic bash",
+			lang: "bash",
+			input: `#!/bin/bash
+set -x
+echo           "hello world"
+`,
+			expected: `#!/bin/bash
+set -x
+echo "hello world"
+`,
+		},
+		{
+			name:  "unknown language",
+			lang:  "unknown",
+			error: true,
+		},
 	}
-	rep := make(chan linter.Report, 1)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 
-	l.Run(testFilePath, rep)
+			tmpDir := t.TempDir()
+			testFilePath := filepath.Join(tmpDir, "test.sh")
+			err := os.WriteFile(testFilePath, []byte(tt.input), 0644)
+			assert.NoError(t, err)
 
-	report := <-rep
-	assert.Equal(t, testFilePath, report.File)
-	assert.NoError(t, report.Err)
+			l := &LintShfmt{
+				Language: tt.lang,
+			}
+			rep := make(chan linter.Report, 1)
 
-	actual, err := os.ReadFile(testFilePath)
-	require.Equal(t, expected, string(actual))
+			l.Run(testFilePath, rep)
+
+			report := <-rep
+
+			assert.Equal(t, testFilePath, report.File)
+			if tt.error {
+				assert.Error(t, report.Err)
+			} else {
+				assert.NoError(t, report.Err)
+			}
+
+			actual, err := os.ReadFile(testFilePath)
+			require.Equal(t, tt.expected, string(actual))
+
+		})
+	}
 }
