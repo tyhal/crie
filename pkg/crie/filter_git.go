@@ -9,13 +9,13 @@ import (
 )
 
 // IsRepo checks for a .git folder
-func (s *RunConfiguration) IsRepo() bool {
-	_, err := git.PlainOpen(".")
+func (s *RunConfiguration) IsRepo(path string) bool {
+	_, err := git.PlainOpen(path)
 	return err == nil
 }
 
-func (s *RunConfiguration) fileListRepoChanged() ([]string, error) {
-	repo, err := git.PlainOpen(".")
+func (s *RunConfiguration) fileListRepoChanged(path string) ([]string, error) {
+	repo, err := git.PlainOpen(path)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +65,8 @@ func (s *RunConfiguration) fileListRepoChanged() ([]string, error) {
 	return files, nil
 }
 
-func (s *RunConfiguration) fileListRepoAll() ([]string, error) {
-	repo, err := git.PlainOpen(".")
+func (s *RunConfiguration) fileListRepoAll(path string) ([]string, error) {
+	repo, err := git.PlainOpen(path)
 	if err != nil {
 		return nil, err
 	}

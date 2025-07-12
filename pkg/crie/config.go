@@ -26,13 +26,13 @@ func (s *RunConfiguration) loadFileList() {
 	var fileList []string
 	var err error
 
-	if s.IsRepo() {
+	if s.IsRepo(".") {
 		if s.GitDiff {
 			// Get files changed in last s.GitDiff commits
-			fileList, err = s.fileListRepoChanged()
+			fileList, err = s.fileListRepoChanged(".")
 		} else {
 			// Get all files in git repo
-			fileList, err = s.fileListRepoAll()
+			fileList, err = s.fileListRepoAll(".")
 		}
 	} else {
 
