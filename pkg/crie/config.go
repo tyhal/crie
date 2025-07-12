@@ -14,7 +14,8 @@ type RunConfiguration struct {
 	ShowPasses      bool
 	Languages       map[string]*linter.Language
 	Ignore          *regexp.Regexp
-	GitDiff         int
+	GitDiff         bool
+	GitTarget       string
 	SingleLang      string
 	fileList        []string
 }
@@ -26,8 +27,7 @@ func (s *RunConfiguration) loadFileList() {
 	var err error
 
 	if s.IsRepo() {
-
-		if s.GitDiff > 0 {
+		if s.GitDiff {
 			// Get files changed in last s.GitDiff commits
 			fileList, err = s.fileListRepoChanged()
 		} else {
@@ -37,8 +37,8 @@ func (s *RunConfiguration) loadFileList() {
 	} else {
 
 		// Check if the user asked for git diffs when not in a repo
-		if s.GitDiff > 0 {
-			log.Fatal("This is not a git repo you are in")
+		if s.GitDiff {
+			log.Fatal("You do not appear to be in a git repository")
 		}
 
 		// Generic grab all the files
