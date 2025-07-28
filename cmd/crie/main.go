@@ -29,7 +29,7 @@ var version = "dev"
 var rootCmd = &cobra.Command{
 	Use:     "crie",
 	Short:   "crie is a formatter and linter for many languages.",
-	Example: "check all python files in the last commit 'crie chk --git-diff 1 --lang python'",
+	Example: "check all files changes since the target branch 'crie chk --git-diff --git-target=origin/main --lang python'",
 	Long: `
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can prettify any codebase.`,
@@ -82,7 +82,7 @@ func addLintCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.ShowPasses, "passes", "p", false, "show files that passed")
 
 	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
-	cmd.PersistentFlags().StringVarP(&settings.Cli.Crie.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files \"remote/branch\"")
+	cmd.PersistentFlags().StringVarP(&settings.Cli.Crie.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files")
 
 	cmd.PersistentFlags().StringVar(&settings.Cli.Crie.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
 
