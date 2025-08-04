@@ -90,6 +90,8 @@ func addLintCommand(cmd *cobra.Command) {
 }
 
 func init() {
+	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(setLogging)
 
 	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.JSON, "json", "j", settings.Cli.JSON, "turn on json output")
 	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Verbose, "verbose", "v", settings.Cli.Verbose, "turn on verbose printing for reports")
@@ -111,8 +113,17 @@ func init() {
 	rootCmd.AddCommand(cmd.SchemaCmd)
 	rootCmd.AddCommand(cmd.NonCmd)
 	rootCmd.AddCommand(cmd.LsCmd)
+}
 
-	cobra.OnInitialize(setLogging)
+func initConfig() {
+	// TODO one config file, for two purposes means I need to parse it twice partially
+	// 1. crie cli settings
+	// 2. project settings
+	// 	1. crie language override settings
+	// 	2. ignore file settings
+	// 3. crie's internal settings
+
+	// crie cli settings do map to crie's internal settings too
 }
 
 func main() {
