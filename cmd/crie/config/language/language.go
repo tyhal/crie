@@ -1,4 +1,4 @@
-package settings
+package language
 
 import "github.com/tyhal/crie/pkg/crie/linter"
 
@@ -9,7 +9,7 @@ type ConfigLanguage struct {
 	Chk   ConfigLinter `json:"chk,omitempty" yaml:"chk,omitempty" jsonschema_description:"used for the given language when linting/checking"`
 }
 
-func (l ConfigLanguage) toLanguage() *linter.Language {
+func (l ConfigLanguage) ToCrieLanguage() *linter.Language {
 	return &linter.Language{
 		Regex: l.Regex.Regexp,
 		Fmt:   l.Fmt.Linter,

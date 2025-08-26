@@ -1,4 +1,4 @@
-package settings
+package language
 
 import (
 	"github.com/invopop/jsonschema"
@@ -11,8 +11,8 @@ import (
 // these references are used by ConfigLinter to give hints to configuring linter implementations when its only an interface
 var linterRefs = []string{"LintCli", "LintShfmt", "LintNoop"}
 
-func ProjectSchema() *jsonschema.Schema {
-	schema := jsonschema.Reflect(&ConfigProject{})
+func LanguagesSchema() *jsonschema.Schema {
+	schema := jsonschema.Reflect(&ConfigLanguages{})
 
 	// Add the definitions for each implementation of a crie Linter
 

@@ -1,7 +1,8 @@
-package settings
+package project
 
 import (
 	"github.com/stretchr/testify/assert"
+	language2 "github.com/tyhal/crie/cmd/crie/config/language"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"github.com/tyhal/crie/pkg/linter/noop"
 	"regexp"
@@ -13,14 +14,14 @@ func TestSaveConfiguration(t *testing.T) {
 	chkLinter := &noop.LintNoop{}
 	regex := regexp.MustCompile(`\.go$`)
 
-	cli := &CliSettings{
-		ConfigProject: ConfigProject{
+	cli := &ConfigProject{
+		ConfigProject: language2.ConfigLanguages{
 			Ignore: []string{"\\*.tmp"},
-			Languages: map[string]ConfigLanguage{
+			Languages: map[string]language2.ConfigLanguage{
 				"go": {
-					Regex: &ConfigRegex{Regexp: regex},
-					Fmt:   ConfigLinter{Linter: fmtLinter},
-					Chk:   ConfigLinter{Linter: chkLinter},
+					Regex: &language2.ConfigRegex{Regexp: regex},
+					Fmt:   language2.ConfigLinter{Linter: fmtLinter},
+					Chk:   language2.ConfigLinter{Linter: chkLinter},
 				},
 			},
 		},

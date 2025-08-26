@@ -1,44 +1,47 @@
-package settings
+package project
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/tyhal/crie/cmd/crie/config/language"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
+// TODO move to project Config test
+
 func TestCreateNewProjectSettings(t *testing.T) {
 	tempDir := t.TempDir()
-	cli := &CliSettings{ConfigPath: filepath.Join(tempDir, "config.yml")}
+	cli := &ConfigProject{Path: filepath.Join(tempDir, "Config.yml")}
 
-	err := cli.CreateNewProjectSettings()
+	err := cli.NewProjectConfigFile()
 
 	assert.NoError(t, err)
-	assert.FileExists(t, cli.ConfigPath)
+	assert.FileExists(t, cli.Path)
 }
 
 func TestLoadConfigFile_NoFile(t *testing.T) {
-	cli := &CliSettings{ConfigPath: "nonexistent.yml"}
+	cli := &ConfigProject{Path: "nonexistent.yml"}
 
-	err := cli.LoadConfigFile()
+	err := cli.LoadFile()
 
 	assert.NoError(t, err) // Should handle missing file gracefully
 }
 
 func TestLoadConfigFile_MergesConfig(t *testing.T) {
 	tempDir := t.TempDir()
-	configPath := filepath.Join(tempDir, "config.yml")
+	configPath := filepath.Join(tempDir, "Config.yml")
 
-	// Write test config
+	// Write test Config
 	testConfig := `ignore: ["*.test"]`
 	os.WriteFile(configPath, []byte(testConfig), 0644)
 
-	cli := &CliSettings{
-		ConfigPath:    configPath,
-		ConfigProject: ConfigProject{Ignore: []string{"*.orig"}},
+	cli := &ConfigProject{
+		Path:          configPath,
+		ConfigProject: language.ConfigLanguages{Ignore: []string{"*.orig"}},
 	}
 
-	err := cli.LoadConfigFile()
+	err := cli.LoadFile()
 
 	assert.NoError(t, err)
 	assert.Contains(t, cli.ConfigProject.Ignore, "*.test")

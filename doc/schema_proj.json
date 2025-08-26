@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/tyhal/crie/cmd/crie/config/project/config-project",
+  "$ref": "#/$defs/ConfigProject",
+  "$defs": {
+    "ConfigProject": {
+      "properties": {
+        "Path": {
+          "type": "string"
+        },
+        "Quiet": {
+          "type": "boolean"
+        },
+        "Verbose": {
+          "type": "boolean"
+        },
+        "Trace": {
+          "type": "boolean"
+        },
+        "JSON": {
+          "type": "boolean"
+        },
+        "ignore": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "list of regexes matched against the file list to ignore them (exact paths also work)"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Path",
+        "Quiet",
+        "Verbose",
+        "Trace",
+        "JSON",
+        "ignore"
+      ]
+    }
+  }
+}

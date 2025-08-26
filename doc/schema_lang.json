@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tyhal/crie/cmd/crie/settings/config-project",
-  "$ref": "#/$defs/ConfigProject",
+  "$id": "https://github.com/tyhal/crie/cmd/crie/config/language/config-languages",
+  "$ref": "#/$defs/ConfigLanguages",
   "$defs": {
     "ConfigLanguage": {
       "properties": {
@@ -29,6 +29,26 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "ConfigLanguages": {
+      "properties": {
+        "Path": {
+          "type": "string"
+        },
+        "languages": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ConfigLanguage"
+          },
+          "type": "object",
+          "description": "a map of languages that crie should be able to run"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "Path",
+        "languages"
+      ]
+    },
     "ConfigLinter": {
       "oneOf": [
         {
@@ -40,30 +60,6 @@
         {
           "$ref": "#/$defs/LintNoop"
         }
-      ]
-    },
-    "ConfigProject": {
-      "properties": {
-        "languages": {
-          "additionalProperties": {
-            "$ref": "#/$defs/ConfigLanguage"
-          },
-          "type": "object",
-          "description": "a map of languages that crie should be able to run"
-        },
-        "ignore": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "description": "list of regexes matched against the file list to ignore them (exact paths also work)"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "languages",
-        "ignore"
       ]
     },
     "ConfigRegex": {
@@ -138,6 +134,7 @@
           "enum": [
             "bash",
             "posix",
+            "sh",
             "mksh"
           ]
         }

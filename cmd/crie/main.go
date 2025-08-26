@@ -4,7 +4,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/cmd/crie/cmd"
-	"github.com/tyhal/crie/cmd/crie/settings"
+	"github.com/tyhal/crie/cmd/crie/config/language"
+	"github.com/tyhal/crie/cmd/crie/config/project"
+	"github.com/tyhal/crie/cmd/crie/config/run_instance"
 	"os"
 	"sort"
 )
@@ -35,10 +37,16 @@ var rootCmd = &cobra.Command{
 	to create a handy tool that can prettify any codebase.`,
 	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if err := settings.Cli.LoadConfigFile(); err != nil {
-			log.Fatalf("Failed to load config: %v", err)
+
+		if err := project.Config.LoadFile(); err != nil {
+			log.Fatalf("Failed to load project config: %v", err)
 		}
-		settings.Cli.SaveConfiguration()
+
+		if err := language.Config.LoadFile(); err != nil {
+			log.Fatalf("Failed to load language config: %v", err)
+		}
+
+		run_instance.SaveConfiguration(&project.Config, &language.Config)
 	},
 }
 
@@ -55,18 +63,18 @@ func msgLast(fields []string) {
 }
 
 func setLogging() {
-	if settings.Cli.Trace {
+	if project.Config.Trace {
 		log.SetLevel(log.TraceLevel)
 	}
-	if settings.Cli.Verbose {
+	if project.Config.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
-	if settings.Cli.Quiet {
+	if project.Config.Quiet {
 		log.SetLevel(log.FatalLevel)
 	}
-	if settings.Cli.JSON {
+	if project.Config.JSON {
 		log.SetFormatter(&log.JSONFormatter{})
-		settings.Cli.Crie.StrictLogging = true
+		run_instance.Crie.StrictLogging = true
 	} else {
 		log.SetFormatter(&log.TextFormatter{
 			SortingFunc:      msgLast,
@@ -78,13 +86,13 @@ func setLogging() {
 }
 
 func addLintCommand(cmd *cobra.Command) {
-	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
-	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.ShowPasses, "passes", "p", false, "show files that passed")
+	cmd.PersistentFlags().BoolVarP(&run_instance.Crie.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
+	cmd.PersistentFlags().BoolVarP(&run_instance.Crie.ShowPasses, "passes", "p", false, "show files that passed")
 
-	cmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
-	cmd.PersistentFlags().StringVarP(&settings.Cli.Crie.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files")
+	cmd.PersistentFlags().BoolVarP(&run_instance.Crie.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
+	cmd.PersistentFlags().StringVarP(&run_instance.Crie.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files")
 
-	cmd.PersistentFlags().StringVar(&settings.Cli.Crie.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
+	cmd.PersistentFlags().StringVar(&run_instance.Crie.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
 
 	rootCmd.AddCommand(cmd)
 }
@@ -93,13 +101,14 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(setLogging)
 
-	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.JSON, "json", "j", settings.Cli.JSON, "turn on json output")
-	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Verbose, "verbose", "v", settings.Cli.Verbose, "turn on verbose printing for reports")
-	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Quiet, "quiet", "q", settings.Cli.Quiet, "turn off extra prints from failures (suppresses verbose)")
-	rootCmd.PersistentFlags().BoolVarP(&settings.Cli.Crie.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
-	rootCmd.PersistentFlags().StringVar(&settings.Cli.ConfigPath, "settings", "crie.yml", "project settings file location")
+	rootCmd.PersistentFlags().BoolVarP(&project.Config.JSON, "json", "j", project.Config.JSON, "turn on json output")
+	rootCmd.PersistentFlags().BoolVarP(&project.Config.Verbose, "verbose", "v", project.Config.Verbose, "turn on verbose printing for reports")
+	rootCmd.PersistentFlags().BoolVarP(&project.Config.Quiet, "quiet", "q", project.Config.Quiet, "turn off extra prints from failures (suppresses verbose)")
+	rootCmd.PersistentFlags().BoolVarP(&run_instance.Crie.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
+	rootCmd.PersistentFlags().StringVar(&project.Config.Path, "project-config", "crie.yml", "project config location")
+	rootCmd.PersistentFlags().StringVar(&language.Config.Path, "language-config", "crie_lang.yml", "language override config location")
 
-	rootCmd.PersistentFlags().BoolVar(&settings.Cli.Trace, "trace", settings.Cli.Trace, "turn on trace printing for reports")
+	rootCmd.PersistentFlags().BoolVar(&project.Config.Trace, "trace", project.Config.Trace, "turn on trace printing for reports")
 	err := rootCmd.PersistentFlags().MarkHidden("trace")
 	if err != nil {
 		log.Fatal(err)
@@ -110,20 +119,23 @@ func init() {
 	addLintCommand(cmd.LntCmd)
 
 	rootCmd.AddCommand(cmd.InitCmd)
-	rootCmd.AddCommand(cmd.SchemaCmd)
+	rootCmd.AddCommand(cmd.ConfCmd)
 	rootCmd.AddCommand(cmd.NonCmd)
 	rootCmd.AddCommand(cmd.LsCmd)
+
+	rootCmd.AddCommand(cmd.SchemaCmd)
+	cmd.SchemaCmd.AddCommand(cmd.SchemaLangCmd)
+	cmd.SchemaCmd.AddCommand(cmd.SchemaProjectCmd)
 }
 
 func initConfig() {
-	// TODO one config file, for two purposes means I need to parse it twice partially
-	// 1. crie cli settings
-	// 2. project settings
-	// 	1. crie language override settings
-	// 	2. ignore file settings
-	// 3. crie's internal settings
+	// 1. crie cli project
+	// 2. project project
+	// 	1. crie language override project
+	// 	2. ignore file project
+	// 3. crie's internal project
 
-	// crie cli settings do map to crie's internal settings too
+	// crie cli project do map to crie's internal project too
 }
 
 func main() {

@@ -1,4 +1,4 @@
-package settings
+package language
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -7,8 +7,8 @@ import (
 )
 
 func TestDefaultProjectConfigYaml(t *testing.T) {
-	var config ConfigProject
-	err := yaml.Unmarshal(defaultProjectConfigYaml, &config)
+	var config ConfigLanguages
+	err := yaml.Unmarshal(defaultLanguageConfigYaml, &config)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, config.Languages)
