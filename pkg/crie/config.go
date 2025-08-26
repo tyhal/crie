@@ -12,15 +12,17 @@ type RunConfiguration struct {
 	ContinueOnError bool
 	StrictLogging   bool
 	ShowPasses      bool
-	Languages       map[string]*linter.Language
 	Ignore          *regexp.Regexp
+	Languages       Languages
 	GitDiff         bool
 	GitTarget       string
 	SingleLang      string
 	fileList        []string
 }
 
-// loadFileList returns all valid files that have also been filtered by the settings
+type Languages map[string]*linter.Language
+
+// loadFileList returns all valid files that have also been filtered by the project
 func (s *RunConfiguration) loadFileList() {
 
 	var fileList []string

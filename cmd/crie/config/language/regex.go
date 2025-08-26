@@ -1,4 +1,4 @@
-package settings
+package language
 
 import (
 	"gopkg.in/yaml.v3"

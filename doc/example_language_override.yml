@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/doc/schema.json
 # ^ use the above to have some form of autocomplete when editing
-# please also reference cmd/crie/settings/defaults.yml to see what is used by default and to see a larger config
+# please also reference cmd/crie/project/language_defaults.yml to see what is used by default and to see a larger config
 languages:
   # TODO add an option to throw out all defaults...
   python: # this will override the entire pre-existing python setup
@@ -22,9 +22,3 @@ languages:
       type: noop
   # ...
   # keep adding your own
-
-# ignore follows the same rules as the "match" regex
-ignore: [
-  "a_file_to_ignore.txt",
-  "\.txt"
-]

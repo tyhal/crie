@@ -40,7 +40,7 @@ The suggested way to start running crie is to run `chk` at the top of your proje
 ## Docs
 
 * [Autocompletion](doc/completion.md) - Setup tab completion for your shell
-* [Example Project Settings](doc/example.yml) - If you want to override any defaults, add more languages, or ignore certain files you can follow this example for your own optional crie.yml
+* [Example Project Settings](doc/example_language_override.yml) - If you want to override any defaults, add more languages, or ignore certain files you can follow this example for your own optional crie.yml
 
 ***
 
