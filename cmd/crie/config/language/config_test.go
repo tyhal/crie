@@ -8,28 +8,28 @@ import (
 func TestConfigProject_merge(t *testing.T) {
 	tests := []struct {
 		name     string
-		base     ConfigLanguages
-		src      ConfigLanguages
-		expected ConfigLanguages
+		base     Languages
+		src      Languages
+		expected Languages
 	}{
 		{
 			name:     "add new language",
-			base:     ConfigLanguages{Languages: map[string]ConfigLanguage{}},
-			src:      ConfigLanguages{Languages: map[string]ConfigLanguage{"go": {}}},
-			expected: ConfigLanguages{Languages: map[string]ConfigLanguage{"go": {}}},
+			base:     Languages{Languages: map[string]Language{}},
+			src:      Languages{Languages: map[string]Language{"go": {}}},
+			expected: Languages{Languages: map[string]Language{"go": {}}},
 		},
 		{
 			name:     "keep existing language",
-			base:     ConfigLanguages{Languages: map[string]ConfigLanguage{"go": {Fmt: ConfigLinter{}}}},
-			src:      ConfigLanguages{Languages: map[string]ConfigLanguage{"go": {}}},
-			expected: ConfigLanguages{Languages: map[string]ConfigLanguage{"go": {Fmt: ConfigLinter{}}}},
+			base:     Languages{Languages: map[string]Language{"go": {Fmt: Linter{}}}},
+			src:      Languages{Languages: map[string]Language{"go": {}}},
+			expected: Languages{Languages: map[string]Language{"go": {Fmt: Linter{}}}},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.base.Languages == nil {
-				tt.base.Languages = make(map[string]ConfigLanguage)
+				tt.base.Languages = make(map[string]Language)
 			}
 			merge(&tt.src, &tt.base)
 

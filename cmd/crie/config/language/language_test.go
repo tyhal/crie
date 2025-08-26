@@ -8,11 +8,11 @@ import (
 )
 
 func TestConfigLanguage_toLanguage(t *testing.T) {
-	regex := &ConfigRegex{Regexp: regexp.MustCompile(`\.go$`)}
-	fmtLinter := ConfigLinter{Linter: &noop.LintNoop{}}
-	chkLinter := ConfigLinter{Linter: &noop.LintNoop{}}
+	regex := &Regex{Regexp: regexp.MustCompile(`\.go$`)}
+	fmtLinter := Linter{Linter: &noop.LintNoop{}}
+	chkLinter := Linter{Linter: &noop.LintNoop{}}
 
-	config := ConfigLanguage{
+	config := Language{
 		Regex: regex,
 		Fmt:   fmtLinter,
 		Chk:   chkLinter,

@@ -3,13 +3,14 @@ package language
 import (
 	_ "embed" // Used to embed our default configurations
 	"fmt"
+
 	"gopkg.in/yaml.v3"
 )
 
 //go:embed defaults.yml
 var defaultLanguageConfigYaml []byte
 
-var defaultLanguageConfig ConfigLanguages
+var defaultLanguageConfig Languages
 
 func init() {
 	err := yaml.Unmarshal(defaultLanguageConfigYaml, &defaultLanguageConfig)

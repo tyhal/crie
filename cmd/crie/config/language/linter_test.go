@@ -42,7 +42,7 @@ language: bash`,
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var cl ConfigLinter
+			var cl Linter
 			err := yaml.Unmarshal([]byte(tt.yaml), &cl)
 
 			if tt.wantErr {

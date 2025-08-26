@@ -12,7 +12,7 @@ import (
 
 func TestCreateNewProjectSettings(t *testing.T) {
 	tempDir := t.TempDir()
-	cli := &ConfigProject{Path: filepath.Join(tempDir, "Config.yml")}
+	cli := &Config{Path: filepath.Join(tempDir, "Config.yml")}
 
 	err := cli.NewProjectConfigFile()
 
@@ -21,7 +21,7 @@ func TestCreateNewProjectSettings(t *testing.T) {
 }
 
 func TestLoadConfigFile_NoFile(t *testing.T) {
-	cli := &ConfigProject{Path: "nonexistent.yml"}
+	cli := &Config{Path: "nonexistent.yml"}
 
 	err := cli.LoadFile()
 
@@ -36,9 +36,9 @@ func TestLoadConfigFile_MergesConfig(t *testing.T) {
 	testConfig := `ignore: ["*.test"]`
 	os.WriteFile(configPath, []byte(testConfig), 0644)
 
-	cli := &ConfigProject{
+	cli := &Config{
 		Path:          configPath,
-		ConfigProject: language.ConfigLanguages{Ignore: []string{"*.orig"}},
+		ConfigProject: language.Languages{Ignore: []string{"*.orig"}},
 	}
 
 	err := cli.LoadFile()

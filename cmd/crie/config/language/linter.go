@@ -10,12 +10,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ConfigLinter attaches a type discriminator field to make a Crie Linter implementation yaml parsable
-type ConfigLinter struct {
+// Linter attaches a type discriminator field to make a Crie Linter implementation yaml parsable
+type Linter struct {
 	linter.Linter
 }
 
-func (c ConfigLinter) JSONSchema() *jsonschema.Schema {
+func (c Linter) JSONSchema() *jsonschema.Schema {
 
 	var schema jsonschema.Schema
 
@@ -40,7 +40,7 @@ func decodeLinter[T linter.Linter](value *yaml.Node, dst *linter.Linter) error {
 }
 
 // UnmarshalYAML implements custom YAML unmarshalling
-func (cl *ConfigLinter) UnmarshalYAML(value *yaml.Node) error {
+func (cl *Linter) UnmarshalYAML(value *yaml.Node) error {
 	var typeOnly struct {
 		Type string `yaml:"type"`
 	}
