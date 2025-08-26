@@ -7,7 +7,7 @@ import (
 )
 
 func TestDefaultProjectConfigYaml(t *testing.T) {
-	var config ConfigLanguages
+	var config Languages
 	err := yaml.Unmarshal(defaultLanguageConfigYaml, &config)
 
 	assert.NoError(t, err)

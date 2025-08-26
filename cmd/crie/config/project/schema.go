@@ -6,5 +6,5 @@ import (
 
 // ProjectSchema
 func ProjectSchema() *jsonschema.Schema {
-	return jsonschema.Reflect(&ConfigProject{})
+	return jsonschema.Reflect(&Config{})
 }

@@ -2,20 +2,17 @@ package language
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
-// Config is the entire current Crie Config languages
-var Config ConfigLanguages
-
-// ConfigLanguages is the schema for a projects' project file
-type ConfigLanguages struct {
-	Path      string
-	Languages map[string]ConfigLanguage `json:"languages" yaml:"languages" jsonschema_description:"a map of languages that crie should be able to run"`
+// Languages is the schema for a projects' project file
+type Languages struct {
+	Languages map[string]Language `json:"languages" yaml:"languages" jsonschema_description:"a map of languages that crie should be able to run"`
 }
 
-func merge(src *ConfigLanguages, dst *ConfigLanguages) {
+func merge(src *Languages, dst *Languages) {
 
 	for langName, lang := range src.Languages {
 		if _, ok := dst.Languages[langName]; !ok {
@@ -25,40 +22,42 @@ func merge(src *ConfigLanguages, dst *ConfigLanguages) {
 }
 
 // NewProjectConfigFile Creates the project file locally
-func (c *ConfigLanguages) NewLanguageConfigFile() error {
-	yamlOut, err := yaml.Marshal(ConfigLanguages{})
+func NewLanguageConfigFile(path string) error {
+	yamlOut, err := yaml.Marshal(Languages{})
 
 	if err != nil {
 		return err
 	}
 
 	// TODO output: # yaml-language-server: $schema=./schema.json with the path matching the version of crie being used
-	err = os.WriteFile(c.Path, yamlOut, 0644)
+	err = os.WriteFile(path, yamlOut, 0644)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("New languages file created: %s\nPlease view this and configure for your repo\n", c.Path)
+	fmt.Printf("New languages file created: %s\nPlease view this and configure for your repo\n", path)
 	return nil
 }
 
-// LoadFile load overrides for our projects' project
-func (c *ConfigLanguages) LoadFile() error {
-	if _, err := os.Stat(c.Path); os.IsNotExist(err) {
-		return nil
+// LoadFile will attempt to parse a Language schema compatible file and use it to overwrite the builtin defaults
+func LoadFile(path string) (*Languages, error) {
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return &defaultLanguageConfig, nil
 	}
 
-	configData, err := os.ReadFile(c.Path)
+	configData, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("failed to read config file %s: %w", c.Path, err)
+		return nil, fmt.Errorf("failed to read config file %s: %w", path, err)
 	}
 
+	var c Languages
 	if err := yaml.Unmarshal(configData, c); err != nil {
-		return fmt.Errorf("failed to parse config file %s: %w", c.Path, err)
+		return nil, fmt.Errorf("failed to parse config file %s: %w", path, err)
 	}
 
-	merge(&defaultLanguageConfig, c)
+	merge(&defaultLanguageConfig, &c)
 
-	return nil
+	return &c, nil
 }

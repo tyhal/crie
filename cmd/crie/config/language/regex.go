@@ -1,18 +1,19 @@
 package language
 
 import (
-	"gopkg.in/yaml.v3"
 	"regexp"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
-// ConfigRegex wraps regexp.Regexp with custom YAML unmarshaling
-type ConfigRegex struct {
+// Regex wraps regexp.Regexp with custom YAML unmarshaling
+type Regex struct {
 	*regexp.Regexp
 }
 
 // UnmarshalYAML implements custom YAML unmarshalling
-func (cr *ConfigRegex) UnmarshalYAML(value *yaml.Node) error {
+func (cr *Regex) UnmarshalYAML(value *yaml.Node) error {
 	var patterns []string
 	if err := value.Decode(&patterns); err != nil {
 		return err

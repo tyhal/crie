@@ -2,16 +2,14 @@ package project
 
 import (
 	"fmt"
+	"os"
+
 	language2 "github.com/tyhal/crie/cmd/crie/config/language"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
-// Config is the entire current Crie Config project
-var Config ConfigProject
-
-// ConfigProject are all the things for crie cli
-type ConfigProject struct {
+// Config are all the things for crie cli
+type Config struct {
 	Path    string // 2. user Config overrides defaults
 	Quiet   bool
 	Verbose bool
@@ -21,8 +19,8 @@ type ConfigProject struct {
 }
 
 // NewProjectConfigFile Creates the project file locally
-func (cli *ConfigProject) NewProjectConfigFile() error {
-	yamlOut, err := yaml.Marshal(language2.ConfigLanguages{})
+func (cli *Config) NewProjectConfigFile() error {
+	yamlOut, err := yaml.Marshal(language2.Languages{})
 
 	if err != nil {
 		return err
@@ -40,7 +38,7 @@ func (cli *ConfigProject) NewProjectConfigFile() error {
 }
 
 // LoadFile load overrides for our projects' project
-func (cli *ConfigProject) LoadFile() error {
+func (cli *Config) LoadFile() error {
 
 	// TODO, do this through viper or something
 

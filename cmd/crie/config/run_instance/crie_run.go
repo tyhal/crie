@@ -13,8 +13,8 @@ import (
 // TODO stop using globals for dumping config somewhere
 var Crie crie.RunConfiguration // 3. final config
 
-// SaveConfiguration pushes the ConfigLanguages to the crie.RunConfiguration
-func SaveConfiguration(proj *project.ConfigProject, langs *language.ConfigLanguages) {
+// SaveConfiguration pushes the Languages to the crie.RunConfiguration
+func SaveConfiguration(proj *project.Config, langs *language.Languages) {
 	Crie.Ignore = regexp.MustCompile(strings.Join(proj.Ignore, "|"))
 
 	Crie.Languages = make(map[string]*linter.Language, len(langs.Languages))
