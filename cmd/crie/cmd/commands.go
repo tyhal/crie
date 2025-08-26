@@ -3,12 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/cmd/crie/config/language"
 	"github.com/tyhal/crie/cmd/crie/config/project"
 	"github.com/tyhal/crie/cmd/crie/config/run_instance"
-	"gopkg.in/yaml.v3"
 )
 
 // FmtCmd Format code command
@@ -64,33 +64,33 @@ Find the file extensions that dont have an associated regex match within crie`,
 	},
 }
 
-// InitCmd command will create a project project file for Crie
-var InitCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Create an optional project project file",
-	Long:  `Create an optional project project file`,
+//// InitCmd command will create a project project file for Crie
+//var InitCmd = &cobra.Command{
+//	Use:   "init",
+//	Short: "Create an optional project project file",
+//	Long:  `Create an optional project project file`,
+//
+//	Run: func(cmd *cobra.Command, args []string) {
+//		err := project.Config.NewProjectConfigFile()
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//	},
+//}
 
-	Run: func(cmd *cobra.Command, args []string) {
-		err := project.Config.NewProjectConfigFile()
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
-}
-
-var ConfCmd = &cobra.Command{
-	Use:     "conf",
-	Aliases: []string{"config", "cnf"},
-	Short:   "Print all the currently configured project",
-	Long:    "Takes all the information from env, flags, and the project project file to show the complete configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		displaySettings, err := yaml.Marshal(project.Config)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(string(displaySettings))
-	},
-}
+//var ConfCmd = &cobra.Command{
+//	Use:     "conf",
+//	Aliases: []string{"config", "cnf"},
+//	Short:   "Print all the currently configured project",
+//	Long:    "Takes all the information from env, flags, and the project project file to show the complete configuration",
+//	Run: func(cmd *cobra.Command, args []string) {
+//		displaySettings, err := yaml.Marshal(project.Config)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//		fmt.Println(string(displaySettings))
+//	},
+//}
 
 var SchemaCmd = &cobra.Command{
 	Use:     "schema",

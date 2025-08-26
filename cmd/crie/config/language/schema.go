@@ -8,11 +8,11 @@ import (
 	"maps"
 )
 
-// these references are used by ConfigLinter to give hints to configuring linter implementations when its only an interface
+// these references are used by Linter to give hints to configuring linter implementations when its only an interface
 var linterRefs = []string{"LintCli", "LintShfmt", "LintNoop"}
 
 func LanguagesSchema() *jsonschema.Schema {
-	schema := jsonschema.Reflect(&ConfigLanguages{})
+	schema := jsonschema.Reflect(&Languages{})
 
 	// Add the definitions for each implementation of a crie Linter
 

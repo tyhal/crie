@@ -36,7 +36,7 @@ func TestConfigRegex_UnmarshalYAML(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var cr ConfigRegex
+			var cr Regex
 			err := yaml.Unmarshal([]byte(tt.yaml), &cr)
 
 			if tt.wantErr {

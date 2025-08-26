@@ -1,14 +1,15 @@
 package main
 
 import (
+	"os"
+	"sort"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tyhal/crie/cmd/crie/cmd"
 	"github.com/tyhal/crie/cmd/crie/config/language"
 	"github.com/tyhal/crie/cmd/crie/config/project"
 	"github.com/tyhal/crie/cmd/crie/config/run_instance"
-	"os"
-	"sort"
 )
 
 //`
@@ -38,17 +39,24 @@ var rootCmd = &cobra.Command{
 	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 
-		if err := project.Config.LoadFile(); err != nil {
+		if err := projectConfig.LoadFile(); err != nil {
 			log.Fatalf("Failed to load project config: %v", err)
 		}
 
-		if err := language.Config.LoadFile(); err != nil {
+		langConfig, err := language.LoadFile(languageConfigPath)
+		if err != nil {
 			log.Fatalf("Failed to load language config: %v", err)
 		}
 
-		run_instance.SaveConfiguration(&project.Config, &language.Config)
+		run_instance.SaveConfiguration(&projectConfig, langConfig)
 	},
 }
+
+var languageConfigPath string
+
+// Stuttering AF
+var projectConfigPath string
+var projectConfig project.Config
 
 func msgLast(fields []string) {
 	sort.Slice(fields, func(i, j int) bool {
@@ -63,16 +71,16 @@ func msgLast(fields []string) {
 }
 
 func setLogging() {
-	if project.Config.Trace {
+	if projectConfig.Trace {
 		log.SetLevel(log.TraceLevel)
 	}
-	if project.Config.Verbose {
+	if projectConfig.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
-	if project.Config.Quiet {
+	if projectConfig.Quiet {
 		log.SetLevel(log.FatalLevel)
 	}
-	if project.Config.JSON {
+	if projectConfig.JSON {
 		log.SetFormatter(&log.JSONFormatter{})
 		run_instance.Crie.StrictLogging = true
 	} else {
@@ -101,14 +109,14 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(setLogging)
 
-	rootCmd.PersistentFlags().BoolVarP(&project.Config.JSON, "json", "j", project.Config.JSON, "turn on json output")
-	rootCmd.PersistentFlags().BoolVarP(&project.Config.Verbose, "verbose", "v", project.Config.Verbose, "turn on verbose printing for reports")
-	rootCmd.PersistentFlags().BoolVarP(&project.Config.Quiet, "quiet", "q", project.Config.Quiet, "turn off extra prints from failures (suppresses verbose)")
+	rootCmd.PersistentFlags().BoolVarP(&projectConfig.JSON, "json", "j", projectConfig.JSON, "turn on json output")
+	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Verbose, "verbose", "v", projectConfig.Verbose, "turn on verbose printing for reports")
+	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Quiet, "quiet", "q", projectConfig.Quiet, "turn off extra prints from failures (suppresses verbose)")
 	rootCmd.PersistentFlags().BoolVarP(&run_instance.Crie.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
-	rootCmd.PersistentFlags().StringVar(&project.Config.Path, "project-config", "crie.yml", "project config location")
-	rootCmd.PersistentFlags().StringVar(&language.Config.Path, "language-config", "crie_lang.yml", "language override config location")
+	rootCmd.PersistentFlags().StringVar(&projectConfigPath, "project-config", "crie.yml", "project config location")
+	rootCmd.PersistentFlags().StringVar(&languageConfigPath, "language-config", "crie_lang.yml", "language override config location")
 
-	rootCmd.PersistentFlags().BoolVar(&project.Config.Trace, "trace", project.Config.Trace, "turn on trace printing for reports")
+	rootCmd.PersistentFlags().BoolVar(&projectConfig.Trace, "trace", projectConfig.Trace, "turn on trace printing for reports")
 	err := rootCmd.PersistentFlags().MarkHidden("trace")
 	if err != nil {
 		log.Fatal(err)
@@ -118,8 +126,8 @@ func init() {
 	addLintCommand(cmd.FmtCmd)
 	addLintCommand(cmd.LntCmd)
 
-	rootCmd.AddCommand(cmd.InitCmd)
-	rootCmd.AddCommand(cmd.ConfCmd)
+	//rootCmd.AddCommand(cmd.InitCmd)
+	//rootCmd.AddCommand(cmd.ConfCmd)
 	rootCmd.AddCommand(cmd.NonCmd)
 	rootCmd.AddCommand(cmd.LsCmd)
 
