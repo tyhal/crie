@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/containerd/platforms v1.0.0-rc.1
-	github.com/containers/podman/v5 v5.6.0
+	github.com/containers/podman/v5 v5.6.1
 	github.com/docker/docker v28.4.0+incompatible
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/renameio v1.0.1
@@ -38,10 +38,10 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
-	github.com/containers/buildah v1.41.3 // indirect
-	github.com/containers/common v0.64.1 // indirect
+	github.com/containers/buildah v1.41.4 // indirect
+	github.com/containers/common v0.64.2 // indirect
 	github.com/containers/gvisor-tap-vsock v0.8.6 // indirect
-	github.com/containers/image/v5 v5.36.1 // indirect
+	github.com/containers/image/v5 v5.36.2 // indirect
 	github.com/containers/libhvee v0.10.0 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.2.1 // indirect
@@ -142,7 +142,7 @@ require (
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.9.0 // indirect
-	github.com/ulikunitz/xz v0.5.14 // indirect
+	github.com/ulikunitz/xz v0.5.15 // indirect
 	github.com/vbatts/tar-split v0.12.1 // indirect
 	github.com/vbauerster/mpb/v8 v8.10.2 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
