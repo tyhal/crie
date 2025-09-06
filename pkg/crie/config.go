@@ -20,6 +20,7 @@ type RunConfiguration struct {
 	fileList        []string
 }
 
+// Languages store the name to a singular language configuration within crie
 type Languages map[string]*linter.Language
 
 // loadFileList returns all valid files that have also been filtered by the project

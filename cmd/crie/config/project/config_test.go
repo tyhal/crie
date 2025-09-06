@@ -1,30 +1,20 @@
 package project
 
-//func TestSaveConfiguration(t *testing.T) {
-//	fmtLinter := &noop.LintNoop{}
-//	chkLinter := &noop.LintNoop{}
-//	regex := regexp.MustCompile(`\.go$`)
-//
-//	cli := &Config{
-//		Config: language2.ConfigLanguages{
-//			Ignore: []string{"\\*.tmp"},
-//			Languages: map[string]language2.ConfigLanguage{
-//				"go": {
-//					Regex: &language2.ConfigRegex{Regexp: regex},
-//					Fmt:   language2.ConfigLinter{Linter: fmtLinter},
-//					Chk:   language2.ConfigLinter{Linter: chkLinter},
-//				},
-//			},
-//		},
-//	}
-//
-//	cli.SaveConfiguration()
-//
-//	expected := &linter.Language{
-//		Regex: regex,
-//		Fmt:   fmtLinter,
-//		Chk:   chkLinter,
-//	}
-//
-//	assert.Equal(t, expected, cli.Crie.Languages["go"])
-//}
+import (
+	"github.com/stretchr/testify/assert"
+	"path/filepath"
+	"testing"
+)
+
+// TODO move to project Config test
+
+func TestNewProjectConfigFile(t *testing.T) {
+	tempDir := t.TempDir()
+	cli := &Config{}
+	conf := filepath.Join(tempDir, "Config.yml")
+
+	err := cli.NewProjectConfigFile(conf)
+
+	assert.NoError(t, err)
+	assert.FileExists(t, conf)
+}

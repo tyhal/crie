@@ -1,43 +1,89 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tyhal/crie/cmd/crie/config/project/config-project",
-  "$ref": "#/$defs/ConfigProject",
   "$defs": {
-    "ConfigProject": {
+    "Config": {
+      "additionalProperties": false,
       "properties": {
-        "Path": {
-          "type": "string"
-        },
-        "Quiet": {
-          "type": "boolean"
-        },
-        "Verbose": {
-          "type": "boolean"
-        },
-        "Trace": {
-          "type": "boolean"
-        },
-        "JSON": {
-          "type": "boolean"
-        },
         "ignore": {
+          "description": "list of regexes matched against the file list to ignore them (exact paths also work)",
           "items": {
             "type": "string"
           },
-          "type": "array",
-          "description": "list of regexes matched against the file list to ignore them (exact paths also work)"
+          "type": "array"
+        },
+        "lint": {
+          "$ref": "#/$defs/LintConfig",
+          "description": "options for commands that lint"
+        },
+        "log": {
+          "$ref": "#/$defs/LoggingConfig",
+          "description": "logging options"
         }
       },
-      "additionalProperties": false,
-      "type": "object",
       "required": [
-        "Path",
-        "Quiet",
-        "Verbose",
-        "Trace",
-        "JSON",
+        "log",
+        "lint",
         "ignore"
-      ]
+      ],
+      "type": "object"
+    },
+    "LintConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "continue": {
+          "type": "boolean"
+        },
+        "gitDiff": {
+          "type": "boolean"
+        },
+        "gitTarget": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "passes": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "continue",
+        "passes",
+        "gitTarget",
+        "gitDiff",
+        "lang"
+      ],
+      "type": "object"
+    },
+    "LoggingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "json": {
+          "description": "change format to json structured logging",
+          "type": "boolean"
+        },
+        "quiet": {
+          "description": "disable all output except for errors",
+          "type": "boolean"
+        },
+        "trace": {
+          "description": "(hidden opt) enable all logging (very very verbose)",
+          "type": "boolean"
+        },
+        "verbose": {
+          "description": "enable debug logging",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "quiet",
+        "verbose",
+        "trace",
+        "json"
+      ],
+      "type": "object"
     }
-  }
+  },
+  "$id": "https://github.com/tyhal/crie/cmd/crie/config/project/config",
+  "$ref": "#/$defs/Config",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
 }

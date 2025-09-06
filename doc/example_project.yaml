@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/doc/schema_proj.json
+# ^ the above to have some form of autocomplete when editing
+log:  # priority quiet,verbose,trace
+  quiet: false
+  verbose: true
+  trace: false
+  json: false
+lint:
+  continue: true
+  passes: false
+  gitTarget: origin/main
+  gitDiff: false
+  lang: ""
+ignore: []

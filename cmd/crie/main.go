@@ -1,15 +1,16 @@
 package main
 
 import (
+	"github.com/tyhal/crie/cmd/crie/config/language"
 	"os"
 	"sort"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/cmd/crie/cmd"
-	"github.com/tyhal/crie/cmd/crie/config/language"
+	"github.com/spf13/viper"
+	crie_cmds "github.com/tyhal/crie/cmd/crie/cmd"
 	"github.com/tyhal/crie/cmd/crie/config/project"
-	"github.com/tyhal/crie/cmd/crie/config/run_instance"
 )
 
 //`
@@ -17,7 +18,7 @@ import (
 //
 //	|> "this unformated code makes me want to crie"
 //
-//	|> Its more important about picking a standard than it is to pick any certain one.
+//	|> It's more important about picking a standard than it is to pick any certain one.
 //
 //	>>-
 //		Does a good farmer neglect a crop they have planted?
@@ -37,26 +38,39 @@ var rootCmd = &cobra.Command{
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can prettify any codebase.`,
 	Version: version,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-		if err := projectConfig.LoadFile(); err != nil {
-			log.Fatalf("Failed to load project config: %v", err)
-		}
+		viper.AddConfigPath(projectConfigPath)
+		viper.SetConfigType("yml")
+		viper.SetEnvPrefix("CRIE")
+		viper.AutomaticEnv()
+		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-		langConfig, err := language.LoadFile(languageConfigPath)
+		_ = viper.ReadInConfig()
+		err := viper.Unmarshal(&projectConfig)
 		if err != nil {
-			log.Fatalf("Failed to load language config: %v", err)
+			return err
 		}
 
-		run_instance.SaveConfiguration(&projectConfig, langConfig)
+		setLogging()
+
+		return nil
 	},
 }
 
 var languageConfigPath string
 
-// Stuttering AF
 var projectConfigPath string
 var projectConfig project.Config
+
+func setCrieConfig(cmd *cobra.Command, args []string) error {
+	langConfig, err := language.LoadFile(languageConfigPath)
+	if err != nil {
+		return err
+	}
+	crie_cmds.SetCrie(crie_cmds.SaveConfiguration(&projectConfig, langConfig))
+	return nil
+}
 
 func msgLast(fields []string) {
 	sort.Slice(fields, func(i, j int) bool {
@@ -71,18 +85,18 @@ func msgLast(fields []string) {
 }
 
 func setLogging() {
-	if projectConfig.Trace {
+	if projectConfig.Log.Trace {
 		log.SetLevel(log.TraceLevel)
 	}
-	if projectConfig.Verbose {
+	if projectConfig.Log.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
-	if projectConfig.Quiet {
+	if projectConfig.Log.Quiet {
 		log.SetLevel(log.FatalLevel)
 	}
-	if projectConfig.JSON {
+	if projectConfig.Log.JSON {
 		log.SetFormatter(&log.JSONFormatter{})
-		run_instance.Crie.StrictLogging = true
+		projectConfig.Lint.StrictLogging = true
 	} else {
 		log.SetFormatter(&log.TextFormatter{
 			SortingFunc:      msgLast,
@@ -94,56 +108,69 @@ func setLogging() {
 }
 
 func addLintCommand(cmd *cobra.Command) {
-	cmd.PersistentFlags().BoolVarP(&run_instance.Crie.ContinueOnError, "continue", "e", false, "show all errors rather than stopping at the first")
-	cmd.PersistentFlags().BoolVarP(&run_instance.Crie.ShowPasses, "passes", "p", false, "show files that passed")
+	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.Continue, "continue", "e", false, "show all errors rather than stopping at the first")
+	errFatal(viper.BindPFlag("Lint.Continue", cmd.PersistentFlags().Lookup("continue")))
+	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.Passes, "passes", "p", false, "show files that passed")
+	errFatal(viper.BindPFlag("Lint.Casses", cmd.PersistentFlags().Lookup("passes")))
 
-	cmd.PersistentFlags().BoolVarP(&run_instance.Crie.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
-	cmd.PersistentFlags().StringVarP(&run_instance.Crie.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files")
+	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
+	errFatal(viper.BindPFlag("Lint.GitDiff", cmd.PersistentFlags().Lookup("git-diff")))
+	cmd.PersistentFlags().StringVarP(&projectConfig.Lint.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files")
+	errFatal(viper.BindPFlag("Lint.GitTarget", cmd.PersistentFlags().Lookup("git-target")))
 
-	cmd.PersistentFlags().StringVar(&run_instance.Crie.SingleLang, "lang", "", "run with only one language (see `crie ls` for available options)")
+	cmd.PersistentFlags().StringVar(&projectConfig.Lint.Lang, "lang", "", "run with only one language (see `crie ls` for available options)")
+	errFatal(viper.BindPFlag("Lint.Lang", cmd.PersistentFlags().Lookup("lang")))
+
+	cmd.PreRunE = setCrieConfig
 
 	rootCmd.AddCommand(cmd)
 }
 
-func init() {
-	cobra.OnInitialize(initConfig)
-	cobra.OnInitialize(setLogging)
+// addCrieCommand is the same as addLintCommand but only to ensure the languages are loaded
+func addCrieCommand(cmd *cobra.Command) {
+	cmd.PreRunE = setCrieConfig
+	rootCmd.AddCommand(cmd)
+}
 
-	rootCmd.PersistentFlags().BoolVarP(&projectConfig.JSON, "json", "j", projectConfig.JSON, "turn on json output")
-	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Verbose, "verbose", "v", projectConfig.Verbose, "turn on verbose printing for reports")
-	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Quiet, "quiet", "q", projectConfig.Quiet, "turn off extra prints from failures (suppresses verbose)")
-	rootCmd.PersistentFlags().BoolVarP(&run_instance.Crie.StrictLogging, "strict-logging", "s", false, "ensure all messages use the structured logger (set true if using json output)")
-	rootCmd.PersistentFlags().StringVar(&projectConfigPath, "project-config", "crie.yml", "project config location")
-	rootCmd.PersistentFlags().StringVar(&languageConfigPath, "language-config", "crie_lang.yml", "language override config location")
-
-	rootCmd.PersistentFlags().BoolVar(&projectConfig.Trace, "trace", projectConfig.Trace, "turn on trace printing for reports")
-	err := rootCmd.PersistentFlags().MarkHidden("trace")
+func errFatal(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	addLintCommand(cmd.ChkCmd)
-	addLintCommand(cmd.FmtCmd)
-	addLintCommand(cmd.LntCmd)
-
-	//rootCmd.AddCommand(cmd.InitCmd)
-	//rootCmd.AddCommand(cmd.ConfCmd)
-	rootCmd.AddCommand(cmd.NonCmd)
-	rootCmd.AddCommand(cmd.LsCmd)
-
-	rootCmd.AddCommand(cmd.SchemaCmd)
-	cmd.SchemaCmd.AddCommand(cmd.SchemaLangCmd)
-	cmd.SchemaCmd.AddCommand(cmd.SchemaProjectCmd)
 }
 
-func initConfig() {
-	// 1. crie cli project
-	// 2. project project
-	// 	1. crie language override project
-	// 	2. ignore file project
-	// 3. crie's internal project
+func init() {
 
-	// crie cli project do map to crie's internal project too
+	rootCmd.PersistentFlags().StringVar(&projectConfigPath, "project-config", "crie.yml", "optional project config location")
+	errFatal(viper.BindPFlag("projectConfigPath", rootCmd.PersistentFlags().Lookup("project-config")))
+	rootCmd.PersistentFlags().StringVar(&languageConfigPath, "language-config", "crie_lang.yml", "optional language override config location")
+	errFatal(viper.BindPFlag("languageConfigPath", rootCmd.PersistentFlags().Lookup("language-config")))
+
+	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.JSON, "json", "j", projectConfig.Log.JSON, "turn on json output")
+	errFatal(viper.BindPFlag("Log.JSON", rootCmd.PersistentFlags().Lookup("json")))
+
+	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Verbose, "verbose", "v", projectConfig.Log.Verbose, "turn on verbose printing for reports")
+	errFatal(viper.BindPFlag("Log.Verbose", rootCmd.PersistentFlags().Lookup("verbose")))
+
+	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Quiet, "quiet", "q", projectConfig.Log.Quiet, "turn off extra prints from failures (suppresses verbose)")
+	errFatal(viper.BindPFlag("Log.Trace", rootCmd.PersistentFlags().Lookup("quiet")))
+
+	rootCmd.PersistentFlags().BoolVar(&projectConfig.Log.Trace, "trace", projectConfig.Log.Trace, "turn on trace printing for reports")
+	errFatal(viper.BindPFlag("Log.Trace", rootCmd.PersistentFlags().Lookup("trace")))
+	errFatal(rootCmd.PersistentFlags().MarkHidden("trace"))
+
+	addLintCommand(crie_cmds.ChkCmd)
+	addLintCommand(crie_cmds.FmtCmd)
+	addLintCommand(crie_cmds.LntCmd)
+
+	addLintCommand(crie_cmds.ConfCmd)
+	addLintCommand(crie_cmds.InitCmd)
+
+	addCrieCommand(crie_cmds.NonCmd)
+	addCrieCommand(crie_cmds.LsCmd)
+
+	rootCmd.AddCommand(crie_cmds.SchemaCmd)
+	crie_cmds.SchemaCmd.AddCommand(crie_cmds.SchemaLangCmd)
+	crie_cmds.SchemaCmd.AddCommand(crie_cmds.SchemaProjectCmd)
 }
 
 func main() {

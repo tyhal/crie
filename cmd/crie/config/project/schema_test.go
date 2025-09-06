@@ -5,5 +5,5 @@ import (
 )
 
 func TestProjectSchema(t *testing.T) {
-	ProjectSchema()
+	Schema()
 }

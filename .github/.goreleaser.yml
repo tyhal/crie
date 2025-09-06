@@ -1,7 +1,5 @@
 version: 2
-
 # TODO add goreleaser cross
-
 builds:
   - main: ./cmd/crie
     env:
@@ -11,15 +9,13 @@ builds:
       - -X main.version={{.Version}}
     goos:
       - linux
-#      - darwin
+      #      - darwin
     goarch:
       - amd64
 #      - arm64
 
-
 archives:
-  - formats: [ 'tar.gz' ]
-
+  - formats: ['tar.gz']
 release:
   github:
     owner: tyhal
