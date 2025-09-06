@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-// TODO move to project Config test
-
 func TestNewProjectConfigFile(t *testing.T) {
 	tempDir := t.TempDir()
 	cli := &Config{}
