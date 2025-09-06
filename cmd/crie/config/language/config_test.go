@@ -2,6 +2,7 @@ package language
 
 import (
 	"github.com/stretchr/testify/assert"
+	"path/filepath"
 	"testing"
 )
 
@@ -36,4 +37,32 @@ func TestConfigProject_merge(t *testing.T) {
 			assert.Equal(t, tt.expected, tt.base)
 		})
 	}
+}
+
+func TestCreateNewLanguagesFile(t *testing.T) {
+	tempDir := t.TempDir()
+	file := filepath.Join(tempDir, "languages.yml")
+
+	err := NewLanguageConfigFile(file)
+
+	assert.NoError(t, err)
+	assert.FileExists(t, file)
+}
+
+func TestLoadConfigFile(t *testing.T) {
+	tempDir := t.TempDir()
+	file := filepath.Join(tempDir, "languages.yml")
+	err := NewLanguageConfigFile(file)
+	assert.NoError(t, err)
+
+	config, err := LoadFile(file)
+
+	assert.NoError(t, err) // Should handle a missing file gracefully
+	assert.NotEmpty(t, config.Languages["python"])
+}
+
+func TestLoadConfigFile_NoFile(t *testing.T) {
+	_, err := LoadFile("nonexistent.yml")
+
+	assert.NoError(t, err) // Should handle a missing file gracefully
 }
