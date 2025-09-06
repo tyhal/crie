@@ -9,6 +9,7 @@ type Language struct {
 	Chk   Linter `json:"chk,omitempty" yaml:"chk,omitempty" jsonschema_description:"used for the given language when linting/checking"`
 }
 
+// ToCrieLanguage will convert the yaml friendly version to an internal representation used by crie
 func (l Language) ToCrieLanguage() *linter.Language {
 	return &linter.Language{
 		Regex: l.Regex.Regexp,

@@ -4,7 +4,7 @@ import (
 	"github.com/invopop/jsonschema"
 )
 
-// ProjectSchema
-func ProjectSchema() *jsonschema.Schema {
+// Schema generates a jsonscema for a project Config
+func Schema() *jsonschema.Schema {
 	return jsonschema.Reflect(&Config{})
 }

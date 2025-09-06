@@ -15,7 +15,8 @@ type Linter struct {
 	linter.Linter
 }
 
-func (c Linter) JSONSchema() *jsonschema.Schema {
+// JSONSchema is used to parse a valid jsonschema just for a Linter
+func (l Linter) JSONSchema() *jsonschema.Schema {
 
 	var schema jsonschema.Schema
 
@@ -40,7 +41,7 @@ func decodeLinter[T linter.Linter](value *yaml.Node, dst *linter.Linter) error {
 }
 
 // UnmarshalYAML implements custom YAML unmarshalling
-func (cl *Linter) UnmarshalYAML(value *yaml.Node) error {
+func (l *Linter) UnmarshalYAML(value *yaml.Node) error {
 	var typeOnly struct {
 		Type string `yaml:"type"`
 	}
@@ -50,11 +51,11 @@ func (cl *Linter) UnmarshalYAML(value *yaml.Node) error {
 
 	switch typeOnly.Type {
 	case "cli":
-		return decodeLinter[*cli.LintCli](value, &cl.Linter)
+		return decodeLinter[*cli.LintCli](value, &l.Linter)
 	case "shfmt":
-		return decodeLinter[*shfmt.LintShfmt](value, &cl.Linter)
+		return decodeLinter[*shfmt.LintShfmt](value, &l.Linter)
 	case "noop":
-		return decodeLinter[*noop.LintNoop](value, &cl.Linter)
+		return decodeLinter[*noop.LintNoop](value, &l.Linter)
 	case "":
 		return fmt.Errorf("field missing 'type'")
 	default:

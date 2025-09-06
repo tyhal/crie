@@ -1,6 +1,7 @@
 package language
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 
@@ -21,7 +22,7 @@ func merge(src *Languages, dst *Languages) {
 	}
 }
 
-// NewProjectConfigFile Creates the project file locally
+// NewLanguageConfigFile Creates the project file locally
 func NewLanguageConfigFile(path string) error {
 	yamlOut, err := yaml.Marshal(Languages{})
 
@@ -29,14 +30,17 @@ func NewLanguageConfigFile(path string) error {
 		return err
 	}
 
-	// TODO output: # yaml-language-server: $schema=./schema.json with the path matching the version of crie being used
-	err = os.WriteFile(path, yamlOut, 0644)
+	var buf bytes.Buffer
+	// TODO add versioning
+	buf.WriteString("# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/doc/schema_lang.json\n")
+	buf.Write(yamlOut)
+	yamlContent := buf.Bytes()
+	err = os.WriteFile(path, yamlContent, 0644)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("New languages file created: %s\nPlease view this and configure for your repo\n", path)
 	return nil
 }
 
@@ -53,7 +57,7 @@ func LoadFile(path string) (*Languages, error) {
 	}
 
 	var c Languages
-	if err := yaml.Unmarshal(configData, c); err != nil {
+	if err := yaml.Unmarshal(configData, &c); err != nil {
 		return nil, fmt.Errorf("failed to parse config file %s: %w", path, err)
 	}
 
