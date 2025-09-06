@@ -12,12 +12,7 @@ jobs:
           fetch-depth: 0
       - name: Install system dependencies
         run: ./script/bootstrap
-<<<<<<< HEAD
-
       - uses: actions/setup-go@v6
-=======
-      - uses: actions/setup-go@v5
->>>>>>> 757d6f6 (Add viper config loading and env parsing)
         with:
           go-version-file: 'go.mod'
       - uses: goreleaser/goreleaser-action@v6
