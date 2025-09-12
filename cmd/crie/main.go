@@ -111,7 +111,7 @@ func addLintCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.Continue, "continue", "e", false, "show all errors rather than stopping at the first")
 	errFatal(viper.BindPFlag("Lint.Continue", cmd.PersistentFlags().Lookup("continue")))
 	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.Passes, "passes", "p", false, "show files that passed")
-	errFatal(viper.BindPFlag("Lint.Casses", cmd.PersistentFlags().Lookup("passes")))
+	errFatal(viper.BindPFlag("Lint.Passes", cmd.PersistentFlags().Lookup("passes")))
 
 	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
 	errFatal(viper.BindPFlag("Lint.GitDiff", cmd.PersistentFlags().Lookup("git-diff")))
@@ -141,9 +141,9 @@ func errFatal(err error) {
 func init() {
 
 	rootCmd.PersistentFlags().StringVar(&projectConfigPath, "project-config", "crie.yml", "optional project config location")
-	errFatal(viper.BindPFlag("projectConfigPath", rootCmd.PersistentFlags().Lookup("project-config")))
+	errFatal(viper.BindPFlag("Project.Config", rootCmd.PersistentFlags().Lookup("project-config")))
 	rootCmd.PersistentFlags().StringVar(&languageConfigPath, "language-config", "crie_lang.yml", "optional language override config location")
-	errFatal(viper.BindPFlag("languageConfigPath", rootCmd.PersistentFlags().Lookup("language-config")))
+	errFatal(viper.BindPFlag("Language.Config", rootCmd.PersistentFlags().Lookup("language-config")))
 
 	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.JSON, "json", "j", projectConfig.Log.JSON, "turn on json output")
 	errFatal(viper.BindPFlag("Log.JSON", rootCmd.PersistentFlags().Lookup("json")))
@@ -152,7 +152,7 @@ func init() {
 	errFatal(viper.BindPFlag("Log.Verbose", rootCmd.PersistentFlags().Lookup("verbose")))
 
 	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Quiet, "quiet", "q", projectConfig.Log.Quiet, "turn off extra prints from failures (suppresses verbose)")
-	errFatal(viper.BindPFlag("Log.Trace", rootCmd.PersistentFlags().Lookup("quiet")))
+	errFatal(viper.BindPFlag("Log.Quiet", rootCmd.PersistentFlags().Lookup("quiet")))
 
 	rootCmd.PersistentFlags().BoolVar(&projectConfig.Log.Trace, "trace", projectConfig.Log.Trace, "turn on trace printing for reports")
 	errFatal(viper.BindPFlag("Log.Trace", rootCmd.PersistentFlags().Lookup("trace")))
