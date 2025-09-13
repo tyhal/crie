@@ -21,13 +21,21 @@
 
 ## Install
 
-Installing Crie
+for `crie` itself:
 
-```bash
+```shell
+    brew install --cask tyhal/tap/crie
+```
+
+from source:
+
+```shell
     go install github.com/tyhal/crie/cmd/crie@latest
 ```
 
-Install either [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/)
+#### Deps
+
+- [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/)
 
 ## Usage
 
