@@ -9,10 +9,21 @@ builds:
       - -X main.version={{.Version}}
     goos:
       - linux
-      #      - darwin
     goarch:
       - amd64
-#      - arm64
+
+homebrew_casks:
+  - repository:
+      owner: tyhal
+      name: homebrew-crie
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    completions:
+      bash: res/completion/crie.bash
+      zsh: res/completion/crie.zsh
+      fish: res/completion/crie.fish
+    homepage: "https://github.com/tyhal/crie"
+    description: "Universal meta-linter using containerized execution "
+    license: "MIT"
 
 archives:
   - formats: ['tar.gz']
