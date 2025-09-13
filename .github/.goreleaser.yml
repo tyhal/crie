@@ -11,6 +11,10 @@ builds:
       - linux
     goarch:
       - amd64
+    hooks:
+      post:
+        - ./script/completions {{ .Path }}
+
 
 homebrew_casks:
   - repository:
@@ -29,6 +33,8 @@ archives:
   - formats: ['tar.gz']
     files:
       - res/completion/*
+      - README.md
+      - LICENSE
 
 release:
   github:
