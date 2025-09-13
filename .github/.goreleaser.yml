@@ -13,7 +13,7 @@ builds:
       - amd64
     hooks:
       post:
-        - ./script/completions {{ .Path }}
+        - sh ./script/completions {{ .Path }}
 
 
 homebrew_casks:
