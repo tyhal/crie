@@ -23,7 +23,7 @@ homebrew_casks:
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     completions:
       bash: res/completion/crie.bash
-      zsh: res/completion/crie.zsh
+      zsh: res/completion/_crie
       fish: res/completion/crie.fish
     homepage: "https://github.com/tyhal/crie"
     description: "Universal meta-linter using containerized execution "

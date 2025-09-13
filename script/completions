@@ -10,6 +10,6 @@ fi
 cd "$(dirname "$0")/.."
 echo "$CRIE_BIN"
 
-$CRIE_BIN completion zsh > res/completion/crie.zsh
+$CRIE_BIN completion zsh > res/completion/_crie
 $CRIE_BIN completion bash > res/completion/crie.bash
 $CRIE_BIN completion fish > res/completion/crie.fish
