@@ -27,6 +27,9 @@ homebrew_casks:
 
 archives:
   - formats: ['tar.gz']
+    files:
+      - res/completion/*
+
 release:
   github:
     owner: tyhal
