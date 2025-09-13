@@ -117,30 +117,30 @@ func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, 
 	}
 
 	toLog.WithFields(log.Fields{"files": len(filteredFilepaths)}).Infof("running %s", name)
-	err = linter.LintFileList(selectedLinter, filteredFilepaths)
+	reporter := linter.Runner{
+		ShowPass:      s.Options.Passes,
+		StrictLogging: s.Options.StrictLogging,
+	}
+	err = reporter.LintFileList(selectedLinter, filteredFilepaths)
 	return
 }
 
 // Run is the generic way to run everything based on the packages configuration
 func (s *RunConfiguration) Run(lintType string) (err error) {
-
 	s.lintType = lintType
 
 	// Get an initial list of files to use
 	s.loadFileList()
 
-	linter.ShowPass = s.ShowPasses
-	linter.StrictLogging = s.StrictLogging
-
 	errCount := 0
 
 	currentLangs := s.Languages
-	if s.SingleLang != "" {
-		lang, err := s.GetLanguage(s.SingleLang)
+	if s.Options.Lang != "" {
+		lang, err := s.GetLanguage(s.Options.Lang)
 		if err != nil {
 			return err
 		}
-		currentLangs = map[string]*linter.Language{s.SingleLang: lang}
+		currentLangs = map[string]*linter.Language{s.Options.Lang: lang}
 	}
 
 	var cleanupGroup sync.WaitGroup
@@ -155,7 +155,7 @@ func (s *RunConfiguration) Run(lintType string) (err error) {
 		if err != nil {
 			log.Error(err)
 			errCount++
-			if !s.ContinueOnError {
+			if !s.Options.Continue {
 				break
 			}
 		}

@@ -2,9 +2,28 @@ package crie
 
 import (
 	"errors"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 )
+
+func (s *RunConfiguration) fileListIgnore(allFiles []string) []string {
+	if s.Ignore == nil {
+		return allFiles
+	}
+
+	var filteredFiles []string
+
+	for _, file := range allFiles {
+		if !s.Ignore.MatchString(file) {
+			filteredFiles = append(filteredFiles, file)
+		} else {
+			log.Debugf("- ignoring file %s", file)
+		}
+	}
+
+	return filteredFiles
+}
 
 func (s *RunConfiguration) fileListAll() ([]string, error) {
 
@@ -36,14 +55,5 @@ func (s *RunConfiguration) fileListAll() ([]string, error) {
 		return nil, errors.New("this is an empty folder")
 	}
 
-	var filteredFiles []string
-	if s.Ignore != nil {
-		for _, file := range allFiles {
-			if s.Ignore.MatchString(file) {
-				filteredFiles = append(filteredFiles, file)
-			}
-		}
-	}
-
-	return filteredFiles, nil
+	return s.fileListIgnore(allFiles), nil
 }

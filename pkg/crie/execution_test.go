@@ -80,14 +80,17 @@ func TestRunConfiguration_Run_WithSingleLang(t *testing.T) {
 				Regex: regexp.MustCompile(`\.test$`),
 			},
 		},
-		SingleLang: "go",
-		fileList:   []string{"test.go"},
+		Options: Options{
+			Lang: "go",
+		},
+		fileList: []string{"test.go"},
 	}
 
 	err := config.Run("chk")
 	assert.NoError(t, err)
 }
 
+// TODO table test
 func TestRunConfiguration_Run_NonexistentSingleLang(t *testing.T) {
 	config := &RunConfiguration{
 		Languages: map[string]*linter.Language{
@@ -96,8 +99,10 @@ func TestRunConfiguration_Run_NonexistentSingleLang(t *testing.T) {
 				Regex: regexp.MustCompile(`\.go$`),
 			},
 		},
-		SingleLang: "nonexistent",
-		fileList:   []string{"test.go"},
+		Options: Options{
+			Lang: "nonexistent",
+		},
+		fileList: []string{"test.go"},
 	}
 
 	err := config.Run("chk")

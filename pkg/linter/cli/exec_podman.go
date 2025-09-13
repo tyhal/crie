@@ -19,6 +19,7 @@ import (
 	"github.com/containers/podman/v5/pkg/machine/vmconfigs"
 	"github.com/containers/podman/v5/pkg/specgen"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/pkg/stdcopy"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -171,7 +172,7 @@ func (e *podmanExecutor) pull() error {
 	return nil
 }
 
-func (e *podmanExecutor) exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, _ io.Writer) error {
+func (e *podmanExecutor) exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, stderr io.Writer) error {
 
 	wdContainer, err := getwdContainer()
 	if err != nil {
@@ -219,11 +220,13 @@ func (e *podmanExecutor) exec(bin string, frontParams []string, filePath string,
 	}
 
 	defer func() {
-		if _, err := io.Copy(stdout, logs); err != nil {
-			log.Errorf("Error during reading logs: %v\n", err)
+		_, err := stdcopy.StdCopy(stdout, stderr, logs)
+		if err != nil {
+			log.Errorf("Error demultiplexing logs: %v", err)
 			return
 		}
-		err := logs.Close()
+
+		err = logs.Close()
 		if err != nil {
 			log.Error(err)
 		}

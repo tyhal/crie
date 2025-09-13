@@ -6,18 +6,23 @@ import (
 	"regexp"
 )
 
+// Options are the core flags and settings to change execution
+type Options struct {
+	Continue      bool   `json:"continue" yaml:"continue"`
+	Passes        bool   `json:"passes" yaml:"passes"`
+	GitTarget     string `json:"gitTarget" yaml:"gitTarget"`
+	GitDiff       bool   `json:"gitDiff" yaml:"gitDiff"`
+	Lang          string `json:"lang" yaml:"lang"`
+	StrictLogging bool   `json:"-" yaml:"-"`
+}
+
 // RunConfiguration is the entire working set of information to process a project
 type RunConfiguration struct {
-	lintType        string
-	ContinueOnError bool
-	StrictLogging   bool
-	ShowPasses      bool
-	Ignore          *regexp.Regexp
-	Languages       Languages
-	GitDiff         bool
-	GitTarget       string
-	SingleLang      string
-	fileList        []string
+	Options   Options
+	Ignore    *regexp.Regexp
+	Languages Languages
+	lintType  string
+	fileList  []string
 }
 
 // Languages store the name to a singular language configuration within crie
@@ -30,7 +35,7 @@ func (s *RunConfiguration) loadFileList() {
 	var err error
 
 	if s.IsRepo(".") {
-		if s.GitDiff {
+		if s.Options.GitDiff {
 			// Get files changed in last s.GitDiff commits
 			fileList, err = s.fileListRepoChanged(".")
 		} else {
@@ -40,7 +45,7 @@ func (s *RunConfiguration) loadFileList() {
 	} else {
 
 		// Check if the user asked for git diffs when not in a repo
-		if s.GitDiff {
+		if s.Options.GitDiff {
 			log.Fatal("You do not appear to be in a git repository")
 		}
 

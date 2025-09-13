@@ -14,8 +14,6 @@ builds:
     hooks:
       post:
         - sh ./script/completions {{ .Path }}
-
-
 homebrew_casks:
   - repository:
       owner: tyhal
@@ -28,14 +26,12 @@ homebrew_casks:
     homepage: "https://github.com/tyhal/crie"
     description: "Universal meta-linter using containerized execution "
     license: "MIT"
-
 archives:
   - formats: ['tar.gz']
     files:
       - res/completion/*
       - README.md
       - LICENSE
-
 release:
   github:
     owner: tyhal

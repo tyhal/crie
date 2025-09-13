@@ -11,7 +11,7 @@
           "type": "array"
         },
         "lint": {
-          "$ref": "#/$defs/LintConfig",
+          "$ref": "#/$defs/Options",
           "description": "options for commands that lint"
         },
         "log": {
@@ -19,14 +19,31 @@
           "description": "logging options"
         }
       },
-      "required": [
-        "log",
-        "lint",
-        "ignore"
-      ],
       "type": "object"
     },
-    "LintConfig": {
+    "LoggingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "json": {
+          "description": "change format to json structured logging",
+          "type": "boolean"
+        },
+        "quiet": {
+          "description": "disable all output except for errors",
+          "type": "boolean"
+        },
+        "trace": {
+          "description": "(hidden opt) enable all logging (very very verbose)",
+          "type": "boolean"
+        },
+        "verbose": {
+          "description": "enable debug logging",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Options": {
       "additionalProperties": false,
       "properties": {
         "continue": {
@@ -51,34 +68,6 @@
         "gitTarget",
         "gitDiff",
         "lang"
-      ],
-      "type": "object"
-    },
-    "LoggingConfig": {
-      "additionalProperties": false,
-      "properties": {
-        "json": {
-          "description": "change format to json structured logging",
-          "type": "boolean"
-        },
-        "quiet": {
-          "description": "disable all output except for errors",
-          "type": "boolean"
-        },
-        "trace": {
-          "description": "(hidden opt) enable all logging (very very verbose)",
-          "type": "boolean"
-        },
-        "verbose": {
-          "description": "enable debug logging",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "quiet",
-        "verbose",
-        "trace",
-        "json"
       ],
       "type": "object"
     }

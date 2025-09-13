@@ -31,6 +31,14 @@ type Language struct {
 	Chk   Linter
 }
 
+// GetName getter method for any Linter's name
+func GetName(l Linter) string {
+	if l == nil {
+		return ""
+	}
+	return l.Name()
+}
+
 // GetLinter allows for string indexing to get fmt or chk...
 // TODO remove requirement for this function
 func (l *Language) GetLinter(which string) (Linter, error) {
