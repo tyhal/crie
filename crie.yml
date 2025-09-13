@@ -1,0 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/res/schema/proj.json
+ignore: ["res/completion/*", # generated files
+  "res/schema/*", # generated files
+]

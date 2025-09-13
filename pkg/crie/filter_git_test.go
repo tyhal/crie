@@ -62,6 +62,7 @@ func TestGit_fileListRepoAll(t *testing.T) {
 	assert.Equal(t, files, changed)
 }
 
+// TODO table test
 func TestGit_fileListRepoChanged(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -89,13 +90,17 @@ func TestGit_fileListRepoChanged(t *testing.T) {
 	commitHelper(t, changeFiles, tmpDir, repo, "changed")
 
 	invalidConfig := RunConfiguration{
-		GitTarget: "abc",
+		Options: Options{
+			GitTarget: "abc",
+		},
 	}
 	_, err = invalidConfig.fileListRepoChanged(tmpDir)
 	assert.Error(t, err)
 
 	validConfig := RunConfiguration{
-		GitTarget: "origin/main",
+		Options: Options{
+			GitTarget: "origin/main",
+		},
 	}
 	changed, err := validConfig.fileListRepoChanged(tmpDir)
 	assert.NoError(t, err)

@@ -33,7 +33,7 @@ func (s *RunConfiguration) fileListRepoChanged(path string) ([]string, error) {
 		return nil, err
 	}
 
-	splitRef := strings.Split(s.GitTarget, "/")
+	splitRef := strings.Split(s.Options.GitTarget, "/")
 	if len(splitRef) != 2 {
 		return nil, fmt.Errorf("invalid git target must be in form remote/branch")
 	}
@@ -62,7 +62,7 @@ func (s *RunConfiguration) fileListRepoChanged(path string) ([]string, error) {
 		}
 	}
 
-	return files, nil
+	return s.fileListIgnore(files), nil
 }
 
 func (s *RunConfiguration) fileListRepoAll(path string) ([]string, error) {
@@ -81,5 +81,5 @@ func (s *RunConfiguration) fileListRepoAll(path string) ([]string, error) {
 		files = append(files, entry.Name)
 	}
 
-	return files, nil
+	return s.fileListIgnore(files), nil
 }

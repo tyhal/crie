@@ -40,7 +40,7 @@ var rootCmd = &cobra.Command{
 	Version: version,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-		viper.AddConfigPath(projectConfigPath)
+		viper.SetConfigFile(projectConfigPath)
 		viper.SetConfigType("yml")
 		viper.SetEnvPrefix("CRIE")
 		viper.AutomaticEnv()
@@ -68,7 +68,7 @@ func setCrieConfig(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	crie_cmds.SetCrie(crie_cmds.SaveConfiguration(&projectConfig, langConfig))
+	crie_cmds.SetCrie(&projectConfig, langConfig)
 	return nil
 }
 
@@ -120,6 +120,8 @@ func addLintCommand(cmd *cobra.Command) {
 
 	cmd.PersistentFlags().StringVar(&projectConfig.Lint.Lang, "lang", "", "run with only one language (see `crie ls` for available options)")
 	errFatal(viper.BindPFlag("Lint.Lang", cmd.PersistentFlags().Lookup("lang")))
+
+	viper.SetDefault("Ignore", []string{})
 
 	cmd.PreRunE = setCrieConfig
 

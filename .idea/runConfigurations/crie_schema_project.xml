@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="crie schema project" type="GoApplicationRunConfiguration" factoryName="Go Application">
-    <output_file path="$PROJECT_DIR$/res/jsonschema/proj.json" is_save="true" />
+    <output_file path="$PROJECT_DIR$/res/schema/proj.json" is_save="true" />
     <module name="crie" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="sch prj" />

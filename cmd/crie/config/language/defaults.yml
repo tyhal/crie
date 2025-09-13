@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../doc/schema.json
+# yaml-language-server: $schema=../../../res/schema/lang.json
 languages:
   python:
     match: ['\.py$']
@@ -164,4 +164,3 @@ languages:
       type: cli
       start: ["--config=/home/standards/.config/cmakelintrc"]
       img: "docker.io/tyhal/crie-dep-pip:latest"
-ignore: []

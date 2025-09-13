@@ -1,15 +1,14 @@
 #!/bin/sh
+set -e
 
 if [ -n "$1" ]; then
-  CRIE_BIN="$1"
+	CRIE_BIN="$1"
 elif [ -z "$CRIE_BIN" ]; then
-  CRIE_BIN="crie"
+	CRIE_BIN="crie"
 fi
 
-
 cd "$(dirname "$0")/.."
-echo "$CRIE_BIN"
 
-$CRIE_BIN completion zsh > res/completion/crie.zsh
-$CRIE_BIN completion bash > res/completion/crie.bash
-$CRIE_BIN completion fish > res/completion/crie.fish
+$CRIE_BIN completion zsh >res/completion/crie.zsh
+$CRIE_BIN completion bash >res/completion/crie.bash
+$CRIE_BIN completion fish >res/completion/crie.fish
