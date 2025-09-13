@@ -32,7 +32,7 @@ func NewLanguageConfigFile(path string) error {
 
 	var buf bytes.Buffer
 	// TODO add versioning
-	buf.WriteString("# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/doc/schema_lang.json\n")
+	buf.WriteString("# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/res/schema/lang.json\n")
 	buf.Write(yamlOut)
 	yamlContent := buf.Bytes()
 	err = os.WriteFile(path, yamlContent, 0644)

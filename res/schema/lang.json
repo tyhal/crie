@@ -1,18 +1,18 @@
 {
   "$defs": {
-    "ConfigLanguage": {
+    "Language": {
       "additionalProperties": false,
       "properties": {
         "chk": {
-          "$ref": "#/$defs/ConfigLinter",
+          "$ref": "#/$defs/Linter",
           "description": "used for the given language when linting/checking"
         },
         "fmt": {
-          "$ref": "#/$defs/ConfigLinter",
+          "$ref": "#/$defs/Linter",
           "description": "used for the given language when formatting"
         },
         "match": {
-          "$ref": "#/$defs/ConfigRegex",
+          "$ref": "#/$defs/Regex",
           "description": "a regex to match files against to know they are the target of this language",
           "oneOf": [
             {
@@ -26,42 +26,20 @@
       },
       "type": "object"
     },
-    "ConfigLanguages": {
+    "Languages": {
       "additionalProperties": false,
       "properties": {
-        "Path": {
-          "type": "string"
-        },
         "languages": {
           "additionalProperties": {
-            "$ref": "#/$defs/ConfigLanguage"
+            "$ref": "#/$defs/Language"
           },
           "description": "a map of languages that crie should be able to run",
           "type": "object"
         }
       },
       "required": [
-        "Path",
         "languages"
       ],
-      "type": "object"
-    },
-    "ConfigLinter": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/LintCli"
-        },
-        {
-          "$ref": "#/$defs/LintShfmt"
-        },
-        {
-          "$ref": "#/$defs/LintNoop"
-        }
-      ]
-    },
-    "ConfigRegex": {
-      "additionalProperties": false,
-      "properties": {},
       "type": "object"
     },
     "LintCli": {
@@ -143,14 +121,32 @@
       ],
       "type": "object"
     },
+    "Linter": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LintCli"
+        },
+        {
+          "$ref": "#/$defs/LintShfmt"
+        },
+        {
+          "$ref": "#/$defs/LintNoop"
+        }
+      ]
+    },
     "Par": {
       "items": {
         "type": "string"
       },
       "type": "array"
+    },
+    "Regex": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
     }
   },
-  "$id": "https://github.com/tyhal/crie/cmd/crie/config/language/config-languages",
-  "$ref": "#/$defs/ConfigLanguages",
+  "$id": "https://github.com/tyhal/crie/cmd/crie/config/language/languages",
+  "$ref": "#/$defs/Languages",
   "$schema": "https://json-schema.org/draft/2020-12/schema"
 }

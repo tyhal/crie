@@ -40,7 +40,7 @@ var rootCmd = &cobra.Command{
 	Version: version,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-		viper.AddConfigPath(projectConfigPath)
+		viper.SetConfigFile(projectConfigPath)
 		viper.SetConfigType("yml")
 		viper.SetEnvPrefix("CRIE")
 		viper.AutomaticEnv()
@@ -68,7 +68,7 @@ func setCrieConfig(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	crie_cmds.SetCrie(crie_cmds.SaveConfiguration(&projectConfig, langConfig))
+	crie_cmds.SetCrie(&projectConfig, langConfig)
 	return nil
 }
 
@@ -157,6 +157,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&projectConfig.Log.Trace, "trace", projectConfig.Log.Trace, "turn on trace printing for reports")
 	errFatal(viper.BindPFlag("Log.Trace", rootCmd.PersistentFlags().Lookup("trace")))
 	errFatal(rootCmd.PersistentFlags().MarkHidden("trace"))
+
+	viper.SetDefault("Ignore", []string{})
 
 	addLintCommand(crie_cmds.ChkCmd)
 	addLintCommand(crie_cmds.FmtCmd)

@@ -18,29 +18,17 @@ import (
 
 var crieRun crie.RunConfiguration
 
-// SetCrie is used to ensure the entire crie configuration is set together
-func SetCrie(cr crie.RunConfiguration) {
-	crieRun = cr
-}
+// SetCrie pushes the Languages to the crie.RunConfiguration
+func SetCrie(proj *project.Config, langs *language.Languages) {
 
-// SaveConfiguration pushes the Languages to the crie.RunConfiguration
-func SaveConfiguration(proj *project.Config, langs *language.Languages) crie.RunConfiguration {
-	crieConfig := crie.RunConfiguration{
-		ContinueOnError: proj.Lint.Continue,
-		ShowPasses:      proj.Lint.Passes,
-		GitDiff:         proj.Lint.GitDiff,
-		GitTarget:       proj.Lint.GitTarget,
-		SingleLang:      proj.Lint.Lang,
-	}
-
-	crieConfig.Ignore = regexp.MustCompile(strings.Join(proj.Ignore, "|"))
-
-	crieConfig.Languages = make(map[string]*linter.Language, len(langs.Languages))
+	languages := make(map[string]*linter.Language, len(langs.Languages))
 	for langName, lang := range langs.Languages {
-		crieConfig.Languages[langName] = lang.ToCrieLanguage()
+		languages[langName] = lang.ToCrieLanguage()
 	}
 
-	return crieConfig
+	ignore := regexp.MustCompile(strings.Join(proj.Ignore, "|"))
+
+	crieRun = crie.RunConfiguration{Options: proj.Lint, Ignore: ignore, Languages: languages}
 }
 
 // FmtCmd Format code command
@@ -99,12 +87,12 @@ Find the file extensions that dont have an associated regex match within crieRun
 // InitCmd command will create a project project file for crieRun
 var InitCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Create an optional project project file",
-	Long:  `Create an optional project project file`,
+	Short: "Create an optional project file",
+	Long:  `Create an optional project file`,
 
 	RunE: func(_ *cobra.Command, _ []string) error {
 
-		err := language.NewLanguageConfigFile(viper.GetString("languageConfigPath"))
+		err := language.NewLanguageConfigFile(viper.GetString("Language.Config"))
 		if err != nil {
 			return err
 		}
@@ -117,9 +105,9 @@ var InitCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		err = projectConfig.NewProjectConfigFile(viper.GetString("projectConfigPath"))
+		err = projectConfig.NewProjectConfigFile(viper.GetString("Project.Config"))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		fmt.Printf("new project file created: %s\nthis will be treated as your project defaults (overiden by flags and env)\n", viper.GetString("projectConfigPath"))
 		return nil
@@ -192,7 +180,7 @@ func stage(stageName string) {
 	log.Info("❨ " + stageName + " ❩")
 	err := crieRun.Run(stageName)
 	if err != nil {
-		if crieRun.ContinueOnError {
+		if crieRun.Options.Continue {
 			log.Error(err)
 		} else {
 			log.Fatal(err)

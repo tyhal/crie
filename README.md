@@ -35,7 +35,7 @@ from source:
 
 #### Deps
 
-- [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/)
+* [Podman](https://podman.io/docs/installation) or [Docker](https://docs.docker.com/get-started/get-docker/)
 
 ## Usage
 
@@ -49,7 +49,7 @@ The suggested way to start running crie is to run `chk` at the top of your proje
 
 * [Autocompletion](doc/completion.md) - Manually setup tab completion for your shell (included with brew)
 * [Example Project Settings](doc/example_project.yaml) - If you want to change the defaults of the CLI when its run from this project or ignore certain files (you can follow this example for your own optional crie.yml)
-* [Example Language Settings](doc/example_language_override.yml) - If you want to override any defaults, add more languages (you can follow this example for your own extra optional crie_lang.yml)
+* [Example Language Settings](doc/example_language_override.yml) - If you want to override any defaults, add more languages (you can follow this example for your own extra optional crie\_lang.yml)
 
 ***
 
