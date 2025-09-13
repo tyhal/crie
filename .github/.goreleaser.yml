@@ -16,7 +16,7 @@ homebrew_casks:
   - repository:
       owner: tyhal
       name: homebrew-crie
-      token: "{{ .Env.GITHUB_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     completions:
       bash: res/completion/crie.bash
       zsh: res/completion/crie.zsh
