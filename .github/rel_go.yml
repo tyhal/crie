@@ -1,0 +1,29 @@
+version: 2
+builds:
+  - main: ./cmd/crie
+    env:
+      - CGO_ENABLED=1
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    hooks:
+      pre:
+        - sh ./script/bootstrap
+      post:
+        - sh ./script/completions {{ .Path }}
+archives:
+  - formats: ['tar.gz']
+    files:
+      - res/completion/*
+      - README.md
+      - LICENSE
+release:
+  github:
+    owner: tyhal
+    name: crie
