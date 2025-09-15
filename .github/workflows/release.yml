@@ -3,13 +3,13 @@ on:
   push:
     tags:
       - v*
-  pull_request:
 jobs:
+  # TODO before v1 release - remove - replacing existing artifacts - and cache between jobs using actions not the releases
   release-go:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ macos-latest, ubuntu-latest ]
     steps:
       - uses: actions/checkout@v5
         with:
@@ -21,10 +21,11 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean --single-target --config .github/.rel_go.yml
+          args: release --clean --config .github/rel_go_${{ matrix.os }}.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release-brew:
+    needs: release-go
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -34,7 +35,8 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean --config .github/.rel_brew.yml
+          args: release --clean --config .github/rel_brew.yml
         # goreleaser build --skip validate --clean --config .github/rel_homebrew.yml
         env:
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
