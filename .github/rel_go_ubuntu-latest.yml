@@ -8,22 +8,17 @@ builds:
       - -X main.version={{.Version}}
     goos:
       - linux
-      - darwin
     goarch:
       - amd64
-      - arm64
     hooks:
       pre:
         - sh ./script/bootstrap
-      post:
-        - sh ./script/completions {{ .Path }}
+checksum:
+  disable: true
 archives:
   - formats: ['tar.gz']
-    files:
-      - res/completion/*
-      - README.md
-      - LICENSE
 release:
   github:
     owner: tyhal
     name: crie
+  replace_existing_artifacts: true
