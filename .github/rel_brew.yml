@@ -1,19 +1,23 @@
 version: 2
-# TODO add goreleaser cross
 builds:
   - main: ./cmd/crie
-    env:
-      - CGO_ENABLED=1
-    ldflags:
-      - -s -w
-      - -X main.version={{.Version}}
+    tool: echo
     goos:
       - linux
+      - darwin
     goarch:
       - amd64
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: amd64
+      - goos: linux
+        goarch: arm64
     hooks:
-      post:
-        - sh ./script/completions {{ .Path }}
+      pre:
+        - sh ./script/download {{ .Version }} {{ .Os }} {{ .Arch }} {{ .Target }}
+archives:
+  - formats: ['tar.gz']
 homebrew_casks:
   - repository:
       owner: tyhal
@@ -26,13 +30,3 @@ homebrew_casks:
     homepage: "https://github.com/tyhal/crie"
     description: "Universal meta-linter using containerized execution "
     license: "MIT"
-archives:
-  - formats: ['tar.gz']
-    files:
-      - res/completion/*
-      - README.md
-      - LICENSE
-release:
-  github:
-    owner: tyhal
-    name: crie

@@ -1,0 +1,18 @@
+#!/bin/sh
+set -ex
+
+VERSION="$1"
+GOOS="$2"
+GOARCH="$3"
+TARGET="$4"
+
+tarname="crie_${VERSION}_${GOOS}_${GOARCH}.tar.gz"
+curl \
+  --fail \
+  --location \
+  --silent \
+  --show-error \
+  -o "dist/$tarname" \
+  "https://github.com/tyhal/crie/releases/download/v${VERSION}/${tarname}"
+
+tar -xzf "dist/$tarname" -C "dist/crie_$TARGET"

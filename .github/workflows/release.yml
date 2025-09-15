@@ -3,15 +3,17 @@ on:
   push:
     tags:
       - v*
+  pull_request:
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  release-go:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Install system dependencies
-        run: ./script/bootstrap
       - uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
@@ -19,7 +21,20 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean --config .github/.goreleaser.yml
+          args: release --clean --single-target --config .github/.rel_go.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  release-brew:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --config .github/.rel_brew.yml
+        # goreleaser build --skip validate --clean --config .github/rel_homebrew.yml
+        env:
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
