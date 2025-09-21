@@ -9,7 +9,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/renameio v1.0.1
 	github.com/invopop/jsonschema v0.13.0
-	github.com/olekukonko/tablewriter v1.0.9
+	github.com/olekukonko/tablewriter v1.1.0
 	github.com/opencontainers/runtime-spec v1.2.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.10.1
