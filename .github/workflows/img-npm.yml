@@ -1,4 +1,6 @@
 name: img-npm
+permissions:
+  contents: read
 on:
   push:
     branches:

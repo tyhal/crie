@@ -1,4 +1,6 @@
 name: img-apk
+permissions:
+  contents: read
 on:
   push:
     branches:
