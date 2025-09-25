@@ -1,4 +1,6 @@
 name: img-pip
+permissions:
+  contents: read
 on:
   push:
     branches:

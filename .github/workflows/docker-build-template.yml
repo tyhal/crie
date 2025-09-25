@@ -1,4 +1,6 @@
 name: docker-build-template
+permissions:
+  contents: read
 on:
   workflow_call:
     inputs:
