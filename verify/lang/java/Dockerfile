@@ -1,2 +1,2 @@
 	
-FROM	java:openjdk-9-jdk
+FROM	eclipse-temurin:21-alpine
