@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/containerd/platforms v1.0.0-rc.1
-	github.com/containers/podman/v5 v5.6.1
+	github.com/containers/podman/v5 v5.6.2
 	github.com/docker/docker v28.4.0+incompatible
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/renameio v1.0.1
@@ -39,7 +39,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
-	github.com/containers/buildah v1.41.4 // indirect
+	github.com/containers/buildah v1.41.5 // indirect
 	github.com/containers/common v0.64.2 // indirect
 	github.com/containers/gvisor-tap-vsock v0.8.6 // indirect
 	github.com/containers/image/v5 v5.36.2 // indirect
