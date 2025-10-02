@@ -9,11 +9,11 @@ TARGET="$4"
 tarname="crie_${VERSION}_${GOOS}_${GOARCH}.tar.gz"
 mkdir -p "dist/tar"
 curl \
-  --fail \
-  --location \
-  --silent \
-  --show-error \
-  -o "dist/tar/$tarname" \
-  "https://github.com/tyhal/crie/releases/download/v${VERSION}/${tarname}"
+	--fail \
+	--location \
+	--silent \
+	--show-error \
+	-o "dist/tar/$tarname" \
+	"https://github.com/tyhal/crie/releases/download/v${VERSION}/${tarname}"
 
 tar -xzf "dist/tar/$tarname" -C "dist/crie_$TARGET"
