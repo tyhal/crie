@@ -2,10 +2,10 @@
     crie.
 </h1>
 <p align="center">
-    Universal meta-linter using containerized execution
+    universal meta-linter using containerized execution
 </p>
 <p align="center">
-    <img src="https://raw.githubusercontent.com/tyhal/crie/main/doc/demo.svg?sanitize=true" width="572" alt="crie cli demo">
+    <img src="doc/demo.svg" width="580" alt="crie cli demo">
 </p>
 
 ## Features
