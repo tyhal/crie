@@ -3,12 +3,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/pkg/crie"
 	"github.com/tyhal/crie/pkg/crie/linter"
 	"gopkg.in/yaml.v3"
-	"regexp"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -26,8 +27,11 @@ func SetCrie(proj *project.Config, langs *language.Languages) {
 		languages[langName] = lang.ToCrieLanguage()
 	}
 
-	ignore := regexp.MustCompile(strings.Join(proj.Ignore, "|"))
-
+	var ignore *regexp.Regexp
+	if proj.Ignore != nil && len(proj.Ignore) > 0 {
+		ignore = regexp.MustCompile(strings.Join(proj.Ignore, "|"))
+	}
+	
 	crieRun = crie.RunConfiguration{Options: proj.Lint, Ignore: ignore, Languages: languages}
 }
 

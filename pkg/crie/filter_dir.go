@@ -2,9 +2,10 @@ package crie
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *RunConfiguration) fileListIgnore(allFiles []string) []string {
@@ -28,7 +29,7 @@ func (s *RunConfiguration) fileListIgnore(allFiles []string) []string {
 func (s *RunConfiguration) fileListAll() ([]string, error) {
 
 	// Work out where we are
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	dir, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,11 @@ func (s *RunConfiguration) fileListAll() ([]string, error) {
 	// Create an initial file list
 	err = filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
-			allFiles = append(allFiles, path)
+			relPath, err := filepath.Rel(dir, path)
+			if err != nil {
+				return err
+			}
+			allFiles = append(allFiles, relPath)
 		}
 		return nil
 	})

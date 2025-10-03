@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/tyhal/crie/cmd/crie/config/language"
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/tyhal/crie/cmd/crie/config/language"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
