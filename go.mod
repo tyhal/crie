@@ -6,7 +6,7 @@ require (
 	github.com/containerd/platforms v1.0.0-rc.1
 	github.com/containers/podman/v5 v5.6.2
 	github.com/docker/docker v28.5.0+incompatible
-	github.com/go-git/go-git/v5 v5.16.2
+	github.com/go-git/go-git/v5 v5.16.3
 	github.com/google/renameio v1.0.1
 	github.com/invopop/jsonschema v0.13.0
 	github.com/olekukonko/tablewriter v1.1.0
