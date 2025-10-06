@@ -32,12 +32,18 @@ import (
 var version = "dev"
 
 var rootCmd = &cobra.Command{
-	Use:     "crie",
-	Short:   "crie is a formatter and linter for many languages.",
-	Example: "check all files changes since the target branch 'crie chk --git-diff --git-target=origin/main --lang python'",
+	Use:   "crie",
+	Short: "crie is a formatter and linter for many languages.",
+	Example: `
+check all files changes since the target branch 
+	$ crie chk --git-diff --git-target=origin/main
+
+format all python files
+	$ crie fmt --only python
+`,
 	Long: `
 	crie brings together a vast collection of formatters and linters
-	to create a handy tool that can prettify any codebase.`,
+	to create a handy tool that can sanity check any codebase.`,
 	Version: version,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
@@ -119,8 +125,8 @@ func addLintCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVarP(&projectConfig.Lint.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files")
 	errFatal(viper.BindPFlag("Lint.GitTarget", cmd.PersistentFlags().Lookup("git-target")))
 
-	cmd.PersistentFlags().StringVar(&projectConfig.Lint.Lang, "lang", "", "run with only one language (see `crie ls` for available options)")
-	errFatal(viper.BindPFlag("Lint.Lang", cmd.PersistentFlags().Lookup("lang")))
+	cmd.PersistentFlags().StringVar(&projectConfig.Lint.Only, "only", "", "run with only one language (see `crie ls` for available options)")
+	errFatal(viper.BindPFlag("Lint.Only", cmd.PersistentFlags().Lookup("only")))
 
 	cmd.PreRunE = setCrieConfig
 
@@ -141,10 +147,10 @@ func errFatal(err error) {
 
 func init() {
 
-	rootCmd.PersistentFlags().StringVar(&projectConfigPath, "project-config", "crie.yml", "optional project config location")
-	errFatal(viper.BindPFlag("Project.Config", rootCmd.PersistentFlags().Lookup("project-config")))
-	rootCmd.PersistentFlags().StringVar(&languageConfigPath, "language-config", "crie_lang.yml", "optional language override config location")
-	errFatal(viper.BindPFlag("Language.Config", rootCmd.PersistentFlags().Lookup("language-config")))
+	rootCmd.PersistentFlags().StringVarP(&projectConfigPath, "conf", "c", "crie.yml", "project configuration file")
+	errFatal(viper.BindPFlag("Project.Conf", rootCmd.PersistentFlags().Lookup("conf")))
+	rootCmd.PersistentFlags().StringVarP(&languageConfigPath, "lang-conf", "l", "crie.lang.yml", "language configuration file")
+	errFatal(viper.BindPFlag("Language.Conf", rootCmd.PersistentFlags().Lookup("lang-conf")))
 
 	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.JSON, "json", "j", projectConfig.Log.JSON, "turn on json output")
 	errFatal(viper.BindPFlag("Log.JSON", rootCmd.PersistentFlags().Lookup("json")))
@@ -152,7 +158,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Verbose, "verbose", "v", projectConfig.Log.Verbose, "turn on verbose printing for reports")
 	errFatal(viper.BindPFlag("Log.Verbose", rootCmd.PersistentFlags().Lookup("verbose")))
 
-	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Quiet, "quiet", "q", projectConfig.Log.Quiet, "turn off extra prints from failures (suppresses verbose)")
+	rootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Quiet, "quiet", "q", projectConfig.Log.Quiet, "only prints critical errors (suppresses verbose)")
 	errFatal(viper.BindPFlag("Log.Quiet", rootCmd.PersistentFlags().Lookup("quiet")))
 
 	rootCmd.PersistentFlags().BoolVar(&projectConfig.Log.Trace, "trace", projectConfig.Log.Trace, "turn on trace printing for reports")

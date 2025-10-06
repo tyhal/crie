@@ -81,7 +81,7 @@ func TestRunConfiguration_Run_WithSingleLang(t *testing.T) {
 			},
 		},
 		Options: Options{
-			Lang: "go",
+			Only: "go",
 		},
 		fileList: []string{"test.go"},
 	}
@@ -100,7 +100,7 @@ func TestRunConfiguration_Run_NonexistentSingleLang(t *testing.T) {
 			},
 		},
 		Options: Options{
-			Lang: "nonexistent",
+			Only: "nonexistent",
 		},
 		fileList: []string{"test.go"},
 	}

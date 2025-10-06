@@ -1,19 +1,12 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/tyhal/crie/cmd/crie/config/language/languages",
+  "$ref": "#/$defs/Languages",
   "$defs": {
     "Language": {
-      "additionalProperties": false,
       "properties": {
-        "chk": {
-          "$ref": "#/$defs/Linter",
-          "description": "used for the given language when linting/checking"
-        },
-        "fmt": {
-          "$ref": "#/$defs/Linter",
-          "description": "used for the given language when formatting"
-        },
         "match": {
           "$ref": "#/$defs/Regex",
-          "description": "a regex to match files against to know they are the target of this language",
           "oneOf": [
             {
               "type": "string"
@@ -21,105 +14,115 @@
             {
               "type": "array"
             }
-          ]
+          ],
+          "description": "a regex to match files against to know they are the target of this language"
+        },
+        "fmt": {
+          "$ref": "#/$defs/Linter",
+          "description": "used for the given language when formatting"
+        },
+        "chk": {
+          "$ref": "#/$defs/Linter",
+          "description": "used for the given language when linting/checking"
         }
       },
+      "additionalProperties": false,
       "type": "object"
     },
     "Languages": {
-      "additionalProperties": false,
       "properties": {
         "languages": {
           "additionalProperties": {
             "$ref": "#/$defs/Language"
           },
-          "description": "a map of languages that crie should be able to run",
-          "type": "object"
+          "type": "object",
+          "description": "a map of languages that crie should be able to run"
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "languages"
-      ],
-      "type": "object"
+      ]
     },
     "LintCli": {
-      "additionalProperties": false,
       "properties": {
-        "bin": {
-          "description": "the binary or command to use",
-          "type": "string"
+        "type": {
+          "type": "string",
+          "enum": [
+            "cli"
+          ],
+          "description": "the most common linter type, a cli tool"
         },
-        "chdir": {
-          "description": "if true the tool will change directory to where the target file is located",
-          "type": "boolean"
+        "bin": {
+          "type": "string",
+          "description": "the binary or command to use"
+        },
+        "start": {
+          "$ref": "#/$defs/Par",
+          "description": "parameters that will be put in front of the file path"
         },
         "end": {
           "$ref": "#/$defs/Par",
           "description": "parameters that will be put behind the file path"
         },
         "img": {
-          "description": "the container image to pull and use",
-          "type": "string"
+          "type": "string",
+          "description": "the container image to pull and use"
         },
-        "start": {
-          "$ref": "#/$defs/Par",
-          "description": "parameters that will be put in front of the file path"
-        },
-        "type": {
-          "description": "the most common linter type, a cli tool",
-          "enum": [
-            "cli"
-          ],
-          "type": "string"
+        "chdir": {
+          "type": "boolean",
+          "description": "if true the tool will change directory to where the target file is located"
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "type",
         "bin"
-      ],
-      "type": "object"
+      ]
     },
     "LintNoop": {
-      "additionalProperties": false,
       "properties": {
         "type": {
-          "description": "a linter type to do nothing",
+          "type": "string",
           "enum": [
             "noop"
           ],
-          "type": "string"
+          "description": "a linter type to do nothing"
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "type"
-      ],
-      "type": "object"
+      ]
     },
     "LintShfmt": {
-      "additionalProperties": false,
       "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "shfmt"
+          ],
+          "description": "a built in shell formatter thanks to mvdan"
+        },
         "language": {
+          "type": "string",
           "enum": [
             "bash",
             "posix",
             "sh",
             "mksh"
-          ],
-          "type": "string"
-        },
-        "type": {
-          "description": "a built in shell formatter thanks to mvdan",
-          "enum": [
-            "shfmt"
-          ],
-          "type": "string"
+          ]
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "type",
         "language"
-      ],
-      "type": "object"
+      ]
     },
     "Linter": {
       "oneOf": [
@@ -141,12 +144,9 @@
       "type": "array"
     },
     "Regex": {
-      "additionalProperties": false,
       "properties": {},
+      "additionalProperties": false,
       "type": "object"
     }
-  },
-  "$id": "https://github.com/tyhal/crie/cmd/crie/config/language/languages",
-  "$ref": "#/$defs/Languages",
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  }
 }

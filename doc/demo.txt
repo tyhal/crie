@@ -1,5 +1,6 @@
 crie \thelp
 crie l\t\t\t
+cd verify
 crie non
 crie chk --passes
-crie fmt --lang python --passes
+crie fmt --only python

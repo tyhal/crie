@@ -1,9 +1,10 @@
 package crie
 
 import (
+	"regexp"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/crie/linter"
-	"regexp"
 )
 
 // Options are the core flags and settings to change execution
@@ -12,7 +13,7 @@ type Options struct {
 	Passes        bool   `json:"passes" yaml:"passes"`
 	GitTarget     string `json:"gitTarget" yaml:"gitTarget"`
 	GitDiff       bool   `json:"gitDiff" yaml:"gitDiff"`
-	Lang          string `json:"lang" yaml:"lang"`
+	Only          string `json:"only" yaml:"only"`
 	StrictLogging bool   `json:"-" yaml:"-"`
 }
 

@@ -135,12 +135,12 @@ func (s *RunConfiguration) Run(lintType string) (err error) {
 	errCount := 0
 
 	currentLangs := s.Languages
-	if s.Options.Lang != "" {
-		lang, err := s.GetLanguage(s.Options.Lang)
+	if s.Options.Only != "" {
+		lang, err := s.GetLanguage(s.Options.Only)
 		if err != nil {
 			return err
 		}
-		currentLangs = map[string]*linter.Language{s.Options.Lang: lang}
+		currentLangs = map[string]*linter.Language{s.Options.Only: lang}
 	}
 
 	var cleanupGroup sync.WaitGroup
