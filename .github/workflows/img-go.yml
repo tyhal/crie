@@ -1,6 +1,7 @@
 name: img-go
 permissions:
   contents: read
+  packages: read
 on:
   push:
     branches:
@@ -15,6 +16,9 @@ jobs:
     with:
       img: 'go'
   img-go-push:
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/docker-push-template.yml
     with:
       img: 'go'

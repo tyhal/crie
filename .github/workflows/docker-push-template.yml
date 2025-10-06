@@ -1,6 +1,7 @@
 name: docker-push-template
 permissions:
   contents: read
+  packages: write
 on:
   workflow_call:
     inputs:
