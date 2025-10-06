@@ -1,6 +1,7 @@
 name: img-apk
 permissions:
   contents: read
+  packages: read
 on:
   push:
     branches:
@@ -15,6 +16,9 @@ jobs:
     with:
       img: 'apk'
   img-apk-push:
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/docker-push-template.yml
     with:
       img: 'apk'
