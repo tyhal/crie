@@ -31,7 +31,7 @@ func SetCrie(proj *project.Config, langs *language.Languages) {
 	if proj.Ignore != nil && len(proj.Ignore) > 0 {
 		ignore = regexp.MustCompile(strings.Join(proj.Ignore, "|"))
 	}
-	
+
 	crieRun = crie.RunConfiguration{Options: proj.Lint, Ignore: ignore, Languages: languages}
 }
 
@@ -64,7 +64,7 @@ var LsCmd = &cobra.Command{
 var ChkCmd = &cobra.Command{
 	Use:     "chk",
 	Aliases: []string{"check"},
-	Short:   "Run checkers",
+	Short:   "Run linters that only check code",
 	Long:    `Check all code standards for coding conventions`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := crieRun.Run("chk")
@@ -91,16 +91,16 @@ Find the file extensions that dont have an associated regex match within crieRun
 // InitCmd command will create a project project file for crieRun
 var InitCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Create an optional project file",
-	Long:  `Create an optional project file`,
+	Short: "Create optional config files",
+	Long:  `Create an optional project file and an extra optional language override file`,
 
 	RunE: func(_ *cobra.Command, _ []string) error {
 
-		err := language.NewLanguageConfigFile(viper.GetString("Language.Config"))
+		err := language.NewLanguageConfigFile(viper.GetString("Language.Conf"))
 		if err != nil {
 			return err
 		}
-		fmt.Printf("new language file created: %s\nused to overide crie internal language settings (optional / can be deleted)\n", viper.GetString("languageConfigPath"))
+		fmt.Printf("new language file created: %s\nused to overide crie internal language settings (optional / can be deleted)\n", viper.GetString("Language.Conf"))
 
 		fmt.Println()
 
@@ -109,11 +109,11 @@ var InitCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		err = projectConfig.NewProjectConfigFile(viper.GetString("Project.Config"))
+		err = projectConfig.NewProjectConfigFile(viper.GetString("Project.Conf"))
 		if err != nil {
 			return err
 		}
-		fmt.Printf("new project file created: %s\nthis will be treated as your project defaults (overiden by flags and env)\n", viper.GetString("projectConfigPath"))
+		fmt.Printf("new project file created: %s\nthis will be treated as your project defaults (overiden by flags and env)\n", viper.GetString("Project.Conf"))
 		return nil
 	},
 }
@@ -122,7 +122,7 @@ var InitCmd = &cobra.Command{
 var ConfCmd = &cobra.Command{
 	Use:     "conf",
 	Aliases: []string{"config", "cnf"},
-	Short:   "Print what crie has parsed from flags, env, the project file, and then defaults",
+	Short:   "Print configuration settings",
 	Long:    "Print what crie has parsed from flags, env, the project file, and then defaults",
 	RunE: func(_ *cobra.Command, _ []string) error {
 		var projectConfig project.Config
@@ -144,8 +144,8 @@ var ConfCmd = &cobra.Command{
 var SchemaCmd = &cobra.Command{
 	Use:     "schema",
 	Aliases: []string{"sch"},
-	Short:   "Print jsonschema's of the crie cli configs",
-	Long:    `Print jsonschema's' of the crie cli configs`,
+	Short:   "Print JSON schemas for config files",
+	Long:    `Print JSON schemas for config files`,
 }
 
 // SchemaLangCmd is the jsonschema generator for the crie languages configuration
@@ -196,7 +196,7 @@ func stage(stageName string) {
 var LntCmd = &cobra.Command{
 	Use:     "lnt",
 	Aliases: []string{"lint", "all"},
-	Short:   "Run everything",
+	Short:   "Runs both fmt and then chk",
 	Long:    `Runs both format and then check`,
 	Run: func(_ *cobra.Command, _ []string) {
 		stage("fmt")

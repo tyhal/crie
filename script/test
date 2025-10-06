@@ -12,7 +12,7 @@ go run ./cmd/crie chk
 go run ./cmd/crie ls
 go run ./cmd/crie fmt
 go run ./cmd/crie chk --git-diff 9 -j
-go run ./cmd/crie chk --lang golang
+go run ./cmd/crie chk --only golang
 go run ./cmd/crie non
 set +x
 
