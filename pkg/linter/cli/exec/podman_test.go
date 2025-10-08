@@ -7,7 +7,7 @@ import (
 )
 
 func TestPodman_SocketGet(t *testing.T) {
-	if willPodman() != nil {
+	if WillPodman() != nil {
 		t.Skip()
 	}
 

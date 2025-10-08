@@ -2,14 +2,15 @@ package crie
 
 import (
 	"errors"
-	"github.com/olekukonko/tablewriter"
-	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/pkg/crie/linter"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"sync"
+
+	"github.com/olekukonko/tablewriter"
+	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/crie/linter"
 )
 
 // List to print all languages chkConf fmt and always commands
@@ -92,7 +93,8 @@ func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, 
 	toLog := log.WithFields(log.Fields{"lang": name, "type": s.lintType})
 
 	if selectedLinter == nil {
-		toLog.Debug("there are no configurations associated for this action")
+		skip := toLog.WithFields(log.Fields{"flag": "skip"})
+		skip.Debug("there are no configurations associated for this action")
 		return
 	}
 
