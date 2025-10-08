@@ -1,4 +1,4 @@
-package cli
+package exec
 
 import (
 	"io"
