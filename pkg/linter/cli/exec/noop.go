@@ -2,13 +2,13 @@ package exec
 
 import "io"
 
-type noopExecutor struct{}
+type NoopExecutor struct{}
 
-func (ne *noopExecutor) setup() error {
+func (ne *NoopExecutor) Setup() error {
 	return nil
 }
 
-func (ne *noopExecutor) exec(bin string, frontParams []string, filePath string, endParams []string, chdir bool, stdout io.Writer, stderr io.Writer) error {
+func (ne *NoopExecutor) Exec(bin string, frontParams []string, filePath string, endParams []string, chdir bool, stdout io.Writer, stderr io.Writer) error {
 	_, err := stdout.Write([]byte("stdout"))
 	if err != nil {
 		return err
@@ -20,6 +20,6 @@ func (ne *noopExecutor) exec(bin string, frontParams []string, filePath string, 
 	return nil
 }
 
-func (ne *noopExecutor) cleanup() error {
+func (ne *NoopExecutor) Cleanup() error {
 	return nil
 }

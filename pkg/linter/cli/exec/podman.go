@@ -8,6 +8,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"os/exec"
+	"os/user"
+	"path/filepath"
+	"strconv"
+	"time"
 
 	"github.com/containerd/platforms"
 	"github.com/containers/podman/v5/pkg/api/handlers"
@@ -23,17 +31,9 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"net/http"
-	"os"
-	"os/exec"
-	"os/user"
-	"path/filepath"
-	"strconv"
-	"time"
 )
 
-type podmanExecutor struct {
+type PodmanExecutor struct {
 	Name   string
 	Image  string
 	client *context.Context
@@ -42,7 +42,7 @@ type podmanExecutor struct {
 
 var podmanInstalled = false
 
-func willPodman() error {
+func WillPodman() error {
 
 	if podmanInstalled {
 		return nil
@@ -83,7 +83,7 @@ func getPodmanMachineSocket() (socketPath string, err error) {
 	return
 }
 
-func (e *podmanExecutor) setup() error {
+func (e *PodmanExecutor) Setup() error {
 
 	ctx := context.Background()
 
@@ -124,7 +124,7 @@ func (e *podmanExecutor) setup() error {
 	if err != nil {
 		return err
 	}
-	wdContainer, err := getwdContainer()
+	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
 		return err
 	}
@@ -141,6 +141,9 @@ func (e *podmanExecutor) setup() error {
 	s.WorkDir = wdContainer
 	s.UserNS = specgen.Namespace{
 		NSMode: "keep-id",
+	}
+	s.NetNS = specgen.Namespace{
+		NSMode: specgen.NoNetwork,
 	}
 	s.Mounts = []spec.Mount{
 		{
@@ -165,7 +168,7 @@ func (e *podmanExecutor) setup() error {
 	return nil
 }
 
-func (e *podmanExecutor) pull() error {
+func (e *PodmanExecutor) pull() error {
 	_, err := images.Pull(*e.client, e.Image, nil)
 	if err != nil {
 		return err
@@ -173,18 +176,19 @@ func (e *podmanExecutor) pull() error {
 	return nil
 }
 
-func (e *podmanExecutor) exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, stderr io.Writer) error {
+func (e *PodmanExecutor) Exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, stderr io.Writer) error {
 
-	wdContainer, err := getwdContainer()
+	targetFile := ToLinuxPath(filePath)
+	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
 		return err
 	}
+
 	if chdir {
-		wdContainer = filepath.Join(wdContainer, filepath.Dir(filePath))
+		wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
 	}
-	targetFile := filePath
 	if chdir {
-		targetFile = filepath.Base(filePath)
+		targetFile = filepath.Base(targetFile)
 	}
 
 	cmd := append([]string{bin}, frontParams...)
@@ -256,7 +260,7 @@ func (e *podmanExecutor) exec(bin string, frontParams []string, filePath string,
 	}
 }
 
-func (e *podmanExecutor) cleanup() error {
+func (e *PodmanExecutor) Cleanup() error {
 
 	// TODO cleanup based on labels (project, language)
 

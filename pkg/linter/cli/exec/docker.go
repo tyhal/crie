@@ -8,20 +8,21 @@ import (
 	"errors"
 	"fmt"
 
+	"io"
+	"os"
+	"path/filepath"
+	"strconv"
+	"time"
+
 	"github.com/containerd/platforms"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"os"
-	"path/filepath"
-	"strconv"
-	"time"
 )
 
-type dockerExecutor struct {
+type DockerExecutor struct {
 	Name   string
 	Image  string
 	client *client.Client
@@ -30,7 +31,7 @@ type dockerExecutor struct {
 
 var dockerInstalled = false
 
-func willDocker() error {
+func WillDocker() error {
 	if dockerInstalled {
 		return nil
 	}
@@ -42,7 +43,7 @@ func willDocker() error {
 	return nil
 }
 
-func (e *dockerExecutor) setup() error {
+func (e *DockerExecutor) Setup() error {
 	ctx := context.Background()
 
 	// Add our clientDocker
@@ -65,7 +66,7 @@ func (e *dockerExecutor) setup() error {
 	if err != nil {
 		return err
 	}
-	wdContainer, err := getwdContainer()
+	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
 		return err
 	}
@@ -79,10 +80,11 @@ func (e *dockerExecutor) setup() error {
 
 	resp, err := e.client.ContainerCreate(ctx,
 		&container.Config{
-			Entrypoint: []string{},
-			Cmd:        []string{"/bin/sh", "-c", "tail -f /dev/null"},
-			Image:      e.Image,
-			WorkingDir: wdContainer,
+			Entrypoint:      []string{},
+			Cmd:             []string{"/bin/sh", "-c", "tail -f /dev/null"},
+			Image:           e.Image,
+			WorkingDir:      wdContainer,
+			NetworkDisabled: true,
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
@@ -92,7 +94,8 @@ func (e *dockerExecutor) setup() error {
 					Target: wdContainer,
 				},
 			},
-		}, nil,
+		},
+		nil,
 		&currPlatform,
 		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name), shortid))
 	if err != nil {
@@ -103,7 +106,7 @@ func (e *dockerExecutor) setup() error {
 	return e.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 }
 
-func (e *dockerExecutor) pull(ctx context.Context) error {
+func (e *DockerExecutor) pull(ctx context.Context) error {
 
 	// Ensure we have the Image downloaded
 	pullstat, err := e.client.ImagePull(ctx, e.Image, image.PullOptions{})
@@ -123,23 +126,24 @@ func (e *dockerExecutor) pull(ctx context.Context) error {
 	return err
 }
 
-func (e *dockerExecutor) exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, _ io.Writer) error {
+func (e *DockerExecutor) Exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, _ io.Writer) error {
 
 	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 
 	ctx := context.Background()
 
 	// Ensure we can mount our filesystem to the same path inside the container
-	containerWD, err := getwdContainer()
+	targetFile := ToLinuxPath(filePath)
+	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
 		return err
 	}
+
 	if chdir {
-		containerWD = filepath.Join(containerWD, filepath.Dir(filePath))
+		wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
 	}
-	targetFile := filePath
 	if chdir {
-		targetFile = filepath.Base(filePath)
+		targetFile = filepath.Base(targetFile)
 	}
 
 	cmd := append([]string{bin}, frontParams...)
@@ -149,7 +153,7 @@ func (e *dockerExecutor) exec(bin string, frontParams []string, filePath string,
 	log.Trace(cmd)
 	config := container.ExecOptions{
 		Cmd:          cmd,
-		WorkingDir:   containerWD,
+		WorkingDir:   wdContainer,
 		AttachStderr: true,
 		AttachStdout: true,
 		Tty:          false,
@@ -197,7 +201,7 @@ func (e *dockerExecutor) exec(bin string, frontParams []string, filePath string,
 	}
 }
 
-func (e *dockerExecutor) cleanup() error {
+func (e *DockerExecutor) Cleanup() error {
 
 	// TODO cleanup based on labels (project, language)
 
