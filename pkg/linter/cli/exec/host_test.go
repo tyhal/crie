@@ -43,6 +43,12 @@ func TestHostExecutor_Run(t *testing.T) {
 	front := []string{"-c", script, "_"}
 	var out bytes.Buffer
 
+	ei := ExecInstance{
+		Bin:   bin,
+		Start: front,
+		End:   nil,
+	}
+
 	cwd, err := os.Getwd()
 	assert.NoError(t, err)
 
@@ -59,7 +65,8 @@ func TestHostExecutor_Run(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			out.Reset()
-			err = e.Exec(bin, front, filePath, nil, tc.chdir, &out, &out)
+			ei.ChDir = tc.chdir
+			err = e.Exec(ei, filePath, &out, &out)
 			assert.NoError(t, err, "exec with %s should succeed", tc.name)
 			stdout := out.String()
 			assert.Contains(t, stdout, "PWD="+tc.expPWD)

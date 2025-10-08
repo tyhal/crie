@@ -3,6 +3,31 @@
   "$id": "https://github.com/tyhal/crie/cmd/crie/config/language/languages",
   "$ref": "#/$defs/Languages",
   "$defs": {
+    "ExecInstance": {
+      "properties": {
+        "bin": {
+          "type": "string",
+          "description": "the binary or command to use"
+        },
+        "start": {
+          "$ref": "#/$defs/Par",
+          "description": "parameters that will be put in front of the file path"
+        },
+        "end": {
+          "$ref": "#/$defs/Par",
+          "description": "parameters that will be put behind the file path"
+        },
+        "chdir": {
+          "type": "boolean",
+          "description": "if true the tool will change directory to where the target file is located"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "bin"
+      ]
+    },
     "Language": {
       "properties": {
         "match": {
@@ -54,32 +79,20 @@
           ],
           "description": "the most common linter type, a cli tool"
         },
-        "bin": {
-          "type": "string",
-          "description": "the binary or command to use"
-        },
-        "start": {
-          "$ref": "#/$defs/Par",
-          "description": "parameters that will be put in front of the file path"
-        },
-        "end": {
-          "$ref": "#/$defs/Par",
-          "description": "parameters that will be put behind the file path"
+        "exec": {
+          "$ref": "#/$defs/ExecInstance",
+          "description": "settings for the command to run"
         },
         "img": {
           "type": "string",
           "description": "the container image to pull and use"
-        },
-        "chdir": {
-          "type": "boolean",
-          "description": "if true the tool will change directory to where the target file is located"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
         "type",
-        "bin"
+        "exec"
       ]
     },
     "LintNoop": {
