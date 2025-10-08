@@ -176,7 +176,7 @@ func (e *PodmanExecutor) pull() error {
 	return nil
 }
 
-func (e *PodmanExecutor) Exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, stderr io.Writer) error {
+func (e *PodmanExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, stderr io.Writer) error {
 
 	targetFile := ToLinuxPath(filePath)
 	wdContainer, err := GetWorkdirAsLinuxPath()
@@ -184,16 +184,16 @@ func (e *PodmanExecutor) Exec(bin string, frontParams []string, filePath string,
 		return err
 	}
 
-	if chdir {
+	if i.ChDir {
 		wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
 	}
-	if chdir {
+	if i.ChDir {
 		targetFile = filepath.Base(targetFile)
 	}
 
-	cmd := append([]string{bin}, frontParams...)
+	cmd := append([]string{i.Bin}, i.Start...)
 	cmd = append(cmd, targetFile)
-	cmd = append(cmd, backParams...)
+	cmd = append(cmd, i.End...)
 
 	log.Debug(cmd)
 	currentUser, err := user.Current()

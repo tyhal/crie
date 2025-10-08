@@ -3,22 +3,26 @@ languages:
   python:
     match: ['\.py$']
     fmt:
-      bin: black
       type: cli
-      start: ["--quiet"]
+      exec:
+        bin: black
+        start: ["--quiet"]
       img: "ghcr.io/tyhal/crie-dep-pip:latest"
     chk:
-      bin: pylint
+      exec:
+        bin: pylint
       type: cli
       img: "ghcr.io/tyhal/crie-dep-pip:latest"
   proto:
     match: ['\.proto$']
     fmt:
-      bin: protolint
+      exec:
+        bin: protolint
       type: cli
       img: "ghcr.io/tyhal/crie-dep-go:latest"
     chk:
-      bin: protolint
+      exec:
+        bin: protolint
       type: cli
       img: "ghcr.io/tyhal/crie-dep-go:latest"
   bash:
@@ -27,9 +31,10 @@ languages:
       type: shfmt
       language: bash
     chk:
-      bin: shellcheck
       type: cli
-      start: ["-x", "--shell=bash", "-Calways"]
+      exec:
+        bin: shellcheck
+        start: ["-x", "--shell=bash", "-Calways"]
       img: "docker.io/koalaman/shellcheck-alpine:stable"
   sh:
     match: ['\.sh$', '/script/[^.]*$', '^script/[^.]*$']
@@ -37,130 +42,151 @@ languages:
       type: shfmt
       language: posix
     chk:
-      bin: shellcheck
       type: cli
-      start: ["-x", "--shell=sh", "-Calways"]
+      exec:
+        bin: shellcheck
+        start: ["-x", "--shell=sh", "-Calways"]
       img: "docker.io/koalaman/shellcheck-alpine:stable"
   docker:
     match: ['Dockerfile$']
     chk:
-      bin: hadolint
       type: cli
-      start: ["--ignore", "DL3007", "--ignore", "DL3018", "--ignore", "DL3016", "--ignore", "DL4006"]
+      exec:
+        bin: hadolint
+        start: ["--ignore", "DL3007", "--ignore", "DL3018", "--ignore", "DL3016", "--ignore", "DL4006"]
       img: "docker.io/hadolint/hadolint:latest-alpine"
   yml:
     match: ['\.yml$', '\.yaml$']
     chk:
-      bin: yamllint
+      exec:
+        bin: yamllint
       type: cli
       img: "ghcr.io/tyhal/crie-dep-pip:latest"
     fmt:
       type: cli
-      bin: yamlfmt
+      exec:
+        bin: yamlfmt
       img: "ghcr.io/google/yamlfmt:latest"
   terraform:
     match: ['\.tf$']
     fmt:
-      bin: terraform
       type: cli
-      start: ["fmt"]
+      exec:
+        bin: terraform
+        start: ["fmt"]
       img: "docker.io/hashicorp/terraform:1.3.5"
     chk:
-      bin: tflint
       type: cli
-      start: ["--filter"]
-      chdir: true
+      exec:
+        bin: tflint
+        start: ["--filter"]
+        chdir: true
       img: "ghcr.io/terraform-linters/tflint"
   javascript:
     match: ['\.js$', '\.jsx$']
     fmt:
-      bin: standard
       type: cli
-      start: ["--fix"]
+      exec:
+        bin: standard
+        start: ["--fix"]
       img: "ghcr.io/tyhal/crie-dep-npm:latest"
     chk:
-      bin: standard
       type: cli
+      exec:
+        bin: standard
       img: "ghcr.io/tyhal/crie-dep-npm:latest"
   golang:
     match: ['\.go$']
     fmt:
-      bin: gofmt
       type: cli
-      start: ["-l", "-w"]
+      exec:
+        bin: gofmt
+        start: ["-l", "-w"]
       img: "ghcr.io/tyhal/crie-dep-go:latest"
     chk:
-      bin: golint
       type: cli
-      start: ["-set_exit_status"]
+      exec:
+        bin: golint
+        start: ["-set_exit_status"]
       img: "ghcr.io/tyhal/crie-dep-go:latest"
   markdown:
     match: ['\.md$']
     fmt:
-      bin: remark
       type: cli
-      start: ["--use", "remark-preset-lint-recommended"]
-      end: ["-o"]
+      exec:
+        bin: remark
+        start: ["--use", "remark-preset-lint-recommended"]
+        end: ["-o"]
       img: "ghcr.io/tyhal/crie-dep-npm:latest"
     chk:
-      bin: vale
       type: cli
-      start: ["--config=/etc/vale/.vale.ini"]
+      exec:
+        bin: vale
+        start: ["--config=/etc/vale/.vale.ini"]
       img: "ghcr.io/tyhal/crie-dep-go:latest"
   asciidoctor:
     match: ['\.adoc$']
     chk:
-      bin: vale
       type: cli
-      start: ["--config=/etc/vale/.vale.ini"]
+      exec:
+        bin: vale
+        start: ["--config=/etc/vale/.vale.ini"]
       img: "ghcr.io/tyhal/crie-dep-go:latest"
   json:
     match: ['\.json$', '\.JSON$']
     fmt:
-      bin: jsonlint
       type: cli
-      start: ["-i", "-s", "-c", "-q"]
+      exec:
+        bin: jsonlint
+        start: ["-i", "-s", "-c", "-q"]
       img: "ghcr.io/tyhal/crie-dep-npm:latest"
     chk:
-      bin: jsonlint
       type: cli
-      start: ["-q"]
+      exec:
+        bin: jsonlint
+        start: ["-q"]
       img: "ghcr.io/tyhal/crie-dep-npm:latest"
   cpp:
     match: ['\.cc$', '\.cpp$']
     fmt:
-      bin: clang-format
       type: cli
-      start: ["-style=file", "-i"]
+      exec:
+        bin: clang-format
+        start: ["-style=file", "-i"]
       img: "ghcr.io/tyhal/crie-dep-apk:latest"
     chk:
-      bin: cppcheck
       type: cli
-      start: ["--enable=all", "--language=c++", "--suppress=operatorEqRetRefThis", "--suppress=operatorEq", "--suppress=noExplicitConstructor", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=noConstructor", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
+      exec:
+        bin: cppcheck
+        start: ["--enable=all", "--language=c++", "--suppress=operatorEqRetRefThis", "--suppress=operatorEq", "--suppress=noExplicitConstructor", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=noConstructor", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
       img: "ghcr.io/tyhal/crie-dep-apk:latest"
   cppheaders:
     match: ['\.h$', '\.hpp$']
     fmt:
-      bin: clang-format
       type: cli
-      start: ["-style=file", "-i"]
+      exec:
+        bin: clang-format
+        start: ["-style=file", "-i"]
       img: "ghcr.io/tyhal/crie-dep-apk:latest"
   c:
     match: ['\.c$']
     fmt:
-      bin: clang-format
       type: cli
-      start: ["-style=file", "-i"]
+      exec:
+        bin: clang-format
+        start: ["-style=file", "-i"]
       img: "ghcr.io/tyhal/crie-dep-apk:latest"
     chk:
-      bin: cppcheck
       type: cli
-      start: ["--enable=all", "--language=c", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
+      exec:
+        bin: cppcheck
+        start: ["--enable=all", "--language=c", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
       img: "ghcr.io/tyhal/crie-dep-apk:latest"
   cmake:
     match: ['CMakeLists.txt$', '\.cmake$']
     chk:
-      bin: cmakelint
       type: cli
-      start: ["--config=/home/standards/.config/cmakelintrc"]
+      exec:
+        bin: cmakelint
+        start: ["--config=/home/standards/.config/cmakelintrc"]
       img: "ghcr.io/tyhal/crie-dep-pip:latest"

@@ -19,17 +19,17 @@ func (e *HostExecutor) Setup() error {
 	return nil
 }
 
-func (e *HostExecutor) Exec(bin string, frontParams []string, filePath string, endParams []string, chdir bool, stdout io.Writer, stderr io.Writer) error {
+func (e *HostExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, stderr io.Writer) error {
 	targetFilePath := filePath
-	if chdir {
+	if i.ChDir {
 		targetFilePath = filepath.Base(filePath)
 	}
 
-	params := append(frontParams, targetFilePath)
-	params = append(params, endParams...)
+	params := append(i.Start, targetFilePath)
+	params = append(params, i.End...)
 
-	c := exec.Command(bin, params...)
-	if chdir {
+	c := exec.Command(i.Bin, params...)
+	if i.ChDir {
 		c.Dir = filepath.Dir(filePath)
 	} else {
 		cwd, err := os.Getwd()

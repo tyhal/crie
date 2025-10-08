@@ -1,9 +1,10 @@
 package language
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
-	"testing"
 )
 
 func TestConfigLinter_UnmarshalYAML(t *testing.T) {
@@ -16,7 +17,8 @@ func TestConfigLinter_UnmarshalYAML(t *testing.T) {
 		{
 			name: "cli linter",
 			yaml: `type: cli
-bin: "eslint"`,
+exec: 
+  bin: "eslint"`,
 			expectName: "eslint",
 			wantErr:    false,
 		},

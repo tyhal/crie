@@ -126,7 +126,7 @@ func (e *DockerExecutor) pull(ctx context.Context) error {
 	return err
 }
 
-func (e *DockerExecutor) Exec(bin string, frontParams []string, filePath string, backParams []string, chdir bool, stdout io.Writer, _ io.Writer) error {
+func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, _ io.Writer) error {
 
 	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 
@@ -139,16 +139,16 @@ func (e *DockerExecutor) Exec(bin string, frontParams []string, filePath string,
 		return err
 	}
 
-	if chdir {
+	if i.ChDir {
 		wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
 	}
-	if chdir {
+	if i.ChDir {
 		targetFile = filepath.Base(targetFile)
 	}
 
-	cmd := append([]string{bin}, frontParams...)
+	cmd := append([]string{i.Bin}, i.Start...)
 	cmd = append(cmd, targetFile)
-	cmd = append(cmd, backParams...)
+	cmd = append(cmd, i.End...)
 
 	log.Trace(cmd)
 	config := container.ExecOptions{

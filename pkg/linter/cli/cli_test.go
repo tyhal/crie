@@ -13,8 +13,19 @@ import (
 	"testing"
 )
 
+func TestLintCli_isContainer(t *testing.T) {
+	{
+		l := &LintCli{Img: "docker.io/tyhal/crie-dep-apk:latest"}
+		assert.True(t, l.isContainer())
+	}
+	{
+		l := &LintCli{}
+		assert.False(t, l.isContainer())
+	}
+}
+
 func TestLint_Name(t *testing.T) {
-	l := &LintCli{Bin: "test"}
+	l := &LintCli{Exec: exec.ExecInstance{Bin: "test"}}
 	assert.Equal(t, "test", l.Name())
 }
 
@@ -37,5 +48,4 @@ func TestLint_Run(t *testing.T) {
 	assert.NoError(t, report.Err)
 	assert.Equal(t, "stdout", report.StdOut.(*bytes.Buffer).String())
 	assert.Equal(t, "stderr", report.StdErr.(*bytes.Buffer).String())
-
 }

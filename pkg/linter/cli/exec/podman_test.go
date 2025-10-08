@@ -6,6 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWillPodman(t *testing.T) {
+	assert.NoError(t, WillPodman())
+}
+
 func TestPodman_SocketGet(t *testing.T) {
 	if WillPodman() != nil {
 		t.Skip()
