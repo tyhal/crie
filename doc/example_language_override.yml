@@ -6,16 +6,16 @@ languages:
   python: # this will override the entire pre-existing python setup
     match: '\.py'
     fmt:
-      exec:
-bin: black
       type: cli
+      exec:
+        bin: black
       img: "example:1234" # you can override the container it will pull and run with
   cpp:
     match: ['\.cc', '\.cpp'] # matches can be a list of regex's
     chk:
-      exec:
-bin: cppcheck
       type: cli
+      exec:
+        bin: cppcheck
   golang: # disabling a language looks like this ...yeah I should probably have something simpler to remove it
     match: []
     chk:
