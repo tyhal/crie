@@ -6,9 +6,11 @@
 package cli
 
 import (
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"math"
 	"syscall"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var maxFilesPerRoutine = 5
@@ -28,7 +30,7 @@ func (e *LintCli) MaxConcurrency() int {
 	var limit syscall.Rlimit
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &limit)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("maxconcurrency failed to get limit: %w", err))
 	}
 
 	oldLimit := limit.Cur

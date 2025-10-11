@@ -44,7 +44,7 @@ var FmtCmd = &cobra.Command{
 		err := crieRun.Run("fmt")
 
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(fmt.Errorf("crie format failed: %w", err))
 		}
 	},
 }
@@ -70,7 +70,7 @@ var ChkCmd = &cobra.Command{
 		err := crieRun.Run("chk")
 
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(fmt.Errorf("crie check failed: %w", err))
 		}
 	},
 }
@@ -187,7 +187,7 @@ func stage(stageName string) {
 		if crieRun.Options.Continue {
 			log.Error(err)
 		} else {
-			log.Fatal(err)
+			log.Fatal(fmt.Errorf("crie %s failed: %w", stageName, err))
 		}
 	}
 }

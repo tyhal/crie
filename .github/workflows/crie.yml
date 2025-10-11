@@ -31,11 +31,10 @@ jobs:
       - name: Run crie all
         uses: tyhal/crie-action@main
         with:
-          command: lnt
+          command: config
           lint_continue: 'true'
           lint_passes: 'true'
           lint_git_diff: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
           lint_git_target: 'origin/${{ github.base_ref || github.ref_name }}'
       - name: ensure no diff
         run: git diff --exit-code
-
