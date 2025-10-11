@@ -31,7 +31,7 @@ jobs:
       - name: Run crie all
         uses: tyhal/crie-action@main
         with:
-          command: config
+          command: lnt
           lint_continue: 'true'
           lint_passes: 'true'
           lint_git_diff: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
