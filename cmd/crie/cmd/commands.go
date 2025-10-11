@@ -180,16 +180,19 @@ var SchemaProjectCmd = &cobra.Command{
 	},
 }
 
-func stage(stageName string) {
+func stage(stageName string) error {
 	log.Info("❨ " + stageName + " ❩")
 	err := crieRun.Run(stageName)
 	if err != nil {
 		if crieRun.Options.Continue {
+			// Log the error but allow subsequent stages to run.
 			log.Error(err)
-		} else {
-			log.Fatal(fmt.Errorf("crie %s failed: %w", stageName, err))
+			return fmt.Errorf("crie %s failed: %w", stageName, err)
 		}
+		// In non-continue mode, fail immediately.
+		log.Fatal(fmt.Errorf("crie %s failed: %w", stageName, err))
 	}
+	return nil
 }
 
 // LntCmd Runs all commands
@@ -199,7 +202,16 @@ var LntCmd = &cobra.Command{
 	Short:   "Runs both fmt and then chk",
 	Long:    `Runs both format and then check`,
 	Run: func(_ *cobra.Command, _ []string) {
-		stage("fmt")
-		stage("chk")
+		var failedStages []string
+		if err := stage("fmt"); err != nil {
+			failedStages = append(failedStages, "fmt")
+		}
+		if err := stage("chk"); err != nil {
+			failedStages = append(failedStages, "chk")
+		}
+		if len(failedStages) > 0 {
+			// Even in Continue mode, eventually fail if any stage failed.
+			log.Fatal(fmt.Errorf("crie stages failed: %s", strings.Join(failedStages, ", ")))
+		}
 	},
 }
