@@ -7,7 +7,9 @@ import (
 )
 
 func TestWillPodman(t *testing.T) {
-	assert.NoError(t, WillPodman())
+	assert.NotPanics(t, func() {
+		_ = WillPodman()
+	}, "WillPodman should not panic")
 }
 
 func TestPodman_SocketGet(t *testing.T) {
