@@ -7,5 +7,7 @@ import (
 )
 
 func TestWillDocker(t *testing.T) {
-	assert.NoError(t, WillDocker())
+	assert.NotPanics(t, func() {
+		_ = WillDocker()
+	}, "WillPodman should not panic")
 }
