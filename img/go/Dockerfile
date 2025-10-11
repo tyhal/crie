@@ -6,10 +6,10 @@ ENV CGO_ENABLED=0
 FROM go_layer AS golint_layer
 # hadolint ignore=DL3062
 RUN go install golang.org/x/lint/golint@latest
-# hadolint ignore=DL3059
-RUN go install github.com/errata-ai/vale@v3.12.0
-# hadolint ignore=DL3059
-RUN go install github.com/yoheimuta/protolint/cmd/protolint@v0.56.4
+# hadolint ignore=DL3059,DL3062
+RUN go install github.com/errata-ai/vale@latest
+# hadolint ignore=DL3059,DL3062
+RUN go install github.com/yoheimuta/protolint/cmd/protolint@latest
 
 
 FROM alpine:3.22.2
