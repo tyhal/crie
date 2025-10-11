@@ -31,6 +31,8 @@ jobs:
       # Run crie through its action
       - name: install crie
         run: go install ./cmd/crie
+      - name: assert podman not installed
+        run: which podman && exit 1
       - name: Run crie all
         uses: tyhal/crie-action@main
         with:
