@@ -11,7 +11,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strconv"
@@ -22,6 +21,7 @@ import (
 	"github.com/containers/podman/v5/pkg/bindings"
 	"github.com/containers/podman/v5/pkg/bindings/containers"
 	"github.com/containers/podman/v5/pkg/bindings/images"
+	"github.com/containers/podman/v5/pkg/bindings/system"
 	"github.com/containers/podman/v5/pkg/machine/define"
 	"github.com/containers/podman/v5/pkg/machine/env"
 	"github.com/containers/podman/v5/pkg/machine/provider"
@@ -37,18 +37,31 @@ type PodmanExecutor struct {
 	Name   string
 	Image  string
 	client *context.Context
+	cancel context.CancelFunc
 	id     string
 }
 
 var podmanInstalled = false
 
 func WillPodman() error {
-
 	if podmanInstalled {
 		return nil
 	}
 
-	_, err := exec.LookPath("podman")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	
+	uri, err := getPodmanMachineSocket()
+	if err != nil {
+		return err
+	}
+
+	c, err := bindings.NewConnection(ctx, uri)
+	if err != nil {
+		return err
+	}
+
+	_, err = system.Info(c, &system.InfoOptions{})
 	if err != nil {
 		return err
 	}
@@ -58,6 +71,11 @@ func WillPodman() error {
 }
 
 func getPodmanMachineSocket() (socketPath string, err error) {
+	if _, found := os.LookupEnv("CONTAINER_HOST"); found {
+		socketPath = ""
+		return
+	}
+
 	currProvider, err := provider.Get()
 	if err != nil {
 		return
@@ -72,31 +90,26 @@ func getPodmanMachineSocket() (socketPath string, err error) {
 		if userErr != nil {
 			return socketPath, userErr
 		}
-		socketPath = fmt.Sprintf("/run/user/%s/podman/podman.sock", currentUser.Uid)
+		socketPath = fmt.Sprintf("unix:///run/user/%s/podman/podman.sock", currentUser.Uid)
 		return
 	}
 	podmanSocket, _, err := mc.ConnectionInfo(currProvider.VMType())
 	if err != nil {
 		return
 	}
-	socketPath = podmanSocket.Path
+	socketPath = fmt.Sprintf("unix://%s", podmanSocket.Path)
 	return
 }
 
 func (e *PodmanExecutor) Setup() error {
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	e.cancel = cancel
 
 	{
-		var uri string
-		if _, found := os.LookupEnv("CONTAINER_HOST"); found {
-			uri = ""
-		} else {
-			socketPath, err := getPodmanMachineSocket()
-			if err != nil {
-				return err
-			}
-			uri = fmt.Sprintf("unix://%s", socketPath)
+		uri, err := getPodmanMachineSocket()
+		if err != nil {
+			return err
 		}
 
 		c, err := bindings.NewConnection(ctx, uri)
@@ -264,6 +277,10 @@ func (e *PodmanExecutor) Cleanup() error {
 
 	// TODO cleanup based on labels (project, language)
 
+	if e.cancel != nil {
+		defer e.cancel()
+	}
+
 	if e.id != "" {
 		var timeoutSeconds uint = 3
 		var ignore = false
@@ -288,7 +305,7 @@ func (e *PodmanExecutor) Cleanup() error {
 		if err != nil {
 			return err
 		}
-
+		e.id = ""
 	}
 
 	return nil

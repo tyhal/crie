@@ -26,6 +26,8 @@ type DockerExecutor struct {
 	Name   string
 	Image  string
 	client *client.Client
+	ctx    context.Context
+	cancel context.CancelFunc
 	id     string
 }
 
@@ -44,7 +46,9 @@ func WillDocker() error {
 }
 
 func (e *DockerExecutor) Setup() error {
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	e.ctx = ctx
+	e.cancel = cancel
 
 	// Add our clientDocker
 	{
@@ -55,9 +59,9 @@ func (e *DockerExecutor) Setup() error {
 		e.client = c
 	}
 
-	_, err := e.client.ImageHistory(ctx, e.Image)
+	_, err := e.client.ImageHistory(e.ctx, e.Image)
 	if err != nil {
-		if err := e.pull(ctx); err != nil {
+		if err := e.pull(); err != nil {
 			return err
 		}
 	}
@@ -78,7 +82,7 @@ func (e *DockerExecutor) Setup() error {
 	rand.Read(b)
 	shortid := hex.EncodeToString(b)
 
-	resp, err := e.client.ContainerCreate(ctx,
+	resp, err := e.client.ContainerCreate(e.ctx,
 		&container.Config{
 			Entrypoint:      []string{},
 			Cmd:             []string{"/bin/sh", "-c", "tail -f /dev/null"},
@@ -103,13 +107,13 @@ func (e *DockerExecutor) Setup() error {
 	}
 	e.id = resp.ID
 
-	return e.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
+	return e.client.ContainerStart(e.ctx, resp.ID, container.StartOptions{})
 }
 
-func (e *DockerExecutor) pull(ctx context.Context) error {
+func (e *DockerExecutor) pull() error {
 
 	// Ensure we have the Image downloaded
-	pullstat, err := e.client.ImagePull(ctx, e.Image, image.PullOptions{})
+	pullstat, err := e.client.ImagePull(e.ctx, e.Image, image.PullOptions{})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"stage": "docker pull",
@@ -129,8 +133,6 @@ func (e *DockerExecutor) pull(ctx context.Context) error {
 func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, _ io.Writer) error {
 
 	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
-
-	ctx := context.Background()
 
 	// Ensure we can mount our filesystem to the same path inside the container
 	targetFile := ToLinuxPath(filePath)
@@ -158,7 +160,7 @@ func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer,
 		AttachStdout: true,
 		Tty:          false,
 	}
-	execResp, err := e.client.ContainerExecCreate(ctx, e.id, config)
+	execResp, err := e.client.ContainerExecCreate(e.ctx, e.id, config)
 	if err != nil {
 		return err
 	}
@@ -167,7 +169,7 @@ func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer,
 		Detach: false,
 		Tty:    false,
 	}
-	attach, err := e.client.ContainerExecAttach(ctx, execResp.ID, startConfig)
+	attach, err := e.client.ContainerExecAttach(e.ctx, execResp.ID, startConfig)
 	if err != nil {
 		return err
 	}
@@ -187,7 +189,7 @@ func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer,
 		case <-timeout:
 			return errors.New("exec timed out")
 		case <-check:
-			inspect, err := e.client.ContainerExecInspect(ctx, execResp.ID)
+			inspect, err := e.client.ContainerExecInspect(e.ctx, execResp.ID)
 			if err != nil {
 				return err
 			}
@@ -203,22 +205,27 @@ func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer,
 
 func (e *DockerExecutor) Cleanup() error {
 
+	if e.cancel != nil {
+		defer e.cancel()
+	}
+
 	// TODO cleanup based on labels (project, language)
 
 	if e.id != "" {
-		ctx := context.Background()
 		timeoutSeconds := 3
 
 		d := log.WithFields(log.Fields{"dockerId": e.id})
 
 		d.Debug("stopping container")
-		if err := e.client.ContainerStop(ctx, e.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
+		if err := e.client.ContainerStop(e.ctx, e.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
 			return err
 		}
 		d.Debug("removing container")
-		if err := e.client.ContainerRemove(ctx, e.id, container.RemoveOptions{}); err != nil {
+		if err := e.client.ContainerRemove(e.ctx, e.id, container.RemoveOptions{}); err != nil {
 			return err
 		}
+		e.id = ""
 	}
+
 	return nil
 }
