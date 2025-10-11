@@ -33,6 +33,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// PodmanExecutor runs CLI tools inside a Podman container.
 type PodmanExecutor struct {
 	Name   string
 	Image  string
@@ -43,6 +44,7 @@ type PodmanExecutor struct {
 
 var podmanInstalled = false
 
+// WillPodman checks whether Podman is available and responsive on the host.
 func WillPodman() error {
 	if podmanInstalled {
 		return nil
@@ -101,6 +103,7 @@ func getPodmanMachineSocket() (socketPath string, err error) {
 	return
 }
 
+// Setup creates and starts a disposable Podman container for executing commands.
 func (e *PodmanExecutor) Setup() error {
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -189,7 +192,8 @@ func (e *PodmanExecutor) pull() error {
 	return nil
 }
 
-func (e *PodmanExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, stderr io.Writer) error {
+// Exec runs the configured command inside the prepared Podman container.
+func (e *PodmanExecutor) Exec(i Instance, filePath string, stdout io.Writer, stderr io.Writer) error {
 
 	targetFile := ToLinuxPath(filePath)
 	wdContainer, err := GetWorkdirAsLinuxPath()
@@ -273,6 +277,7 @@ func (e *PodmanExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer,
 	}
 }
 
+// Cleanup stops and removes the temporary Podman container created during Setup.
 func (e *PodmanExecutor) Cleanup() error {
 
 	// TODO cleanup based on labels (project, language)

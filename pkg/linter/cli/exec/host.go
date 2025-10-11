@@ -7,19 +7,23 @@ import (
 	"path/filepath"
 )
 
+// HostExecutor runs CLI tools directly on the host operating system.
 type HostExecutor struct {
 }
 
+// WillHost checks whether the given binary can be found on the host PATH.
 func WillHost(bin string) error {
 	_, err := exec.LookPath(bin)
 	return err
 }
 
+// Setup performs any required initialization for host execution.
 func (e *HostExecutor) Setup() error {
 	return nil
 }
 
-func (e *HostExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, stderr io.Writer) error {
+// Exec runs the configured CLI tool on the host against the provided file.
+func (e *HostExecutor) Exec(i Instance, filePath string, stdout io.Writer, stderr io.Writer) error {
 	targetFilePath := filePath
 	if i.ChDir {
 		targetFilePath = filepath.Base(filePath)
@@ -44,6 +48,7 @@ func (e *HostExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, s
 	return c.Run()
 }
 
+// Cleanup releases any resources allocated during host execution setup.
 func (e *HostExecutor) Cleanup() error {
 	return nil
 }

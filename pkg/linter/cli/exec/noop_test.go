@@ -17,7 +17,7 @@ func TestNoopExecutor_Exec(t *testing.T) {
 
 	var outB, errB bytes.Buffer
 
-	err := executor.Exec(ExecInstance{}, "test.txt", &outB, &errB)
+	err := executor.Exec(Instance{}, "test.txt", &outB, &errB)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "stdout", outB.String())
