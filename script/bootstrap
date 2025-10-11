@@ -6,19 +6,12 @@ has_command() {
 }
 
 install_brew() {
-	brew install \
-		pkg-config \
-		gpgme \
-		gnupg
+	xargs brew install < "$(dirname "$0")/pkgs/brew.txt"
 }
 
 install_apt() {
-	sudo apt-get update
-	sudo apt-get install -y \
-		libgpgme-dev \
-		libbtrfs-dev \
-		libdevmapper-dev \
-		pkg-config
+	sudo apt-get update -qq
+	xargs sudo apt-get install -y --no-install-recommends < "$(dirname "$0")/pkgs/apt.txt"
 }
 
 if has_command brew; then
