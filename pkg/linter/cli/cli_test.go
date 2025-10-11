@@ -25,7 +25,7 @@ func TestLintCli_isContainer(t *testing.T) {
 }
 
 func TestLint_Name(t *testing.T) {
-	l := &LintCli{Exec: exec.ExecInstance{Bin: "test"}}
+	l := &LintCli{Exec: exec.Instance{Bin: "test"}}
 	assert.Equal(t, "test", l.Name())
 }
 

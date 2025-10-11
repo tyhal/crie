@@ -43,7 +43,7 @@ func TestHostExecutor_Run(t *testing.T) {
 	front := []string{"-c", script, "_"}
 	var out bytes.Buffer
 
-	ei := ExecInstance{
+	ei := Instance{
 		Bin:   bin,
 		Start: front,
 		End:   nil,

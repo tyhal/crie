@@ -13,9 +13,9 @@ import (
 
 // LintCli defines a predefined command to run against a file
 type LintCli struct {
-	Type     string            `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
-	Exec     exec.ExecInstance `json:"exec" yaml:"exec" jsonschema_required:"true" jsonschema_description:"settings for the command to run" `
-	Img      string            `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
+	Type     string        `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
+	Exec     exec.Instance `json:"exec" yaml:"exec" jsonschema_required:"true" jsonschema_description:"settings for the command to run" `
+	Img      string        `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
 	executor exec.Executor
 }
 

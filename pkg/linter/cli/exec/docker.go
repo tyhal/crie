@@ -22,6 +22,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// DockerExecutor runs CLI tools inside a Docker container.
 type DockerExecutor struct {
 	Name   string
 	Image  string
@@ -33,6 +34,7 @@ type DockerExecutor struct {
 
 var dockerInstalled = false
 
+// WillDocker checks whether Docker is available on the host (via the socket).
 func WillDocker() error {
 	if dockerInstalled {
 		return nil
@@ -45,6 +47,7 @@ func WillDocker() error {
 	return nil
 }
 
+// Setup creates and starts a disposable Docker container for executing commands.
 func (e *DockerExecutor) Setup() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	e.ctx = ctx
@@ -130,7 +133,8 @@ func (e *DockerExecutor) pull() error {
 	return err
 }
 
-func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer, _ io.Writer) error {
+// Exec runs the configured command inside the prepared Docker container.
+func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, _ io.Writer) error {
 
 	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 
@@ -203,6 +207,7 @@ func (e *DockerExecutor) Exec(i ExecInstance, filePath string, stdout io.Writer,
 	}
 }
 
+// Cleanup stops and removes the temporary Docker container created during Setup.
 func (e *DockerExecutor) Cleanup() error {
 
 	if e.cancel != nil {
