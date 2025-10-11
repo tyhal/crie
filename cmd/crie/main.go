@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"sort"
 	"strings"
@@ -141,7 +142,7 @@ func addCrieCommand(cmd *cobra.Command) {
 
 func errFatal(err error) {
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("incorrect viper configuration: %w", err))
 	}
 }
 

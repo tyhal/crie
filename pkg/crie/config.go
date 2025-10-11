@@ -1,6 +1,7 @@
 package crie
 
 import (
+	"fmt"
 	"regexp"
 
 	log "github.com/sirupsen/logrus"
@@ -54,7 +55,7 @@ func (s *RunConfiguration) loadFileList() {
 		fileList, err = s.fileListAll()
 	}
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(fmt.Errorf("failed to get filelist from git: %w", err))
 	} else {
 		s.fileList = fileList
 	}
