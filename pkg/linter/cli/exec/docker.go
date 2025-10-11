@@ -52,7 +52,7 @@ func (e *DockerExecutor) Setup() error {
 
 	// Add our clientDocker
 	{
-		c, err := client.NewClientWithOpts()
+		c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		if err != nil {
 			return err
 		}
