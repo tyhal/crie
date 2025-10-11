@@ -1,0 +1,4 @@
+libgpgme-dev
+libbtrfs-dev
+libdevmapper-dev
+pkg-config
