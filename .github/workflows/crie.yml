@@ -16,6 +16,8 @@ jobs:
       - name: Fetch base ref for PR
         if: github.event_name == 'pull_request'
         run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+      - name: assert podman not installed
+        run: which podman && exit 1
       - name: Install system dependencies
         run: ./script/bootstrap
       - uses: actions/setup-go@v6
@@ -29,6 +31,8 @@ jobs:
           files: ./coverage.out
           token: ${{ secrets.CODECOV_TOKEN }}
       # Run crie through its action
+      - name: assert podman not installed
+        run: which podman && exit 1
       - name: install crie
         run: go install ./cmd/crie
       - name: assert podman not installed
