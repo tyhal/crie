@@ -6,12 +6,12 @@ has_command() {
 }
 
 install_brew() {
-	xargs brew install < "$(dirname "$0")/pkgs/brew.txt"
+	xargs brew install <"$(dirname "$0")/pkgs/brew.txt"
 }
 
 install_apt() {
 	sudo apt-get update -qq
-	xargs sudo apt-get install -y --no-install-recommends < "$(dirname "$0")/pkgs/apt.txt"
+	xargs sudo apt-get install -y --no-install-recommends <"$(dirname "$0")/pkgs/apt.txt"
 }
 
 if has_command brew; then
