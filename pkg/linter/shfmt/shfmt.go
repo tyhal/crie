@@ -11,13 +11,13 @@ import (
 	"mvdan.cc/sh/v3/syntax"
 )
 
-const ()
-
 // LintShfmt contains all the information needed to configure shfmt
 type LintShfmt struct {
 	Type     string `json:"type" yaml:"type" jsonschema:"enum=shfmt" jsonschema_description:"a built in shell formatter thanks to mvdan"`
 	Language string `json:"language" yaml:"language" jsonschema:"enum=bash,enum=posix,enum=sh,enum=mksh"`
 }
+
+var _ linter.Linter = (*LintShfmt)(nil)
 
 // Name returns the name of the linter
 func (l *LintShfmt) Name() string {

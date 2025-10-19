@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -48,14 +49,14 @@ var FmtCmd = &cobra.Command{
 	},
 }
 
-// LsCmd List support languages command
+// LsCmd Show support languages command
 var LsCmd = &cobra.Command{
 	Use:     "ls",
 	Aliases: []string{"list"},
-	Short:   "List languages",
-	Long:    `List all languages available and the commands run when used`,
+	Short:   "Show languages",
+	Long:    `Show all languages available and the commands run when used`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := crieRun.List()
+		err := crieRun.Languages.Show(os.Stdout)
 		if err != nil {
 			log.Fatal(fmt.Errorf("crie list failed: %w", err))
 		}
@@ -77,16 +78,19 @@ var ChkCmd = &cobra.Command{
 	},
 }
 
-// NonCmd List every type of file that just passes through
+// NonCmd Show every type of file that just passes through
 var NonCmd = &cobra.Command{
 	Use:     "non",
 	Aliases: []string{"not-linted"},
-	Short:   "List what isn't supported for this project",
-	Long: `List what isn't supported for this project
+	Short:   "Show what isn't supported for this project",
+	Long: `Show what isn't supported for this project
 
 Find the file extensions that dont have an associated regex match within crieRun`,
 	Run: func(cmd *cobra.Command, args []string) {
-		crieRun.NoStandards()
+		err := crieRun.NoStandards()
+		if err != nil {
+			log.Fatal(fmt.Errorf("finding unassociated files failed: %w", err))
+		}
 	},
 }
 

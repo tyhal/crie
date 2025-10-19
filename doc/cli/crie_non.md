@@ -1,10 +1,10 @@
 ## crie non
 
-List what isn't supported for this project
+Show what isn't supported for this project
 
 ### Synopsis
 
-List what isn't supported for this project
+Show what isn't supported for this project
 
 Find the file extensions that dont have an associated regex match within crieRun
 
