@@ -28,8 +28,6 @@ import (
 //	>>-
 //`
 
-var version = "dev"
-
 // RootCmd is the root Cobra command for the crie CLI.
 // It wires configuration, global flags, and subcommands together.
 var RootCmd = &cobra.Command{
@@ -45,7 +43,6 @@ format all python files
 	Long: `
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can sanity check any codebase.`,
-	Version: version,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
 		viper.SetConfigFile(projectConfigPath)
