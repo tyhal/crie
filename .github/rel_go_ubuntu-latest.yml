@@ -5,7 +5,7 @@ builds:
       - CGO_ENABLED=1
     ldflags:
       - -s -w
-      - -X internal.cli.version={{.Version}}
+      - -X main.version={{.Version}}
     goos:
       - linux
     goarch:
