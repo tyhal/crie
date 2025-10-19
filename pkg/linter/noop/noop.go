@@ -12,6 +12,8 @@ type LintNoop struct {
 	Type string `json:"type" yaml:"type" jsonschema:"enum=noop" jsonschema_description:"a linter type to do nothing"`
 }
 
+var _ linter.Linter = (*LintNoop)(nil)
+
 // Name returns the name of the linter
 func (l *LintNoop) Name() string {
 	return "noop"

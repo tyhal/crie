@@ -1,10 +1,10 @@
 ## crie ls
 
-List languages
+Show languages
 
 ### Synopsis
 
-List all languages available and the commands run when used
+Show all languages available and the commands run when used
 
 ```
 crie ls [flags]

@@ -19,6 +19,8 @@ type LintCli struct {
 	executor exec.Executor
 }
 
+var _ linter.Linter = (*LintCli)(nil)
+
 func (e *LintCli) isContainer() bool {
 	return e.Img != ""
 }

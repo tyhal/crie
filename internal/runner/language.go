@@ -2,8 +2,11 @@ package runner
 
 import (
 	"fmt"
+	"io"
 	"regexp"
+	"sort"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/tyhal/crie/pkg/linter"
 )
 
@@ -12,6 +15,32 @@ type Language struct {
 	Regex *regexp.Regexp
 	Fmt   linter.Linter
 	Chk   linter.Linter
+}
+
+// Languages store the name to a singular language configuration within crie
+type Languages map[string]*Language
+
+// Show to print all languages chkConf fmt and always commands
+func (s Languages) Show(w io.Writer) error {
+	table := tablewriter.NewWriter(w)
+	table.Header([]string{"language", "checker", "formatter", "associated files"})
+
+	// Get sorted language names
+	langNames := make([]string, 0, len(s))
+	for langName := range s {
+		langNames = append(langNames, langName)
+	}
+	sort.Strings(langNames)
+
+	for _, langName := range langNames {
+		l := s[langName]
+		err := table.Append([]string{langName, getName(l.Chk), getName(l.Fmt), l.Regex.String()})
+		if err != nil {
+			return err
+		}
+	}
+	err := table.Render()
+	return err
 }
 
 // LintType indicates which linter to retrieve for a language (formatter or checker).

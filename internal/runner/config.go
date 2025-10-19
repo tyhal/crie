@@ -1,10 +1,9 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Options are the core flags and settings to change execution
@@ -22,18 +21,10 @@ type RunConfiguration struct {
 	Options   Options
 	Ignore    *regexp.Regexp
 	Languages Languages
-	fileList  []string
 }
 
-// Languages store the name to a singular language configuration within crie
-type Languages map[string]*Language
-
-// loadFileList returns all valid files that have also been filtered by the project
-func (s *RunConfiguration) loadFileList() {
-
-	var fileList []string
-	var err error
-
+// getFileList returns all valid files that have also been filtered by the project
+func (s *RunConfiguration) getFileList() (fileList []string, err error) {
 	if s.IsRepo(".") {
 		if s.Options.GitDiff {
 			// Get files changed in last s.GitDiff commits
@@ -46,17 +37,13 @@ func (s *RunConfiguration) loadFileList() {
 
 		// Check if the user asked for git diffs when not in a repo
 		if s.Options.GitDiff {
-			log.Fatal("You do not appear to be in a git repository")
+			return nil, errors.New("you do not appear to be in a git repository")
 		}
 
 		// Generic grab all the files
 		fileList, err = s.fileListAll()
 	}
-	if err != nil {
-		log.Fatal(fmt.Errorf("failed to get filelist from git: %w", err))
-	} else {
-		s.fileList = fileList
-	}
+	return
 }
 
 // GetLanguage returns the Language configuration by its name or an error if it does not exist.

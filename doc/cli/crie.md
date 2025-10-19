@@ -38,7 +38,7 @@ format all python files
 * [crie fmt](crie_fmt.md)	 - Run formatters
 * [crie init](crie_init.md)	 - Create optional config files
 * [crie lnt](crie_lnt.md)	 - Runs both fmt and then chk
-* [crie ls](crie_ls.md)	 - List languages
-* [crie non](crie_non.md)	 - List what isn't supported for this project
+* [crie ls](crie_ls.md)	 - Show languages
+* [crie non](crie_non.md)	 - Show what isn't supported for this project
 * [crie schema](crie_schema.md)	 - Print JSON schemas for config files
 

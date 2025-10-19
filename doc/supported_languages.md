@@ -17,6 +17,6 @@
 │ python      │ pylint     │ black        │ \.py$                               │
 │ sh          │ shellcheck │ shfmt        │ \.sh$|/script/[^.]*$|^script/[^.]*$ │
 │ terraform   │ tflint     │ terraform    │ \.tf$                               │
-│ yml         │ yamllint   │ yamlfmt      │ \.yml$|\.yaml$                      │
+│ yml         │ yamllint   │ yamlfmt      │ \.ya?ml$                            │
 └─────────────┴────────────┴──────────────┴─────────────────────────────────────┘
 ```

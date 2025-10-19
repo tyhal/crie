@@ -1,29 +1,15 @@
 package runner
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *RunConfiguration) fileListIgnore(allFiles []string) []string {
 	if s.Ignore == nil {
 		return allFiles
 	}
-
-	var filteredFiles []string
-
-	for _, file := range allFiles {
-		if !s.Ignore.MatchString(file) {
-			filteredFiles = append(filteredFiles, file)
-		} else {
-			log.Debugf("- ignoring file %s", file)
-		}
-	}
-
-	return filteredFiles
+	return Filter(allFiles, false, s.Ignore.MatchString)
 }
 
 func (s *RunConfiguration) fileListAll() ([]string, error) {
@@ -49,15 +35,6 @@ func (s *RunConfiguration) fileListAll() ([]string, error) {
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	empty, err := IsEmpty(".")
-	if err != nil {
-		return nil, err
-	}
-
-	if empty {
-		return nil, errors.New("this is an empty folder")
 	}
 
 	return s.fileListIgnore(allFiles), nil

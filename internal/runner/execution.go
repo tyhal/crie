@@ -2,6 +2,7 @@ package runner
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -20,35 +21,14 @@ func getName(lint linter.Linter) string {
 	return lint.Name()
 }
 
-// List to print all languages chkConf fmt and always commands
-func (s *RunConfiguration) List() error {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.Header([]string{"language", "checker", "formatter", "associated files"})
-
-	// Get sorted language names
-	langNames := make([]string, 0, len(s.Languages))
-	for langName := range s.Languages {
-		langNames = append(langNames, langName)
-	}
-	sort.Strings(langNames)
-
-	for _, langName := range langNames {
-		l := s.Languages[langName]
-		err := table.Append([]string{langName, getName(l.Chk), getName(l.Fmt), l.Regex.String()})
-		if err != nil {
-			return err
-		}
-	}
-	err := table.Render()
-	return err
-}
-
 // NoStandards runs all fmt exec commands in languages and in always fmt
-func (s *RunConfiguration) NoStandards() {
-	s.loadFileList()
+func (s *RunConfiguration) NoStandards() error {
 
 	// Get files not used
-	files := s.fileList
+	files, err := s.getFileList()
+	if err != nil {
+		return err
+	}
 	for _, standardizer := range s.Languages {
 		files = Filter(files, false, standardizer.Regex.MatchString)
 	}
@@ -86,18 +66,28 @@ func (s *RunConfiguration) NoStandards() {
 	count := 10
 	for _, i := range values {
 		for _, s := range output[i] {
-			table.Append([]string{s, strconv.Itoa(i)})
+			err = table.Append([]string{s, strconv.Itoa(i)})
+			if err != nil {
+				return err
+			}
 			count--
 			if count < 0 {
-				table.Render()
-				return
+				err = table.Render()
+				if err != nil {
+					return err
+				}
+				return nil
 			}
 		}
 	}
-	table.Render()
+	err = table.Render()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, lintType LintType) (err error) {
+func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, lintType LintType, list []string) (err error) {
 	selectedLinter, err := s.Languages[name].GetLinter(lintType)
 	if err != nil {
 		return
@@ -113,11 +103,11 @@ func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, 
 	// Get the match for this formatter's files.
 	reg := s.Languages[name].Regex
 
-	// filter the files to format based on given match and format them.
-	filteredFilepaths := Filter(s.fileList, true, reg.MatchString)
+	// find the associated files with our given regex to match.
+	associatedFiles := Filter(list, true, reg.MatchString)
 
 	// Skip language as no files found
-	if len(filteredFilepaths) == 0 {
+	if len(associatedFiles) == 0 {
 		return
 	}
 
@@ -130,21 +120,16 @@ func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, 
 		return
 	}
 
-	toLog.WithFields(log.Fields{"files": len(filteredFilepaths)}).Infof("running %s", name)
+	toLog.WithFields(log.Fields{"files": len(associatedFiles)}).Infof("running %s", name)
 	reporter := linter.Runner{
 		ShowPass:      s.Options.Passes,
 		StrictLogging: s.Options.StrictLogging,
 	}
-	err = reporter.LintFileList(selectedLinter, filteredFilepaths)
+	err = reporter.LintFileList(selectedLinter, associatedFiles)
 	return
 }
 
-// Run is the generic way to run everything based on the packages configuration
-func (s *RunConfiguration) Run(lintType LintType) (err error) {
-
-	// Get an initial list of files to use
-	s.loadFileList()
-
+func (s *RunConfiguration) runLinters(lintType LintType, list []string) error {
 	errCount := 0
 
 	currentLangs := s.Languages
@@ -164,7 +149,7 @@ func (s *RunConfiguration) Run(lintType LintType) (err error) {
 
 	// Run every linter.
 	for name := range currentLangs {
-		err := s.runLinter(&cleanupGroup, name, lintType)
+		err := s.runLinter(&cleanupGroup, name, lintType, list)
 		if err != nil {
 			log.Error(err)
 			errCount++
@@ -178,6 +163,19 @@ func (s *RunConfiguration) Run(lintType LintType) (err error) {
 		return errors.New(strconv.Itoa(errCount) + " language(s) failed while " + lintType.String() + "'ing \u26c8")
 	}
 
+	return nil
+}
+
+// Run is the generic way to run everything based on the packages configuration
+func (s *RunConfiguration) Run(lintType LintType) error {
+	fileList, err := s.getFileList()
+	if err != nil {
+		return fmt.Errorf("failed to get filelist: %w", err)
+	}
+	err = s.runLinters(lintType, fileList)
+	if err != nil {
+		return err
+	}
 	log.Println("\u26c5  " + lintType.String() + "'ing passed")
 	return nil
 }
