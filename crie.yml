@@ -2,3 +2,5 @@
 ignore:
   - "res/completion/*" # generated files
   - "res/schema/*" # generated files
+  - "doc/cli/*" # generated files
+  - "doc/supported_languages.md" # generated files

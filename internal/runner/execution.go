@@ -24,8 +24,16 @@ func getName(lint linter.Linter) string {
 func (s *RunConfiguration) List() error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Header([]string{"language", "checker", "formatter", "associated files"})
-	for langName, l := range s.Languages {
 
+	// Get sorted language names
+	langNames := make([]string, 0, len(s.Languages))
+	for langName := range s.Languages {
+		langNames = append(langNames, langName)
+	}
+	sort.Strings(langNames)
+
+	for _, langName := range langNames {
+		l := s.Languages[langName]
 		err := table.Append([]string{langName, getName(l.Chk), getName(l.Fmt), l.Regex.String()})
 		if err != nil {
 			return err

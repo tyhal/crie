@@ -2,21 +2,21 @@
 ┌─────────────┬────────────┬──────────────┬─────────────────────────────────────┐
 │  LANGUAGE   │  CHECKER   │  FORMATTER   │          ASSOCIATED FILES           │
 ├─────────────┼────────────┼──────────────┼─────────────────────────────────────┤
-│ python      │ pylint     │ black        │ \.py$                               │
-│ cppheaders  │            │ clang-format │ \.h$|\.hpp$                         │
-│ sh          │ shellcheck │ shfmt        │ \.sh$|/script/[^.]*$|^script/[^.]*$ │
-│ proto       │ protolint  │ protolint    │ \.proto$                            │
-│ bash        │ shellcheck │ shfmt        │ \.bash$                             │
-│ javascript  │ standard   │ standard     │ \.js$|\.jsx$                        │
-│ docker      │ hadolint   │              │ Dockerfile$                         │
-│ json        │ jsonlint   │ jsonlint     │ \.json$|\.JSON$                     │
-│ cmake       │ cmakelint  │              │ CMakeLists.txt$|\.cmake$            │
-│ golang      │ golint     │ gofmt        │ \.go$                               │
-│ markdown    │ vale       │ remark       │ \.md$                               │
-│ terraform   │ tflint     │ terraform    │ \.tf$                               │
-│ cpp         │ cppcheck   │ clang-format │ \.cc$|\.cpp$                        │
-│ c           │ cppcheck   │ clang-format │ \.c$                                │
-│ yml         │ yamllint   │ yamlfmt      │ \.yml$|\.yaml$                      │
 │ asciidoctor │ vale       │              │ \.adoc$                             │
+│ bash        │ shellcheck │ shfmt        │ \.bash$                             │
+│ c           │ cppcheck   │ clang-format │ \.c$                                │
+│ cmake       │ cmakelint  │              │ CMakeLists.txt$|\.cmake$            │
+│ cpp         │ cppcheck   │ clang-format │ \.cc$|\.cpp$                        │
+│ cppheaders  │            │ clang-format │ \.h$|\.hpp$                         │
+│ docker      │ hadolint   │              │ Dockerfile$                         │
+│ golang      │ golint     │ gofmt        │ \.go$                               │
+│ javascript  │ standard   │ standard     │ \.js$|\.jsx$                        │
+│ json        │ jsonlint   │ jsonlint     │ \.json$|\.JSON$                     │
+│ markdown    │ vale       │ remark       │ \.md$                               │
+│ proto       │ protolint  │ protolint    │ \.proto$                            │
+│ python      │ pylint     │ black        │ \.py$                               │
+│ sh          │ shellcheck │ shfmt        │ \.sh$|/script/[^.]*$|^script/[^.]*$ │
+│ terraform   │ tflint     │ terraform    │ \.tf$                               │
+│ yml         │ yamllint   │ yamlfmt      │ \.yml$|\.yaml$                      │
 └─────────────┴────────────┴──────────────┴─────────────────────────────────────┘
 ```
