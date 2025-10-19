@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"errors"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/pkg/crie/linter"
-	"github.com/tyhal/crie/pkg/linter/cli/exec"
-
 	"sync"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/linter"
+	"github.com/tyhal/crie/pkg/linter/cli/exec"
 )
 
 // LintCli defines a predefined command to run against a file

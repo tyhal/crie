@@ -3,11 +3,12 @@ package shfmt
 import (
 	"bytes"
 	"fmt"
-	"github.com/tyhal/crie/pkg/crie/linter"
 	"math"
-	"mvdan.cc/sh/v3/syntax"
 	"strings"
 	"sync"
+
+	"github.com/tyhal/crie/pkg/linter"
+	"mvdan.cc/sh/v3/syntax"
 )
 
 const ()

@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tyhal/crie/cmd/crie/config/language/languages",
+  "$id": "https://github.com/tyhal/crie/internal/config/language/languages",
   "$ref": "#/$defs/Languages",
   "$defs": {
-    "ExecInstance": {
+    "Instance": {
       "properties": {
         "bin": {
           "type": "string",
@@ -80,7 +80,7 @@
           "description": "the most common linter type, a cli tool"
         },
         "exec": {
-          "$ref": "#/$defs/ExecInstance",
+          "$ref": "#/$defs/Instance",
           "description": "settings for the command to run"
         },
         "img": {

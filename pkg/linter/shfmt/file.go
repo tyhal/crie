@@ -8,10 +8,11 @@ package shfmt
 
 import (
 	"bytes"
-	maybeio "github.com/google/renameio/maybe"
 	"io"
-	"mvdan.cc/sh/v3/syntax"
 	"os"
+
+	maybeio "github.com/google/renameio/maybe"
+	"mvdan.cc/sh/v3/syntax"
 )
 
 func (s *shfmt) formatPath(path string, checkShebang bool) error {

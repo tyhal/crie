@@ -1,8 +1,0 @@
-#!/bin/sh
-set -e
-
-cd "$(dirname "$0")/.."
-
-go run ./cmd/crie completion zsh >res/completion/crie.zsh
-go run ./cmd/crie completion bash >res/completion/crie.bash
-go run ./cmd/crie completion fish >res/completion/crie.fish
