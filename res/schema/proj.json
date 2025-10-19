@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tyhal/crie/cmd/crie/config/project/config",
+  "$id": "https://github.com/tyhal/crie/internal/config/project/config",
   "$ref": "#/$defs/Config",
   "$defs": {
     "Config": {

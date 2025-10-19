@@ -3,14 +3,15 @@ package shfmt
 // NOTE This mostly exists to just to be an easy boilerplate for testing other linter implementations
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/tyhal/crie/pkg/crie/linter"
 	"math"
 	"os"
 	"path/filepath"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 func TestLint_Name(t *testing.T) {

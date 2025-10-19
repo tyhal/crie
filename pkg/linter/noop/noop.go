@@ -1,9 +1,10 @@
 package noop
 
 import (
-	"github.com/tyhal/crie/pkg/crie/linter"
 	"math"
 	"sync"
+
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 // LintNoop performs no operations, as a template implementation of cries' linter.Linter

@@ -4,5 +4,5 @@ coverage:
       default:
         target: 50%
   ignore:
-    - cmd/crie/main.go # until cli testing is decided to be unit tests or some other solution
-    - cmd/crie/cmd/commands.go
+    - internal/cli/root.go # until cli testing is decided to be unit tests or some other solution
+    - internal/cli/commands.go

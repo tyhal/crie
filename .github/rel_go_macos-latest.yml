@@ -5,7 +5,7 @@ builds:
       - CGO_ENABLED=1
     ldflags:
       - -s -w
-      - -X main.version={{.Version}}
+      - -X internal.cli.version={{.Version}}
     goos:
       - darwin
     goarch:

@@ -5,12 +5,12 @@ package cli
 import (
 	"bytes"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/tyhal/crie/pkg/crie/linter"
-	"github.com/tyhal/crie/pkg/linter/cli/exec"
-
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/tyhal/crie/pkg/linter"
+	"github.com/tyhal/crie/pkg/linter/cli/exec"
 )
 
 func TestLintCli_isContainer(t *testing.T) {
