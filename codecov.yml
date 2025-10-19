@@ -6,3 +6,5 @@ coverage:
   ignore:
     - internal/cli/root.go # until cli testing is decided to be unit tests or some other solution
     - internal/cli/commands.go
+    - cmd/crie/main.go
+    - cmd/docgen/main.go
