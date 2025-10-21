@@ -1,6 +1,9 @@
 package runner
 
 import (
+	"errors"
+	"os"
+	"path"
 	"regexp"
 	"sync"
 	"testing"
@@ -121,8 +124,78 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 			err := tt.config.runLinters(LintTypeChk, tt.files)
 
 			if tt.expectErr {
-				assert.Error(t, err)
-				if tt.errMessage != "" {
+				if assert.Error(t, err) && tt.errMessage != "" {
+					assert.Contains(t, err.Error(), tt.errMessage)
+				}
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestRunConfiguration_Run(t *testing.T) {
+	tests := []struct {
+		name       string
+		config     *RunConfiguration
+		expectErr  bool
+		errMessage string
+	}{
+		{
+			name: "no errors",
+			config: &RunConfiguration{
+				Languages: map[string]*Language{
+					"go": {
+						Chk:   noop.WithErr(nil, nil),
+						Regex: regexp.MustCompile(`\.go$`),
+					},
+				},
+			},
+			expectErr: false,
+		},
+		{
+			name: "linter startup error",
+			config: &RunConfiguration{
+				Languages: map[string]*Language{
+					"go": {
+						Chk:   noop.WithErr(errors.New("startup err"), nil),
+						Regex: regexp.MustCompile(`\.go$`),
+					},
+				},
+			},
+			expectErr:  true,
+			errMessage: "1 language(s) failed while chk'ing",
+		},
+		{
+			name: "linter run error",
+			config: &RunConfiguration{
+				Languages: map[string]*Language{
+					"go": {
+						Chk:   noop.WithErr(nil, errors.New("run err")),
+						Regex: regexp.MustCompile(`\.go$`),
+					},
+				},
+			},
+			expectErr:  true,
+			errMessage: "1 language(s) failed while chk'ing",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			err := os.Chdir(dir)
+			assert.NoError(t, err)
+
+			file, err := os.Create(path.Join(dir, "test.go"))
+			defer func() {
+				_ = file.Close()
+			}()
+
+			err = tt.config.Run(LintTypeChk)
+
+			if tt.expectErr {
+				if assert.Error(t, err) && tt.errMessage != "" {
 					assert.Contains(t, err.Error(), tt.errMessage)
 				}
 			} else {
