@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"errors"
+	"fmt"
 
 	"sync"
 
@@ -11,12 +12,16 @@ import (
 	"github.com/tyhal/crie/pkg/linter/cli/exec"
 )
 
+// Version used to match img tags with crie versions
+var Version = "latest"
+
 // LintCli defines a predefined command to run against a file
 type LintCli struct {
-	Type     string        `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
-	Exec     exec.Instance `json:"exec" yaml:"exec" jsonschema_required:"true" jsonschema_description:"settings for the command to run" `
-	Img      string        `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
-	executor exec.Executor
+	Type           string        `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
+	Exec           exec.Instance `json:"exec" yaml:"exec" jsonschema_required:"true" jsonschema_description:"settings for the command to run" `
+	Img            string        `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
+	TagCrieVersion bool          `json:"tag_crie_version,omitempty" yaml:"tag_crie_version,omitempty" jsonschema_description:"if an image tag should be appended with cries current version"`
+	executor       exec.Executor
 }
 
 var _ linter.Linter = (*LintCli)(nil)
@@ -33,11 +38,16 @@ func (e *LintCli) Name() string {
 // WillRun does preflight checks for the 'Run'
 func (e *LintCli) WillRun() error {
 
+	img := e.Img
+	if e.TagCrieVersion {
+		img = fmt.Sprintf("%s:%s", e.Img, Version)
+	}
+
 	switch {
 	case e.isContainer() && exec.WillPodman() == nil:
-		e.executor = &exec.PodmanExecutor{Name: e.Exec.Bin, Image: e.Img}
+		e.executor = &exec.PodmanExecutor{Name: e.Exec.Bin, Image: img}
 	case e.isContainer() && exec.WillDocker() == nil:
-		e.executor = &exec.DockerExecutor{Name: e.Exec.Bin, Image: e.Img}
+		e.executor = &exec.DockerExecutor{Name: e.Exec.Bin, Image: img}
 	case exec.WillHost(e.Exec.Bin) == nil:
 		e.executor = &exec.HostExecutor{}
 	default:
@@ -54,9 +64,11 @@ func (e *LintCli) WillRun() error {
 // Cleanup removes any additional resources created in the process
 func (e *LintCli) Cleanup(group *sync.WaitGroup) {
 	defer group.Done()
-	err := e.executor.Cleanup()
-	if err != nil {
-		log.Error(err)
+	if e.executor != nil {
+		err := e.executor.Cleanup()
+		if err != nil {
+			log.Error(err)
+		}
 	}
 }
 
