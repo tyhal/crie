@@ -1,9 +1,13 @@
 package main
 
-import "os"
-import "github.com/tyhal/crie/internal/cli"
+import (
+	"os"
 
-var version = "dev"
+	"github.com/tyhal/crie/internal/cli"
+	lintercli "github.com/tyhal/crie/pkg/linter/cli"
+)
+
+var version = "latest"
 
 func main() {
 	if err := cli.RootCmd.Execute(); err != nil {
@@ -13,4 +17,5 @@ func main() {
 
 func init() {
 	cli.RootCmd.Version = version
+	lintercli.Version = version
 }

@@ -9,7 +9,6 @@ import (
 
 //go:embed defaults.yml
 var defaultLanguageConfigYaml []byte
-
 var defaultLanguageConfig Languages
 
 func init() {
