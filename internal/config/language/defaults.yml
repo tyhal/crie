@@ -7,13 +7,13 @@ languages:
       exec:
         bin: black
         start: ["--quiet"]
-      img: "crie-dep-pip"
+      img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true
     chk:
       exec:
         bin: pylint
       type: cli
-      img: "crie-dep-pip"
+      img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true
   proto:
     match: ['\.proto$']
@@ -21,13 +21,13 @@ languages:
       exec:
         bin: protolint
       type: cli
-      img: "crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
     chk:
       exec:
         bin: protolint
       type: cli
-      img: "crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
   bash:
     match: ['\.bash$']
@@ -65,7 +65,7 @@ languages:
       exec:
         bin: yamllint
       type: cli
-      img: "crie-dep-pip"
+      img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true
     fmt:
       type: cli
@@ -94,13 +94,13 @@ languages:
       exec:
         bin: standard
         start: ["--fix"]
-      img: "crie-dep-npm"
+      img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: standard
-      img: "crie-dep-npm"
+      img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
   golang:
     match: ['\.go$']
@@ -109,14 +109,14 @@ languages:
       exec:
         bin: gofmt
         start: ["-l", "-w"]
-      img: "crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: golint
         start: ["-set_exit_status"]
-      img: "crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
   markdown:
     match: ['\.md$']
@@ -126,14 +126,14 @@ languages:
         bin: remark
         start: ["--use", "remark-preset-lint-recommended"]
         end: ["-o"]
-      img: "crie-dep-npm"
+      img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: vale
         start: ["--config=/etc/vale/.vale.ini"]
-      img: "crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
   asciidoctor:
     match: ['\.adoc$']
@@ -142,7 +142,7 @@ languages:
       exec:
         bin: vale
         start: ["--config=/etc/vale/.vale.ini"]
-      img: "crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
   json:
     match: ['\.json$', '\.JSON$']
@@ -151,14 +151,14 @@ languages:
       exec:
         bin: jsonlint
         start: ["-i", "-s", "-c", "-q"]
-      img: "crie-dep-npm"
+      img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: jsonlint
         start: ["-q"]
-      img: "crie-dep-npm"
+      img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
   cpp:
     match: ['\.cc$', '\.cpp$']
@@ -167,14 +167,14 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
-      img: "crie-dep-apk"
+      img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: cppcheck
         start: ["--enable=all", "--language=c++", "--suppress=operatorEqRetRefThis", "--suppress=operatorEq", "--suppress=noExplicitConstructor", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=noConstructor", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
-      img: "crie-dep-apk"
+      img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   cppheaders:
     match: ['\.h$', '\.hpp$']
@@ -183,7 +183,7 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
-      img: "crie-dep-apk"
+      img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   c:
     match: ['\.c$']
@@ -192,14 +192,14 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
-      img: "crie-dep-apk"
+      img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: cppcheck
         start: ["--enable=all", "--language=c", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
-      img: "crie-dep-apk"
+      img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   cmake:
     match: ['CMakeLists.txt$', '\.cmake$']
@@ -208,5 +208,5 @@ languages:
       exec:
         bin: cmakelint
         start: ["--config=/home/standards/.config/cmakelintrc"]
-      img: "crie-dep-pip"
+      img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true

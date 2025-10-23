@@ -29,12 +29,32 @@ func TestLint_Name(t *testing.T) {
 	assert.Equal(t, "test", l.Name())
 }
 
+func TestLint_imgTagged(t *testing.T) {
+	{
+		l := &LintCli{Img: "a", TagCrieVersion: true}
+		assert.Equal(t, "a:latest", l.imgTagged())
+	}
+	{
+		l := &LintCli{Img: "a", TagCrieVersion: false}
+		assert.Equal(t, "a", l.imgTagged())
+	}
+}
+
 func TestLint_Cleanup(t *testing.T) {
-	l := &LintCli{executor: &exec.NoopExecutor{}}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	l.Cleanup(&wg)
-	wg.Wait()
+	{
+		l := &LintCli{executor: &exec.NoopExecutor{}}
+		var wg sync.WaitGroup
+		wg.Add(1)
+		assert.NotPanics(t, func() { l.Cleanup(&wg) })
+		wg.Wait()
+	}
+	{
+		l := &LintCli{executor: nil}
+		var wg sync.WaitGroup
+		wg.Add(1)
+		assert.NotPanics(t, func() { l.Cleanup(&wg) })
+		wg.Wait()
+	}
 }
 
 func TestLint_Run(t *testing.T) {

@@ -35,13 +35,17 @@ func (e *LintCli) Name() string {
 	return e.Exec.Bin
 }
 
+func (e *LintCli) imgTagged() string {
+	if e.TagCrieVersion {
+		return fmt.Sprintf("%s:%s", e.Img, Version)
+	}
+	return e.Img
+}
+
 // WillRun does preflight checks for the 'Run'
 func (e *LintCli) WillRun() error {
 
-	img := e.Img
-	if e.TagCrieVersion {
-		img = fmt.Sprintf("%s:%s", e.Img, Version)
-	}
+	img := e.imgTagged()
 
 	switch {
 	case e.isContainer() && exec.WillPodman() == nil:
