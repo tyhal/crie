@@ -120,7 +120,7 @@ func (e *DockerExecutor) pull() error {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"stage": "docker pull",
-			"Image": e.Image,
+			"image": e.Image,
 		}).Fatal(err)
 		return err
 	}
