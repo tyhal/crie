@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/tyhal/crie/pkg/errchain"
+	"github.com/tyhal/crie/internal/errchain"
 	"gopkg.in/yaml.v3"
 )
 

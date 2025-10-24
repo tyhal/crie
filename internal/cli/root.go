@@ -4,13 +4,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tyhal/crie/internal/config/language"
-	"github.com/tyhal/crie/internal/config/project"
-	"github.com/tyhal/crie/pkg/errchain"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tyhal/crie/internal/config/language"
+	"github.com/tyhal/crie/internal/config/project"
+	"github.com/tyhal/crie/internal/errchain"
 )
 
 //`
