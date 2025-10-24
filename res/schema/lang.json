@@ -86,6 +86,10 @@
         "img": {
           "type": "string",
           "description": "the container image to pull and use"
+        },
+        "tag_crie_version": {
+          "type": "boolean",
+          "description": "if an image tag should be appended with cries current version"
         }
       },
       "additionalProperties": false,
