@@ -1,7 +1,6 @@
 # This workflow uses actions that are not certified by GitHub. They are provided
 # by a third-party and are governed by separate terms of service, privacy
 # policy, and support documentation.
-
 name: Scorecard supply-chain security
 on:
   # For Branch-Protection check. Only the default branch is supported. See
@@ -12,11 +11,9 @@ on:
   schedule:
     - cron: '32 14 * * 5'
   push:
-    branches: [ "main" ]
-
+    branches: ["main"]
 # Declare default permissions as read only.
 permissions: read-all
-
 jobs:
   analysis:
     name: Scorecard analysis
@@ -31,13 +28,11 @@ jobs:
       # Uncomment the permissions below if installing in a private repository.
       # contents: read
       # actions: read
-
     steps:
       - name: "Checkout code"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-
       - name: "Run analysis"
         uses: ossf/scorecard-action@f49aabe0b5af0936a0987cfb85d86b75731b0186 # v2.4.1
         with:
@@ -48,7 +43,6 @@ jobs:
           # - you are installing Scorecard on a *private* repository
           # To create the PAT, follow the steps in https://github.com/ossf/scorecard-action?tab=readme-ov-file#authentication-with-fine-grained-pat-optional.
           # repo_token: ${{ secrets.SCORECARD_TOKEN }}
-
           # Public repositories:
           #   - Publish results to OpenSSF REST API for easy access by consumers
           #   - Allows the repository to include the Scorecard badge.
@@ -57,10 +51,8 @@ jobs:
           #   - `publish_results` will always be set to `false`, regardless
           #     of the value entered here.
           publish_results: true
-
           # (Optional) Uncomment file_mode if you have a .gitattributes with files marked export-ignore
           # file_mode: git
-
       # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
       # format to the repository Actions tab.
       - name: "Upload artifact"
@@ -69,7 +61,6 @@ jobs:
           name: SARIF file
           path: results.sarif
           retention-days: 5
-
       # Upload the results to GitHub's code scanning dashboard (optional).
       # Commenting out will disable upload of results to your repo's Code Scanning dashboard
       - name: "Upload to code-scanning"
