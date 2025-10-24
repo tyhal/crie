@@ -8,9 +8,10 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-	language2 "github.com/tyhal/crie/internal/config/language"
-	project2 "github.com/tyhal/crie/internal/config/project"
+	"github.com/tyhal/crie/internal/config/language"
+	"github.com/tyhal/crie/internal/config/project"
 	"github.com/tyhal/crie/internal/runner"
+	"github.com/tyhal/crie/pkg/errchain"
 	"gopkg.in/yaml.v3"
 
 	log "github.com/sirupsen/logrus"
@@ -20,7 +21,7 @@ import (
 var crieRun runner.RunConfiguration
 
 // SetCrie pushes the Languages to the crie.RunConfiguration
-func SetCrie(proj *project2.Config, langs *language2.Languages) {
+func SetCrie(proj *project.Config, langs *language.Languages) {
 
 	languages := make(map[string]*runner.Language, len(langs.Languages))
 	for langName, lang := range langs.Languages {
@@ -44,7 +45,7 @@ var FmtCmd = &cobra.Command{
 		err := crieRun.Run(runner.LintTypeFmt)
 
 		if err != nil {
-			log.Fatal(fmt.Errorf("crie format failed: %w", err))
+			log.Fatal(errchain.From(err).Error("crie format"))
 		}
 	},
 }
@@ -58,7 +59,7 @@ var LsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := crieRun.Languages.Show(os.Stdout)
 		if err != nil {
-			log.Fatal(fmt.Errorf("crie list failed: %w", err))
+			log.Fatal(errchain.From(err).Error("crie list failed"))
 		}
 	},
 }
@@ -73,7 +74,7 @@ var ChkCmd = &cobra.Command{
 		err := crieRun.Run(runner.LintTypeChk)
 
 		if err != nil {
-			log.Fatal(fmt.Errorf("crie check failed: %w", err))
+			log.Fatal(errchain.From(err).Error("crie check"))
 		}
 	},
 }
@@ -89,7 +90,7 @@ Find the file extensions that dont have an associated regex match within crieRun
 	Run: func(cmd *cobra.Command, args []string) {
 		err := crieRun.NoStandards()
 		if err != nil {
-			log.Fatal(fmt.Errorf("finding unassociated files failed: %w", err))
+			log.Fatal(errchain.From(err).Error("finding unassociated files"))
 		}
 	},
 }
@@ -102,7 +103,7 @@ var InitCmd = &cobra.Command{
 
 	RunE: func(_ *cobra.Command, _ []string) error {
 
-		err := language2.NewLanguageConfigFile(viper.GetString("Language.Conf"))
+		err := language.NewLanguageConfigFile(viper.GetString("Language.Conf"))
 		if err != nil {
 			return err
 		}
@@ -110,7 +111,7 @@ var InitCmd = &cobra.Command{
 
 		fmt.Println()
 
-		var projectConfig project2.Config
+		var projectConfig project.Config
 		err = viper.Unmarshal(&projectConfig)
 		if err != nil {
 			return err
@@ -131,7 +132,7 @@ var ConfCmd = &cobra.Command{
 	Short:   "Print configuration settings",
 	Long:    "Print what crie has parsed from flags, env, the project file, and then defaults",
 	RunE: func(_ *cobra.Command, _ []string) error {
-		var projectConfig project2.Config
+		var projectConfig project.Config
 		err := viper.Unmarshal(&projectConfig)
 		if err != nil {
 			return err
@@ -161,7 +162,7 @@ var SchemaLangCmd = &cobra.Command{
 	Short:   "Print the schema for language's configurations",
 	Long:    `Print json schema for cries configuration format used override language project`,
 	Run: func(_ *cobra.Command, _ []string) {
-		schema := language2.Schema()
+		schema := language.Schema()
 		jsonBytes, err := json.MarshalIndent(schema, "", "  ")
 		if err != nil {
 			return
@@ -177,7 +178,7 @@ var SchemaProjectCmd = &cobra.Command{
 	Short:   "Print the schema for language's configurations",
 	Long:    `Print json schema for cries configuration format used override language project`,
 	Run: func(_ *cobra.Command, _ []string) {
-		schema := project2.Schema()
+		schema := project.Schema()
 		jsonBytes, err := json.MarshalIndent(schema, "", "  ")
 		if err != nil {
 			return
@@ -190,13 +191,7 @@ func stage(lintType runner.LintType) error {
 	log.Infof("❨ %s ❩", lintType.String())
 	err := crieRun.Run(lintType)
 	if err != nil {
-		if crieRun.Options.Continue {
-			// Log the error but allow subsequent stages to run.
-			log.Error(err)
-			return fmt.Errorf("crie %s failed: %w", lintType, err)
-		}
-		// In non-continue mode, fail immediately.
-		log.Fatal(fmt.Errorf("crie %s failed: %w", lintType, err))
+		return errchain.From(err).ErrorF("crie %s", lintType)
 	}
 	return nil
 }
@@ -213,7 +208,11 @@ var LntCmd = &cobra.Command{
 
 		for _, lintType := range stages {
 			if err := stage(lintType); err != nil {
-				failedStages = append(failedStages, lintType.String())
+				if crieRun.Options.Continue {
+					failedStages = append(failedStages, lintType.String())
+				} else {
+					log.Fatal(err)
+				}
 			}
 		}
 

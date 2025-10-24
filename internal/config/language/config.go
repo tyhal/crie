@@ -2,9 +2,9 @@ package language
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 
+	"github.com/tyhal/crie/pkg/errchain"
 	"gopkg.in/yaml.v3"
 )
 
@@ -53,12 +53,12 @@ func LoadFile(path string) (*Languages, error) {
 
 	configData, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file %s: %w", path, err)
+		return nil, errchain.From(err).ErrorF("readding config file %s", path)
 	}
 
 	var c Languages
-	if err := yaml.Unmarshal(configData, &c); err != nil {
-		return nil, fmt.Errorf("failed to parse config file %s: %w", path, err)
+	if err = yaml.Unmarshal(configData, &c); err != nil {
+		return nil, errchain.From(err).ErrorF("parsing config file %s", path)
 	}
 
 	merge(&defaultLanguageConfig, &c)

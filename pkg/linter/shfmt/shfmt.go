@@ -72,5 +72,5 @@ func (l *LintShfmt) Run(filepath string, rep chan linter.Report) {
 	syntax.FunctionNextLine(false)(currFmt.printer)
 
 	err := currFmt.formatPath(filepath, true)
-	rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
+	rep <- linter.Report{File: filepath, Err: linter.Result(err), StdOut: &outB, StdErr: &errB}
 }
