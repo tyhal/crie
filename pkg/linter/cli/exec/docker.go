@@ -84,7 +84,7 @@ func (e *DockerExecutor) Setup() error {
 	currPlatform.OS = "linux"
 
 	b := make([]byte, 4)
-	rand.Read(b)
+	_, _ = rand.Read(b)
 	shortid := hex.EncodeToString(b)
 
 	resp, err := e.client.ContainerCreate(e.ctx,
@@ -94,6 +94,7 @@ func (e *DockerExecutor) Setup() error {
 			Image:           e.Image,
 			WorkingDir:      wdContainer,
 			NetworkDisabled: true,
+			User:            fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()),
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{
@@ -106,7 +107,8 @@ func (e *DockerExecutor) Setup() error {
 		},
 		nil,
 		&currPlatform,
-		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name), shortid))
+		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name), shortid),
+	)
 	if err != nil {
 		return err
 	}
@@ -161,6 +163,7 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 	log.Trace(cmd)
 	config := container.ExecOptions{
 		Cmd:          cmd,
+		User:         fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()),
 		WorkingDir:   wdContainer,
 		AttachStderr: true,
 		AttachStdout: true,
