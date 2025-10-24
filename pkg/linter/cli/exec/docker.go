@@ -19,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/linter"
 )
@@ -135,7 +136,7 @@ func (e *DockerExecutor) pull() error {
 }
 
 // Exec runs the configured command inside the prepared Docker container.
-func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, _ io.Writer) error {
+func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, stderr io.Writer) error {
 
 	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 
@@ -180,9 +181,10 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, _ i
 	}
 	defer attach.Close()
 	go func() {
-		_, err := io.Copy(stdout, attach.Reader)
+		_, err := stdcopy.StdCopy(stdout, stderr, attach.Reader)
 		if err != nil {
-			log.Error(err)
+			log.Errorf("Error demultiplexing logs: %v", err)
+			return
 		}
 	}()
 
