@@ -63,7 +63,6 @@ func TestGit_fileListRepoAll(t *testing.T) {
 	assert.Equal(t, files, changed)
 }
 
-// TODO table test
 func TestGit_fileListRepoChanged(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -90,20 +89,52 @@ func TestGit_fileListRepoChanged(t *testing.T) {
 	changeFiles := []string{"README.md", "changed.md"}
 	commitHelper(t, changeFiles, tmpDir, repo, "changed")
 
-	invalidConfig := RunConfiguration{
-		Options: Options{
-			GitTarget: "abc",
+	tests := []struct {
+		name      string
+		cfg       RunConfiguration
+		expectErr bool
+		expect    []string
+	}{
+		{
+			name: "invalid target",
+			cfg: RunConfiguration{Options: Options{GitTarget: "abc"}},
+			expectErr: true,
+		},
+		{
+			name: "valid target origin/main",
+			cfg: RunConfiguration{Options: Options{GitTarget: "origin/main"}},
+			expect: changeFiles,
 		},
 	}
-	_, err = invalidConfig.fileListRepoChanged(tmpDir)
-	assert.Error(t, err)
 
-	validConfig := RunConfiguration{
-		Options: Options{
-			GitTarget: "origin/main",
-		},
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			changed, err := tt.cfg.fileListRepoChanged(tmpDir)
+			if tt.expectErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expect, changed)
+		})
 	}
-	changed, err := validConfig.fileListRepoChanged(tmpDir)
+}
+
+func TestGit_changesUncommitted(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	repo, err := git.PlainInit(tmpDir, false)
 	assert.NoError(t, err)
-	assert.Equal(t, changeFiles, changed)
+
+	// create and commit a file
+	commitHelper(t, []string{"README.md"}, tmpDir, repo, "initial")
+
+	// modify the tracked file without staging or committing
+	err = os.WriteFile(filepath.Join(tmpDir, "README.md"), []byte("modified"), 0644)
+	assert.NoError(t, err)
+
+	rc := RunConfiguration{}
+	files, err := rc.changesUncommitted(repo)
+	assert.NoError(t, err)
+	assert.Contains(t, files, "README.md")
 }
