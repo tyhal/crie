@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 // HostExecutor runs CLI tools directly on the host operating system.
@@ -45,7 +47,7 @@ func (e *HostExecutor) Exec(i Instance, filePath string, stdout io.Writer, stder
 	c.Stdout = stdout
 	c.Stderr = stderr
 
-	return c.Run()
+	return linter.Result(c.Run())
 }
 
 // Cleanup releases any resources allocated during host execution setup.

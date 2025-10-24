@@ -1,12 +1,12 @@
 package cli
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/config/project"
+	"github.com/tyhal/crie/pkg/errchain"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -58,6 +58,11 @@ format all python files
 		}
 
 		setLogging()
+
+		// enable git diff if target is set
+		if projectConfig.Lint.GitTarget != "" {
+			projectConfig.Lint.GitDiff = true
+		}
 
 		return nil
 	},
@@ -118,9 +123,9 @@ func addLintCommand(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.Passes, "passes", "p", false, "show files that passed")
 	errFatal(viper.BindPFlag("Lint.Passes", cmd.PersistentFlags().Lookup("passes")))
 
-	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.GitDiff, "git-diff", "g", false, "only use files from the current commit to (git-target)")
+	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.GitDiff, "git-diff", "g", false, "only check files changed in git")
 	errFatal(viper.BindPFlag("Lint.GitDiff", cmd.PersistentFlags().Lookup("git-diff")))
-	cmd.PersistentFlags().StringVarP(&projectConfig.Lint.GitTarget, "git-target", "t", "origin/main", "the branch to compare against to find changed files")
+	cmd.PersistentFlags().StringVarP(&projectConfig.Lint.GitTarget, "git-target", "t", "", "a target branch to compare against e.g 'remote/branch' or 'branch'")
 	errFatal(viper.BindPFlag("Lint.GitTarget", cmd.PersistentFlags().Lookup("git-target")))
 
 	cmd.PersistentFlags().StringVar(&projectConfig.Lint.Only, "only", "", "run with only one language (see `crie ls` for available options)")
@@ -139,7 +144,7 @@ func addCrieCommand(cmd *cobra.Command) {
 
 func errFatal(err error) {
 	if err != nil {
-		log.Fatal(fmt.Errorf("incorrect viper configuration: %w", err))
+		log.Fatal(errchain.From(err).Error("incorrect viper configuration"))
 	}
 }
 

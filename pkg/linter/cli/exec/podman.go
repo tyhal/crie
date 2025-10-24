@@ -31,6 +31,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
 	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 // PodmanExecutor runs CLI tools inside a Podman container.
@@ -269,7 +270,7 @@ func (e *PodmanExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 			}
 			if inspect.Running == false {
 				if inspect.ExitCode != 0 {
-					return errors.New("exit code " + strconv.Itoa(inspect.ExitCode))
+					return linter.Result(errors.New("exit code " + strconv.Itoa(inspect.ExitCode)))
 				}
 				return nil
 			}

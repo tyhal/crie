@@ -20,6 +20,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 // DockerExecutor runs CLI tools inside a Docker container.
@@ -199,7 +200,7 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, _ i
 			}
 			if inspect.Running == false {
 				if inspect.ExitCode != 0 {
-					return errors.New("exit code " + strconv.Itoa(inspect.ExitCode))
+					return linter.Result(errors.New("exit code " + strconv.Itoa(inspect.ExitCode)))
 				}
 				return nil
 			}

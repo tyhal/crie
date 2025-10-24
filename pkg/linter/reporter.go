@@ -43,9 +43,14 @@ func (r *Runner) Log(rep *Report) error {
 		} else {
 			fmt.Printf("\u274C %v\n\n", rep.File)
 		}
-		r.logConditional(rep.StdErr, "stderr", log.ErrorLevel)
-		r.logConditional(rep.StdOut, "stdout", log.InfoLevel)
-		r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
+		var failedResultErr *FailedResultError
+		if errors.As(rep.Err, &failedResultErr) {
+			r.logConditional(rep.StdErr, "stderr", log.ErrorLevel)
+			r.logConditional(rep.StdOut, "stdout", log.InfoLevel)
+			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
+		} else {
+			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
+		}
 	}
 
 	return rep.Err

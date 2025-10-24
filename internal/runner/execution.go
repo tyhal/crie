@@ -2,7 +2,6 @@ package runner
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/errchain"
 	"github.com/tyhal/crie/pkg/linter"
 )
 
@@ -170,7 +170,7 @@ func (s *RunConfiguration) runLinters(lintType LintType, list []string) error {
 func (s *RunConfiguration) Run(lintType LintType) error {
 	fileList, err := s.getFileList()
 	if err != nil {
-		return fmt.Errorf("failed to get filelist: %w", err)
+		return errchain.From(err).Error("getting filelist")
 	}
 	err = s.runLinters(lintType, fileList)
 	if err != nil {
