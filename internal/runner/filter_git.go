@@ -7,7 +7,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/tyhal/crie/pkg/errchain"
+	"github.com/tyhal/crie/internal/errchain"
 )
 
 // IsRepo checks for a .git folder

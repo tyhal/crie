@@ -96,13 +96,13 @@ func TestGit_fileListRepoChanged(t *testing.T) {
 		expect    []string
 	}{
 		{
-			name: "invalid target",
-			cfg: RunConfiguration{Options: Options{GitTarget: "abc"}},
+			name:      "invalid target",
+			cfg:       RunConfiguration{Options: Options{GitTarget: "abc"}},
 			expectErr: true,
 		},
 		{
-			name: "valid target origin/main",
-			cfg: RunConfiguration{Options: Options{GitTarget: "origin/main"}},
+			name:   "valid target origin/main",
+			cfg:    RunConfiguration{Options: Options{GitTarget: "origin/main"}},
 			expect: changeFiles,
 		},
 	}

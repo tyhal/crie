@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/pkg/errchain"
+	"github.com/tyhal/crie/internal/errchain"
 )
 
 var maxFilesPerRoutine = 5

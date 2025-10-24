@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/config/project"
+	"github.com/tyhal/crie/internal/errchain"
 	"github.com/tyhal/crie/internal/runner"
-	"github.com/tyhal/crie/pkg/errchain"
 	"gopkg.in/yaml.v3"
 
 	log "github.com/sirupsen/logrus"
