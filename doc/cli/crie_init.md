@@ -14,8 +14,8 @@ crie init [flags]
 
 ```
   -e, --continue            show all errors rather than stopping at the first
-  -g, --git-diff            only use files from the current commit to (git-target)
-  -t, --git-target string   the branch to compare against to find changed files (default "origin/main")
+  -g, --git-diff            only check files changed in git
+  -t, --git-target string   a target branch to compare against e.g 'remote/branch' or 'branch'
   -h, --help                help for init
       --only crie ls        run with only one language (see crie ls for available options)
   -p, --passes              show files that passed
