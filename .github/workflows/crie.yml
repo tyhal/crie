@@ -12,7 +12,7 @@ jobs:
   crie-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Fetch base ref for PR
         if: github.event_name == 'pull_request'
         run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
@@ -20,17 +20,17 @@ jobs:
         id: packages
         run: echo "list=$(cat script/pkgs/apt.txt | tr '\n' ' ')" >> $GITHUB_OUTPUT
       - name: Cache apt packages
-        uses: awalsh128/cache-apt-pkgs-action@latest
+        uses: awalsh128/cache-apt-pkgs-action@2c09a5e66da6c8016428a2172bd76e5e4f14bb17 # latest
         with:
           packages: ${{ steps.packages.outputs.list }}
           version: 1.0
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: 'go.mod'
       - name: Run tests
         run: go test -coverprofile=coverage.out ./...
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
           files: ./coverage.out
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -38,7 +38,7 @@ jobs:
       - name: install crie
         run: go install ./cmd/crie
       - name: Run crie all
-        uses: tyhal/crie-action@main
+        uses: tyhal/crie-action@48352be71b16b393f128274c1113c1996c611d36 # main
         with:
           command: lnt
           lint_continue: 'true'
