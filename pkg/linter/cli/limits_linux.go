@@ -30,7 +30,7 @@ func (e *LintCli) MaxConcurrency() int {
 	var limit syscall.Rlimit
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &limit)
 	if err != nil {
-		log.Fatal(errchain.From(err).Error("getting limit for max concurrency"))
+		log.Fatal(errchain.From(err).Link("getting limit for max concurrency"))
 	}
 
 	oldLimit := limit.Cur

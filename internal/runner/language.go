@@ -25,7 +25,7 @@ func (s Languages) Show(w io.Writer) error {
 	table := tablewriter.NewWriter(w)
 	table.Header([]string{"language", "checker", "formatter", "associated files"})
 
-	// Get sorted language names
+	// GetFiles sorted language names
 	langNames := make([]string, 0, len(s))
 	for langName := range s {
 		langNames = append(langNames, langName)

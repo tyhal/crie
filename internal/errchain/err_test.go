@@ -10,7 +10,7 @@ import (
 func TestError_WrapsAndAddsContext(t *testing.T) {
 	base := errors.New("base failure")
 
-	err := From(base).Error("doing important work")
+	err := From(base).Link("doing important work")
 
 	// It should wrap the base error
 	assert.ErrorIs(t, err, base)
@@ -24,7 +24,7 @@ func TestError_WrapsAndAddsContext(t *testing.T) {
 func TestErrorF_WrapsAndFormats(t *testing.T) {
 	base := errors.New("not found")
 
-	err := From(base).ErrorF("fetching id %d", 42)
+	err := From(base).LinkF("fetching id %d", 42)
 
 	assert.ErrorIs(t, err, base)
 
@@ -37,9 +37,9 @@ func TestChaining_PreservesOriginalAndAllContexts(t *testing.T) {
 	base := errors.New("disk full")
 
 	// First wrap
-	err1 := From(base).Error("writing cache")
+	err1 := From(base).Link("writing cache")
 	// Second wrap by starting a new chain from the previous error
-	err2 := From(err1).ErrorF("attempt %d", 3)
+	err2 := From(err1).LinkF("attempt %d", 3)
 
 	assert.ErrorIs(t, err2, base)
 

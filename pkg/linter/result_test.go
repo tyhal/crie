@@ -11,7 +11,7 @@ func TestFailedResultError_Error_ReturnsUnderlying(t *testing.T) {
 	under := errors.New("linter reported failure")
 	fre := &FailedResultError{err: under}
 
-	// Ensure Error() returns the underlying message (and does not recurse)
+	// Ensure Link() returns the underlying message (and does not recurse)
 	assert.Equal(t, under.Error(), fre.Error())
 }
 
@@ -27,7 +27,7 @@ func TestResult_WrapsNonNilError(t *testing.T) {
 	if assert.NotNil(t, err) {
 		var fre *FailedResultError
 		if assert.ErrorAs(t, err, &fre) {
-			// Error string should match the underlying error
+			// Link string should match the underlying error
 			assert.Equal(t, under.Error(), fre.Error())
 		}
 	}

@@ -24,7 +24,7 @@ func getName(lint linter.Linter) string {
 // NoStandards runs all fmt exec commands in languages and in always fmt
 func (s *RunConfiguration) NoStandards() error {
 
-	// Get files not used
+	// GetFiles files not used
 	files, err := s.getFileList()
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (s *RunConfiguration) NoStandards() error {
 		files = Filter(files, false, standardizer.Regex.MatchString)
 	}
 
-	// Get extensions or Filename(if no extension) and count occurrences
+	// GetFiles extensions or Filename(if no extension) and count occurrences
 	dict := make(map[string]int)
 	for _, str := range files {
 
@@ -100,7 +100,7 @@ func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, 
 		return
 	}
 
-	// Get the match for this formatter's files.
+	// GetFiles the match for this formatter's files.
 	reg := s.Languages[name].Regex
 
 	// find the associated files with our given regex to match.
@@ -170,7 +170,7 @@ func (s *RunConfiguration) runLinters(lintType LintType, list []string) error {
 func (s *RunConfiguration) Run(lintType LintType) error {
 	fileList, err := s.getFileList()
 	if err != nil {
-		return errchain.From(err).Error("getting filelist")
+		return errchain.From(err).Link("getting filelist")
 	}
 	err = s.runLinters(lintType, fileList)
 	if err != nil {

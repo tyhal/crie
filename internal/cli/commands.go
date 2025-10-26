@@ -45,7 +45,7 @@ var FmtCmd = &cobra.Command{
 		err := crieRun.Run(runner.LintTypeFmt)
 
 		if err != nil {
-			log.Fatal(errchain.From(err).Error("crie format"))
+			log.Fatal(errchain.From(err).Link("crie format"))
 		}
 	},
 }
@@ -59,7 +59,7 @@ var LsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := crieRun.Languages.Show(os.Stdout)
 		if err != nil {
-			log.Fatal(errchain.From(err).Error("crie list failed"))
+			log.Fatal(errchain.From(err).Link("crie list failed"))
 		}
 	},
 }
@@ -74,7 +74,7 @@ var ChkCmd = &cobra.Command{
 		err := crieRun.Run(runner.LintTypeChk)
 
 		if err != nil {
-			log.Fatal(errchain.From(err).Error("crie check"))
+			log.Fatal(errchain.From(err).Link("crie check"))
 		}
 	},
 }
@@ -90,7 +90,7 @@ Find the file extensions that dont have an associated regex match within crieRun
 	Run: func(cmd *cobra.Command, args []string) {
 		err := crieRun.NoStandards()
 		if err != nil {
-			log.Fatal(errchain.From(err).Error("finding unassociated files"))
+			log.Fatal(errchain.From(err).Link("finding unassociated files"))
 		}
 	},
 }
@@ -191,7 +191,7 @@ func stage(lintType runner.LintType) error {
 	log.Infof("❨ %s ❩", lintType.String())
 	err := crieRun.Run(lintType)
 	if err != nil {
-		return errchain.From(err).ErrorF("crie %s", lintType)
+		return errchain.From(err).LinkF("crie %s", lintType)
 	}
 	return nil
 }
