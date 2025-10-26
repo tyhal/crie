@@ -5,8 +5,8 @@ package runner
 func Filter(list []string, expect bool, f func(string) bool) []string {
 	filteredLists := make([]string, 0)
 	for _, entry := range list {
-		result := f(entry)
-		if result == expect {
+		matched := f(entry)
+		if matched == expect {
 			filteredLists = append(filteredLists, entry)
 		}
 	}

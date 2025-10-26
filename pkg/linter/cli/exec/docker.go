@@ -186,7 +186,7 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 	go func() {
 		_, err := stdcopy.StdCopy(stdout, stderr, attach.Reader)
 		if err != nil {
-			log.Errorf("Error demultiplexing logs: %v", err)
+			log.Errorf("Link demultiplexing logs: %v", err)
 			return
 		}
 	}()

@@ -143,7 +143,7 @@ func addCrieCommand(cmd *cobra.Command) {
 
 func errFatal(err error) {
 	if err != nil {
-		log.Fatal(errchain.From(err).Error("incorrect viper configuration"))
+		log.Fatal(errchain.From(err).Link("incorrect viper configuration"))
 	}
 }
 

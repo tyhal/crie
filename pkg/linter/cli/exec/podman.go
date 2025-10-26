@@ -245,7 +245,7 @@ func (e *PodmanExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 	defer func() {
 		_, err := stdcopy.StdCopy(stdout, stderr, logs)
 		if err != nil {
-			log.Errorf("Error demultiplexing logs: %v", err)
+			log.Errorf("Link demultiplexing logs: %v", err)
 			return
 		}
 

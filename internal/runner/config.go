@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 )
@@ -21,29 +20,6 @@ type RunConfiguration struct {
 	Options   Options
 	Ignore    *regexp.Regexp
 	Languages Languages
-}
-
-// getFileList returns all valid files that have also been filtered by the project
-func (s *RunConfiguration) getFileList() (fileList []string, err error) {
-	if s.IsRepo(".") {
-		if s.Options.GitDiff {
-			// Get files changed in last s.GitDiff commits
-			fileList, err = s.fileListRepoChanged(".")
-		} else {
-			// Get all files in git repo
-			fileList, err = s.fileListRepoAll(".")
-		}
-	} else {
-
-		// Check if the user asked for git diffs when not in a repo
-		if s.Options.GitDiff {
-			return nil, errors.New("you do not appear to be in a git repository")
-		}
-
-		// Generic grab all the files
-		fileList, err = s.fileListAll()
-	}
-	return
 }
 
 // GetLanguage returns the Language configuration by its name or an error if it does not exist.

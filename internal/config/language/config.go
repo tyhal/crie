@@ -53,12 +53,12 @@ func LoadFile(path string) (*Languages, error) {
 
 	configData, err := os.ReadFile(path)
 	if err != nil {
-		return nil, errchain.From(err).ErrorF("readding config file %s", path)
+		return nil, errchain.From(err).LinkF("readding config file %s", path)
 	}
 
 	var c Languages
 	if err = yaml.Unmarshal(configData, &c); err != nil {
-		return nil, errchain.From(err).ErrorF("parsing config file %s", path)
+		return nil, errchain.From(err).LinkF("parsing config file %s", path)
 	}
 
 	merge(&defaultLanguageConfig, &c)
