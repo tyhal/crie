@@ -43,7 +43,7 @@ jobs:
           command: lnt
           lint_continue: 'true'
           lint_passes: 'true'
-          lint_git_diff: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
-          lint_git_target: 'origin/${{ github.base_ref || github.ref_name }}'
+          lint_git_diff: ${{ github.event_name == 'pull_request'  && 'true' || 'false' }}
+          lint_git_target: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref || github.ref_name) || '' }}
       - name: Ensure no diff
         run: git diff --exit-code
