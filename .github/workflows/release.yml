@@ -6,43 +6,25 @@ on:
 permissions:
   contents: read
 jobs:
-  # TODO before v1 release - remove - replacing existing artifacts - and cache between jobs using actions not the releases
-  release-go:
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
-        with:
-          go-version-file: 'go.mod'
-      - uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean --config .github/rel_go_${{ matrix.os }}.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  release-brew:
-    needs: release-go
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          fetch-depth: 0
-      - uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean --config .github/rel_brew.yml
-        # goreleaser build --skip validate --clean --config .github/rel_homebrew.yml
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+      - name: Calculate SHA256
+        id: sha
+        run: |
+          curl -L -o tool.tar.gz \
+            https://github.com/tyhal/crie/releases/download/${GITHUB_REF_NAME}/${GITHUB_REF_NAME}.tar.gz
+          echo "SHA256=$(sha256sum tool.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+      - name: Bump formula in tap
         env:
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+        run: |
+          brew bump-formula-pr \
+            --url="https://github.com/tyhal/crie/releases/download/${GITHUB_REF_NAME}/${GITHUB_REF_NAME}.tar.gz" \
+            --sha256="${SHA256}" \
+            --no-fork \
+            tyhal/tap/crie
+
+
