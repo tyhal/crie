@@ -21,10 +21,8 @@
 
 ## Install
 
-for `crie` itself:
-
 ```shell
-    brew install --cask tyhal/tap/crie
+    brew install tyhal/tap/crie
 ```
 
 from source:
