@@ -19,7 +19,7 @@ jobs:
         id: sha
         run: |
           curl -L -o tool.tar.gz \
-            https://github.com/tyhal/crie/releases/download/${GITHUB_REF_NAME}/${GITHUB_REF_NAME}.tar.gz
+            https://github.com/tyhal/crie/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz
           echo "SHA256=$(sha256sum tool.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
       - name: Tap the repository
         run: brew tap tyhal/tap
@@ -28,8 +28,9 @@ jobs:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
         run: |
           brew bump-formula-pr \
-            --url="https://github.com/tyhal/crie/releases/download/${GITHUB_REF_NAME}/${GITHUB_REF_NAME}.tar.gz" \
+            --url="https://github.com/tyhal/crie/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz" \
             --sha256="${SHA256}" \
+            --no-browser \
             --no-fork \
             tyhal/tap/crie
 
