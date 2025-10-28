@@ -30,7 +30,7 @@ jobs:
           brew bump-formula-pr \
             --url="https://github.com/tyhal/crie/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz" \
             --sha256="${SHA256}" \
-            --no-browser \
+            --no-browse \
             --no-fork \
             tyhal/tap/crie
 
