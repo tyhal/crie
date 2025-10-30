@@ -19,12 +19,12 @@ func TestLanguages_Show(t *testing.T) {
 			name: "two languages",
 			languages: Languages{
 				"python": {
-					Regex: regexp.MustCompile(`\.py$`),
-					Chk:   &noop.LintNoop{},
+					FileMatch: regexp.MustCompile(`\.py$`),
+					Chk:       &noop.LintNoop{},
 				},
 				"go": {
-					Regex: regexp.MustCompile(`\.go$`),
-					Fmt:   &noop.LintNoop{},
+					FileMatch: regexp.MustCompile(`\.go$`),
+					Fmt:       &noop.LintNoop{},
 				},
 			},
 			expected: []string{"go", "noop", "noop", "\\.go$", "python", "noop", "noop", "\\.py$"},
@@ -33,8 +33,8 @@ func TestLanguages_Show(t *testing.T) {
 			name: "one language",
 			languages: Languages{
 				"yaml": {
-					Regex: regexp.MustCompile(`\.ya?ml$`),
-					Chk:   &noop.LintNoop{},
+					FileMatch: regexp.MustCompile(`\.ya?ml$`),
+					Chk:       &noop.LintNoop{},
 				},
 			},
 			expected: []string{"yaml", "noop", "", "\\.ya?ml$"},

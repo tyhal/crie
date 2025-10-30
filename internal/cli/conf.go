@@ -51,7 +51,7 @@ var InitCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Printf("new language file created: %s\nused to overide crie internal language settings (optional / can be deleted)\n", viper.GetString("Language.Conf"))
+		fmt.Printf("new language file created: %s\nused to overide crie internal language settings (optional and can be deleted)\n", viper.GetString("Language.Conf"))
 
 		fmt.Println()
 

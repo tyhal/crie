@@ -13,7 +13,7 @@ import (
 
 // LintShfmt contains all the information needed to configure shfmt
 type LintShfmt struct {
-	Type     string `json:"type" yaml:"type" jsonschema:"enum=shfmt" jsonschema_description:"a built in shell formatter thanks to mvdan"`
+	Type     string `json:"type" yaml:"type" jsonschema:"enum=shfmt" jsonschema_description:"a built in shell formatter thanks to mvdan (Daniel Martí)"`
 	Language string `json:"language" yaml:"language" jsonschema:"enum=bash,enum=posix,enum=sh,enum=mksh"`
 }
 
