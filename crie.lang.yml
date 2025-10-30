@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/res/schema/lang.json
+languages:
+  dockfmt:
+    match: ['(?i).*(Contain|Docker)file.*']
+    fmt:
+      type: dockfmt
+      indent_size: 4
+      trailing_newline: false
+      space_redirects: false
+

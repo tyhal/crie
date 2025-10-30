@@ -21,9 +21,9 @@ func TestRunConfiguration_GetLanguage(t *testing.T) {
 	config := &RunConfiguration{
 		Languages: map[string]*Language{
 			"test": {
-				Chk:   &noop.LintNoop{},
-				Fmt:   &noop.LintNoop{},
-				Regex: regexp.MustCompile(`\.test$`),
+				Chk:       &noop.LintNoop{},
+				Fmt:       &noop.LintNoop{},
+				FileMatch: regexp.MustCompile(`\.test$`),
 			},
 		},
 	}
@@ -43,8 +43,8 @@ func TestRunConfiguration_runLinter(t *testing.T) {
 	config := &RunConfiguration{
 		Languages: map[string]*Language{
 			"go": {
-				Chk:   &noop.LintNoop{},
-				Regex: regexp.MustCompile(`\.go$`),
+				Chk:       &noop.LintNoop{},
+				FileMatch: regexp.MustCompile(`\.go$`),
 			},
 		},
 	}
@@ -72,8 +72,8 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 			config: &RunConfiguration{
 				Languages: map[string]*Language{
 					"go": {
-						Chk:   &noop.LintNoop{},
-						Regex: regexp.MustCompile(`\.go$`),
+						Chk:       &noop.LintNoop{},
+						FileMatch: regexp.MustCompile(`\.go$`),
 					},
 				},
 			},
@@ -85,12 +85,12 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 			config: &RunConfiguration{
 				Languages: map[string]*Language{
 					"go": {
-						Chk:   &noop.LintNoop{},
-						Regex: regexp.MustCompile(`\.go$`),
+						Chk:       &noop.LintNoop{},
+						FileMatch: regexp.MustCompile(`\.go$`),
 					},
 					"test": {
-						Chk:   &noop.LintNoop{},
-						Regex: regexp.MustCompile(`\.test$`),
+						Chk:       &noop.LintNoop{},
+						FileMatch: regexp.MustCompile(`\.test$`),
 					},
 				},
 				Options: Options{
@@ -105,8 +105,8 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 			config: &RunConfiguration{
 				Languages: map[string]*Language{
 					"go": {
-						Chk:   &noop.LintNoop{},
-						Regex: regexp.MustCompile(`\.go$`),
+						Chk:       &noop.LintNoop{},
+						FileMatch: regexp.MustCompile(`\.go$`),
 					},
 				},
 				Options: Options{
@@ -146,8 +146,8 @@ func TestRunConfiguration_Run(t *testing.T) {
 			config: &RunConfiguration{
 				Languages: map[string]*Language{
 					"go": {
-						Chk:   noop.WithErr(nil, nil),
-						Regex: regexp.MustCompile(`\.go$`),
+						Chk:       noop.WithErr(nil, nil),
+						FileMatch: regexp.MustCompile(`\.go$`),
 					},
 				},
 			},
@@ -158,8 +158,8 @@ func TestRunConfiguration_Run(t *testing.T) {
 			config: &RunConfiguration{
 				Languages: map[string]*Language{
 					"go": {
-						Chk:   noop.WithErr(errors.New("startup err"), nil),
-						Regex: regexp.MustCompile(`\.go$`),
+						Chk:       noop.WithErr(errors.New("startup err"), nil),
+						FileMatch: regexp.MustCompile(`\.go$`),
 					},
 				},
 			},
@@ -171,8 +171,8 @@ func TestRunConfiguration_Run(t *testing.T) {
 			config: &RunConfiguration{
 				Languages: map[string]*Language{
 					"go": {
-						Chk:   noop.WithErr(nil, errors.New("run err")),
-						Regex: regexp.MustCompile(`\.go$`),
+						Chk:       noop.WithErr(nil, errors.New("run err")),
+						FileMatch: regexp.MustCompile(`\.go$`),
 					},
 				},
 			},

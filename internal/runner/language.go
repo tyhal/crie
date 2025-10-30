@@ -12,9 +12,9 @@ import (
 
 // Language is used to associate a file pattern with the relevant tools to check and format
 type Language struct {
-	Regex *regexp.Regexp
-	Fmt   linter.Linter
-	Chk   linter.Linter
+	FileMatch *regexp.Regexp
+	Fmt       linter.Linter
+	Chk       linter.Linter
 }
 
 // Languages store the name to a singular language configuration within crie
@@ -34,7 +34,7 @@ func (s Languages) Show(w io.Writer) error {
 
 	for _, langName := range langNames {
 		l := s[langName]
-		err := table.Append([]string{langName, getName(l.Chk), getName(l.Fmt), l.Regex.String()})
+		err := table.Append([]string{langName, getName(l.Chk), getName(l.Fmt), l.FileMatch.String()})
 		if err != nil {
 			return err
 		}

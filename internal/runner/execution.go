@@ -30,7 +30,7 @@ func (s *RunConfiguration) NoStandards() error {
 		return err
 	}
 	for _, standardizer := range s.Languages {
-		files = Filter(files, false, standardizer.Regex.MatchString)
+		files = Filter(files, false, standardizer.FileMatch.MatchString)
 	}
 
 	// GetFiles extensions or Filename(if no extension) and count occurrences
@@ -101,7 +101,7 @@ func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, 
 	}
 
 	// GetFiles the match for this formatter's files.
-	reg := s.Languages[name].Regex
+	reg := s.Languages[name].FileMatch
 
 	// find the associated files with our given regex to match.
 	associatedFiles := Filter(list, true, reg.MatchString)

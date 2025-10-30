@@ -63,9 +63,13 @@ func setCrie(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	languages := make(map[string]*runner.Language, len(langs.Languages))
+	crieLanguages := make(map[string]*runner.Language, len(langs.Languages))
 	for langName, lang := range langs.Languages {
-		languages[langName] = lang.ToCrieLanguage()
+		crieLang, err := lang.ToCrieLanguage()
+		if err != nil {
+			return errchain.From(err).LinkF("parsing language %s", langName)
+		}
+		crieLanguages[langName] = crieLang
 	}
 
 	var ignore *regexp.Regexp
@@ -73,7 +77,7 @@ func setCrie(_ *cobra.Command, _ []string) error {
 		ignore = regexp.MustCompile(strings.Join(projectConfig.Ignore, "|"))
 	}
 
-	crieRun = runner.RunConfiguration{Options: projectConfig.Lint, Ignore: ignore, Languages: languages}
+	crieRun = runner.RunConfiguration{Options: projectConfig.Lint, Ignore: ignore, Languages: crieLanguages}
 
 	return nil
 }

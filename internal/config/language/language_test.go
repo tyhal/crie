@@ -14,14 +14,14 @@ func TestConfigLanguage_toLanguage(t *testing.T) {
 	chkLinter := Linter{Linter: &noop.LintNoop{}}
 
 	config := Language{
-		Regex: regex,
-		Fmt:   fmtLinter,
-		Chk:   chkLinter,
+		FileMatch: regex,
+		Fmt:       fmtLinter,
+		Chk:       chkLinter,
 	}
 
-	result := config.ToCrieLanguage()
-
-	assert.Equal(t, regex.Regexp, result.Regex)
+	result, err := config.ToCrieLanguage()
+	assert.NoError(t, err)
+	assert.Equal(t, regex.Regexp, result.FileMatch)
 	assert.Equal(t, fmtLinter.Linter, result.Fmt)
 	assert.Equal(t, chkLinter.Linter, result.Chk)
 }
