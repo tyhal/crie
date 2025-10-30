@@ -15,7 +15,8 @@ go run ./cmd/crie schema proj >./res/schema/proj.json
 # docs
 
 echo '```' >./doc/supported_languages.md
-go run ./cmd/crie ls >>./doc/supported_languages.md
+# point to non-existent lang to skip non-defaults
+go run ./cmd/crie ls --lang-config="not.lang.yml" >>./doc/supported_languages.md
 echo '```' >>./doc/supported_languages.md
 
 go run ./cmd/docgen -out ./doc/cli -format markdown

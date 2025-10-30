@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/jsonschema"
 	"github.com/tyhal/crie/pkg/linter"
 	"github.com/tyhal/crie/pkg/linter/cli"
+	"github.com/tyhal/crie/pkg/linter/dockfmt"
 	"github.com/tyhal/crie/pkg/linter/noop"
 	"github.com/tyhal/crie/pkg/linter/shfmt"
 	"gopkg.in/yaml.v3"
@@ -55,6 +56,8 @@ func (l *Linter) UnmarshalYAML(value *yaml.Node) error {
 		return decodeLinter[*cli.LintCli](value, &l.Linter)
 	case "shfmt":
 		return decodeLinter[*shfmt.LintShfmt](value, &l.Linter)
+	case "dockfmt":
+		return decodeLinter[*dockfmt.LintDockFmt](value, &l.Linter)
 	case "noop":
 		return decodeLinter[*noop.LintNoop](value, &l.Linter)
 	case "":

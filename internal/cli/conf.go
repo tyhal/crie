@@ -10,10 +10,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func completeYml(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-	return []cobra.Completion{"yml", "yaml"}, cobra.ShellCompDirectiveFilterFileExt
-}
-
 // ConfCmd is used to show configuration settings after flags, env, configs are parsed
 var ConfCmd = &cobra.Command{
 	Use:               "conf",
