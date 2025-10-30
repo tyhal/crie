@@ -1,13 +1,11 @@
 package cli
 
 import (
-	"sort"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/config/project"
 	"github.com/tyhal/crie/internal/errchain"
 )
@@ -72,75 +70,6 @@ var languageConfigPath string
 var projectConfigPath string
 var projectConfig project.Config
 
-func setCrieConfig(cmd *cobra.Command, args []string) error {
-	langConfig, err := language.LoadFile(languageConfigPath)
-	if err != nil {
-		return err
-	}
-	SetCrie(&projectConfig, langConfig)
-	return nil
-}
-
-func msgLast(fields []string) {
-	sort.Slice(fields, func(i, j int) bool {
-		if fields[i] == "msg" {
-			return false
-		}
-		if fields[j] == "msg" {
-			return true
-		}
-		return fields[i] < fields[j]
-	})
-}
-
-func setLogging() {
-	if projectConfig.Log.Trace {
-		log.SetLevel(log.TraceLevel)
-	}
-	if projectConfig.Log.Verbose {
-		log.SetLevel(log.DebugLevel)
-	}
-	if projectConfig.Log.Quiet {
-		log.SetLevel(log.FatalLevel)
-	}
-	if projectConfig.Log.JSON {
-		log.SetFormatter(&log.JSONFormatter{})
-		projectConfig.Lint.StrictLogging = true
-	} else {
-		log.SetFormatter(&log.TextFormatter{
-			SortingFunc:      msgLast,
-			DisableQuote:     true,
-			DisableTimestamp: true,
-			DisableSorting:   false,
-		})
-	}
-}
-
-func addLintCommand(cmd *cobra.Command) {
-	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.Continue, "continue", "e", false, "show all errors rather than stopping at the first")
-	errFatal(viper.BindPFlag("Lint.Continue", cmd.PersistentFlags().Lookup("continue")))
-	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.Passes, "passes", "p", false, "show files that passed")
-	errFatal(viper.BindPFlag("Lint.Passes", cmd.PersistentFlags().Lookup("passes")))
-
-	cmd.PersistentFlags().BoolVarP(&projectConfig.Lint.GitDiff, "git-diff", "g", false, "only check files changed in git")
-	errFatal(viper.BindPFlag("Lint.GitDiff", cmd.PersistentFlags().Lookup("git-diff")))
-	cmd.PersistentFlags().StringVarP(&projectConfig.Lint.GitTarget, "git-target", "t", "", "a target branch to compare against e.g 'remote/branch' or 'branch'")
-	errFatal(viper.BindPFlag("Lint.GitTarget", cmd.PersistentFlags().Lookup("git-target")))
-
-	cmd.PersistentFlags().StringVar(&projectConfig.Lint.Only, "only", "", "run with only one language (see `crie ls` for available options)")
-	errFatal(viper.BindPFlag("Lint.Only", cmd.PersistentFlags().Lookup("only")))
-
-	cmd.PreRunE = setCrieConfig
-
-	RootCmd.AddCommand(cmd)
-}
-
-// addCrieCommand is the same as addLintCommand but only to ensure the languages are loaded
-func addCrieCommand(cmd *cobra.Command) {
-	cmd.PreRunE = setCrieConfig
-	RootCmd.AddCommand(cmd)
-}
-
 func errFatal(err error) {
 	if err != nil {
 		log.Fatal(errchain.From(err).Link("incorrect viper configuration"))
@@ -151,8 +80,11 @@ func init() {
 
 	RootCmd.PersistentFlags().StringVarP(&projectConfigPath, "conf", "c", "crie.yml", "project configuration file")
 	errFatal(viper.BindPFlag("Project.Conf", RootCmd.PersistentFlags().Lookup("conf")))
+	errFatal(RootCmd.RegisterFlagCompletionFunc("conf", completeYml))
+
 	RootCmd.PersistentFlags().StringVarP(&languageConfigPath, "lang-conf", "l", "crie.lang.yml", "language configuration file")
 	errFatal(viper.BindPFlag("Language.Conf", RootCmd.PersistentFlags().Lookup("lang-conf")))
+	errFatal(RootCmd.RegisterFlagCompletionFunc("lang-conf", completeYml))
 
 	RootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.JSON, "json", "j", projectConfig.Log.JSON, "turn on json output")
 	errFatal(viper.BindPFlag("Log.JSON", RootCmd.PersistentFlags().Lookup("json")))
