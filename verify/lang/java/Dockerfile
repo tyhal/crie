@@ -1,2 +1,2 @@
-	
-FROM	eclipse-temurin:25-alpine
+
+FROM eclipse-temurin:25-alpine

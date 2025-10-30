@@ -2,58 +2,18 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
-	"github.com/go-git/go-git/v5/plumbing"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/errchain"
-	"github.com/tyhal/crie/internal/filelist"
 	"github.com/tyhal/crie/internal/runner"
 )
 
 var crieRun runner.RunConfiguration
-
-func completeLanguage(_ *cobra.Command, _ []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
-	langs, err := language.LoadFile(languageConfigPath)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveError
-	}
-	var comps []cobra.Completion
-	for lang := range langs.Languages {
-		if strings.HasPrefix(lang, toComplete) {
-			comps = append(comps, lang)
-		}
-	}
-	return comps, cobra.ShellCompDirectiveNoFileComp
-}
-
-func completeGitTarget(_ *cobra.Command, _ []string, _ string) ([]cobra.Completion, cobra.ShellCompDirective) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveError
-	}
-	repo, err := filelist.GetGitRepo(cwd)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveError
-	}
-	var comps []cobra.Completion
-	remotes, err := repo.Remotes()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveError
-	}
-	for _, r := range remotes {
-		refName := plumbing.ReferenceName("refs/remotes/" + r.Config().Name + "/HEAD")
-		if ref, err := repo.Reference(refName, true); err == nil {
-			comps = append(comps, ref.Name().Short())
-		}
-	}
-	return comps, cobra.ShellCompDirectiveNoFileComp
-}
 
 // setCrie pushes the Languages to the crie.RunConfiguration
 func setCrie(_ *cobra.Command, _ []string) error {

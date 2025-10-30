@@ -30,5 +30,3 @@ RUN chmod -R 755 /etc/vale
 RUN vale sync
 
 USER standards
-
-

@@ -52,7 +52,7 @@ languages:
         start: ["-x", "--shell=sh", "-Calways"]
       img: "docker.io/koalaman/shellcheck-alpine:stable"
   docker:
-    match: ['Dockerfile$']
+    match: ['(?i).*(Contain|Docker)file.*']
     chk:
       type: cli
       exec:
