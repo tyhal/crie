@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/language"
-	"github.com/tyhal/crie/internal/errchain"
 	"github.com/tyhal/crie/internal/runner"
+	"github.com/tyhal/crie/pkg/errchain"
 )
 
 var crieRun runner.RunConfiguration

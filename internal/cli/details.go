@@ -5,7 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/internal/errchain"
+	"github.com/tyhal/crie/pkg/errchain"
 )
 
 // addCrieCommand is the same as addLintCommand but only to ensure the languages are loaded
