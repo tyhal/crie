@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/reteps/dockerfmt/lib"
-	"github.com/tyhal/crie/internal/errchain"
+	"github.com/tyhal/crie/pkg/errchain"
 )
 
 func (l *LintDockFmt) format(filepath string) error {

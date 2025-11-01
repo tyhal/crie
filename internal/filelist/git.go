@@ -10,7 +10,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/tyhal/crie/internal/errchain"
+	"github.com/tyhal/crie/pkg/errchain"
 )
 
 // GetGitRepo opens a git repository rooted at dir (or its parents when .git is detected)
