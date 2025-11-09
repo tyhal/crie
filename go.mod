@@ -59,7 +59,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/crc-org/vfkit v0.6.1 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467 // indirect
-	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
+	github.com/cyphar/filepath-securejoin v0.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/digitalocean/go-libvirt v0.0.0-20220804181439-8648fbde413e // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20250212194115-ee9b0668d242 // indirect
@@ -128,7 +128,7 @@ require (
 	github.com/opencontainers/cgroups v0.0.4 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/opencontainers/runc v1.3.0 // indirect
+	github.com/opencontainers/runc v1.3.3 // indirect
 	github.com/opencontainers/runtime-tools v0.9.1-0.20250523060157-0ea5ed0382a2 // indirect
 	github.com/opencontainers/selinux v1.12.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
@@ -139,7 +139,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/proglottis/gpgme v0.1.4 // indirect
-	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.9.0 // indirect
