@@ -15,7 +15,7 @@ func (g gitlabFolder) Start(display string, open bool) string {
 	if open {
 		collapsed = "false"
 	}
-	fmt.Printf("\033[0Ksection_start:%d:%s[collapsed=%s]\r\033[0K%s",
+	fmt.Printf("\033[0Ksection_start:%d:%s[collapsed=%s]\r\033[0K%s\n",
 		time.Now().Unix(),
 		id,
 		collapsed,
