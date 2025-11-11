@@ -43,7 +43,7 @@ The suggested way to start running crie is to run `chk` at the top of your proje
     crie chk --continue
 ```
 
-## 📚 Documentation
+## Documentation
 
 See the **[documentation](doc/README.md)** for installation, configuration, and usage guides.
 
