@@ -5,8 +5,8 @@ import "fmt"
 type plainFolder struct {
 }
 
-func (s plainFolder) Start(display string, _ bool) string {
-	fmt.Println(display)
+func (s plainFolder) Start(file, msg string, _ bool) string {
+	fmt.Printf("%s %v\n\n", msg, file)
 	return ""
 }
 
