@@ -13,8 +13,8 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@0fd01fffe2bb7ba090ade9655fe7e89ab5c613d4 # main
       - name: Configure git
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
       - name: Calculate SHA256
         id: sha
         run: |
