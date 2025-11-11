@@ -44,7 +44,7 @@ func (r *Runner) Log(rep *Report) error {
 		if r.StrictLogging {
 			log.Printf("fail %v", rep.File)
 		} else {
-			id = r.folder.Start(fmt.Sprintf("\u274C %v", rep.File), false)
+			id = r.folder.Start(rep.File, "❌", false)
 		}
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {

@@ -3,7 +3,7 @@ package folding
 import "os"
 
 type Folder interface {
-	Start(display string, open bool) string
+	Start(file string, msg string, open bool) string
 	Stop(id string)
 }
 

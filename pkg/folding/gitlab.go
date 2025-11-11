@@ -9,17 +9,18 @@ import (
 type gitlabFolder struct {
 }
 
-func (g gitlabFolder) Start(display string, open bool) string {
+func (g gitlabFolder) Start(file, msg string, open bool) string {
 	id := fmt.Sprintf("%08x\n", rand.Int31())
 	collapsed := "true"
 	if open {
 		collapsed = "false"
 	}
-	fmt.Printf("\033[0Ksection_start:%d:%s[collapsed=%s]\r\033[0K%s\n",
+	fmt.Printf("\033[0Ksection_start:%d:%s[collapsed=%s]\r\033[0K%s %v\n",
 		time.Now().Unix(),
 		id,
 		collapsed,
-		display)
+		msg,
+		file)
 	return id
 }
 
