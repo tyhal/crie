@@ -5,15 +5,11 @@ import "fmt"
 type githubFolder struct {
 }
 
-func (g githubFolder) Start(id string) {
-	fmt.Printf("start github span %s\n", id)
+func (g githubFolder) Start(display string, _ bool) string {
+	fmt.Printf("::group::%s\n", display)
+	return display
 }
 
-func (g githubFolder) Stop() {
-	fmt.Printf("stop github span\n")
-}
-
-func (g githubFolder) Log() {
-	//TODO implement me
-	panic("implement me")
+func (g githubFolder) Stop(_ string) {
+	fmt.Printf("::endgroup::\n")
 }

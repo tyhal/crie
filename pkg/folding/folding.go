@@ -3,9 +3,8 @@ package folding
 import "os"
 
 type Folder interface {
-	Start(id string)
-	Stop()
-	Log()
+	Start(display string, open bool) string
+	Stop(id string)
 }
 
 func isSet(key string) bool {
@@ -15,9 +14,6 @@ func isSet(key string) bool {
 
 func NewFolder(structured bool) Folder {
 	switch {
-	case structured:
-
-		return &structuredFolder{}
 	case isSet("GITHUB_ACTIONS"):
 
 		return &githubFolder{}
