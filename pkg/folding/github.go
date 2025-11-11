@@ -6,8 +6,8 @@ type githubFolder struct {
 }
 
 func (g githubFolder) Start(file string, msg string, _ bool) string {
-	fmt.Printf("::error file=%s::%s\n", file, msg)
-	fmt.Printf("::group::see more\n")
+	fmt.Printf("::error file=%s::%s %v\n", file, msg, file)
+	fmt.Printf("::group::see logs\n")
 	return file
 }
 

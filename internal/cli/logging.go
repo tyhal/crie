@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"os"
 	"sort"
 
 	log "github.com/sirupsen/logrus"
@@ -32,6 +33,7 @@ func setLogging() {
 		log.SetFormatter(&log.JSONFormatter{})
 		projectConfig.Lint.StrictLogging = true
 	} else {
+		log.SetOutput(os.Stdout)
 		log.SetFormatter(&log.TextFormatter{
 			SortingFunc:      msgLast,
 			DisableQuote:     true,
