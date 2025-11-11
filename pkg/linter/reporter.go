@@ -37,9 +37,9 @@ func (r *Runner) Log(rep *Report) error {
 			} else {
 				fmt.Printf("\u2714 %v\n", rep.File)
 			}
-			r.folder.Start(rep.File)
+			id := r.folder.Start(rep.File, false)
 			r.logConditional(rep.StdOut, "stdout", log.DebugLevel)
-			r.folder.Stop()
+			r.folder.Stop(id)
 		}
 	} else {
 		if r.StrictLogging {
@@ -48,7 +48,7 @@ func (r *Runner) Log(rep *Report) error {
 			fmt.Printf("\u274C %v\n\n", rep.File)
 		}
 		var failedResultErr *FailedResultError
-		r.folder.Start(rep.File)
+		id := r.folder.Start(rep.File, false)
 		if errors.As(rep.Err, &failedResultErr) {
 			r.logConditional(rep.StdErr, "stderr", log.ErrorLevel)
 			r.logConditional(rep.StdOut, "stdout", log.InfoLevel)
@@ -56,7 +56,7 @@ func (r *Runner) Log(rep *Report) error {
 		} else {
 			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
 		}
-		r.folder.Stop()
+		r.folder.Stop(id)
 	}
 
 	return rep.Err
