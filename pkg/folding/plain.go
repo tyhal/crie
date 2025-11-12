@@ -1,15 +1,27 @@
 package folding
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 type plainFolder struct {
+	io.Writer
 }
 
-func (s plainFolder) Start(file, msg string, _ bool) string {
-	fmt.Printf("%s %v\n\n", msg, file)
-	return ""
+// NewPlain is a basic implementation of the Folder interface
+func NewPlain(w io.Writer) Folder {
+	return &plainFolder{w}
 }
 
-func (s plainFolder) Stop(_ string) {
-	return
+func (p plainFolder) Start(file, msg string, _ bool) (string, error) {
+	_, err := fmt.Fprintf(p, "%s %v\n\n", msg, file)
+	if err != nil {
+		return "", err
+	}
+	return "", nil
+}
+
+func (p plainFolder) Stop(_ string) error {
+	return nil
 }
