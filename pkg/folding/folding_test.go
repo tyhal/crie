@@ -28,7 +28,7 @@ func TestNewFolder(t *testing.T) {
 	var b bytes.Buffer
 	folder := NewW(&b)
 	folder.Start("a/b", "hello", true)
-	assert.Greater(t, b.Len(), 0)
+	assert.Positive(t, b.Len())
 
 	folder = New()
 	assert.NotNil(t, folder)

@@ -13,7 +13,7 @@ import (
 )
 
 func Test_getName(t *testing.T) {
-	assert.Equal(t, "", getName(nil))
+	assert.Empty(t, getName(nil))
 	assert.Equal(t, "noop", getName(&noop.LintNoop{}))
 }
 
