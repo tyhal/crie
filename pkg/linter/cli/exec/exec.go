@@ -1,3 +1,4 @@
+// Package exec allows for a CLI tool to be executed in different contexts
 package exec
 
 import "io"

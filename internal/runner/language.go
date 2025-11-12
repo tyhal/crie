@@ -1,3 +1,4 @@
+// Package runner contains the logic to run the linters
 package runner
 
 import (
