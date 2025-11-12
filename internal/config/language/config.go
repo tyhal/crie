@@ -1,3 +1,4 @@
+// Package language contains configuration structures and helpers for language definitions.
 package language
 
 import (

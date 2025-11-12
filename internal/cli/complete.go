@@ -38,7 +38,7 @@ func completeGitTarget(_ *cobra.Command, _ []string, _ string) ([]cobra.Completi
 }
 
 func completeLanguage(cmd *cobra.Command, _ []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
-	filter := func(l language.Language) bool { return true }
+	filter := func(_ language.Language) bool { return true }
 	switch cmd.Name() {
 	case "fmt":
 		filter = func(l language.Language) bool {

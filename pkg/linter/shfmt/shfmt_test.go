@@ -24,7 +24,7 @@ func TestLint_WillRun(t *testing.T) {
 	assert.NoError(t, l.WillRun())
 }
 
-func TestLint_Cleanup(t *testing.T) {
+func TestLint_Cleanup(_ *testing.T) {
 	l := &LintShfmt{}
 	var wg sync.WaitGroup
 	wg.Add(1)

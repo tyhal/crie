@@ -22,7 +22,7 @@ var LsCmd = &cobra.Command{
 	Long:              `Show all languages available and the commands run when used`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		err := crieRun.Languages.Show(os.Stdout)
 		if err != nil {
 			log.Fatal(errchain.From(err).Link("crie list failed"))
@@ -40,7 +40,7 @@ var NonCmd = &cobra.Command{
 Find the file extensions that dont have an associated regex match within crie`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		err := crieRun.NoStandards()
 		if err != nil {
 			log.Fatal(errchain.From(err).Link("finding unassociated files"))

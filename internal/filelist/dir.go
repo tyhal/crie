@@ -1,3 +1,4 @@
+// Package filelist provides utilities to build file lists from directories.
 package filelist
 
 import (
@@ -11,7 +12,7 @@ func FromDir(dir string) ([]string, error) {
 	var files []string
 
 	// Create an initial file list
-	err := filepath.Walk(dir, func(currPath string, f os.FileInfo, err error) error {
+	err := filepath.Walk(dir, func(currPath string, f os.FileInfo, _ error) error {
 		if !f.IsDir() {
 			relPath, err := filepath.Rel(dir, currPath)
 			if err != nil {
