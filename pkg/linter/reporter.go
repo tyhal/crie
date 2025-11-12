@@ -62,7 +62,7 @@ func (r *Runner) Log(rep *Report) error {
 }
 
 func (r *Runner) listen(results chan error, linterReport chan Report) {
-	r.folder = folding.NewFolder(r.StrictLogging)
+	r.folder = folding.New()
 	for report := range linterReport {
 		err := r.Log(&report)
 		results <- err

@@ -2,28 +2,39 @@ package folding
 
 import (
 	"fmt"
+	"io"
 	"math/rand"
 	"time"
 )
 
 type gitlabFolder struct {
+	io.Writer
 }
 
-func (g gitlabFolder) Start(file, msg string, open bool) string {
+// NewGitlab uses the Gitlab CI log syntax
+func NewGitlab(w io.Writer) Folder {
+	return &gitlabFolder{w}
+}
+
+func (g gitlabFolder) Start(file, msg string, open bool) (string, error) {
 	id := fmt.Sprintf("%08x\n", rand.Int31())
 	collapsed := "true"
 	if open {
 		collapsed = "false"
 	}
-	fmt.Printf("\033[0Ksection_start:%d:%s[collapsed=%s]\r\033[0K%s %v\n",
+	_, err := fmt.Fprintf(g, "\033[0Ksection_start:%d:%s[collapsed=%s]\r\033[0K%s %v\n",
 		time.Now().Unix(),
 		id,
 		collapsed,
 		msg,
 		file)
-	return id
+	if err != nil {
+		return "", err
+	}
+	return id, nil
 }
 
-func (g gitlabFolder) Stop(id string) {
-	fmt.Printf("\033[0Ksection_end:%d:%s\r\033[0K", time.Now().Unix(), id)
+func (g gitlabFolder) Stop(id string) error {
+	_, err := fmt.Fprintf(g, "\033[0Ksection_end:%d:%s\r\033[0K", time.Now().Unix(), id)
+	return err
 }
