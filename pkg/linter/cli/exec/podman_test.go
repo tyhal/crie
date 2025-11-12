@@ -19,5 +19,5 @@ func TestPodman_SocketGet(t *testing.T) {
 
 	socket, err := getPodmanMachineSocket()
 	assert.NoError(t, err)
-	assert.NotEqual(t, "", socket)
+	assert.NotEmpty(t, socket)
 }

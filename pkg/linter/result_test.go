@@ -16,7 +16,7 @@ func TestFailedResultError_Error_ReturnsUnderlying(t *testing.T) {
 }
 
 func TestResult_NilPassThrough(t *testing.T) {
-	assert.Nil(t, Result(nil))
+	assert.NoError(t, Result(nil))
 }
 
 func TestResult_WrapsNonNilError(t *testing.T) {
@@ -24,7 +24,7 @@ func TestResult_WrapsNonNilError(t *testing.T) {
 	err := Result(under)
 
 	// Not nil and of the correct type
-	if assert.NotNil(t, err) {
+	if assert.Error(t, err) {
 		var fre *FailedResultError
 		if assert.ErrorAs(t, err, &fre) {
 			// Link string should match the underlying error
