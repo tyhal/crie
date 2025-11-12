@@ -44,7 +44,7 @@ func (r *Runner) Log(rep *Report) error {
 		if r.StrictLogging {
 			log.Printf("fail %v", rep.File)
 		} else {
-			id = r.folder.Start(rep.File, "\u2716", false)
+			id, _ = r.folder.Start(rep.File, "\u2716", false)
 		}
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
@@ -55,7 +55,7 @@ func (r *Runner) Log(rep *Report) error {
 			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
 		}
 		if id != "" {
-			r.folder.Stop(id)
+			_ = r.folder.Stop(id)
 		}
 	}
 	return rep.Err
