@@ -1,3 +1,4 @@
+// Package cli allows a CLI tool to be linted from the host or in a container
 package cli
 
 import (

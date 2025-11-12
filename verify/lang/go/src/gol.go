@@ -1,3 +1,4 @@
+// Package main is a dummy package for testing
 package main
 
 import "fmt"

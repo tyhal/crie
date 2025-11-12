@@ -114,8 +114,8 @@ languages:
     chk:
       type: cli
       exec:
-        bin: golint
-        start: ["-set_exit_status"]
+        bin: revive
+        start: ["-config", "/etc/revive/revive.toml", "-set_exit_status"]
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
   markdown:

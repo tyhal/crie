@@ -24,7 +24,7 @@ func TestFilter(t *testing.T) {
 	}
 
 	// Test empty result
-	result = Filter([]string{}, true, func(s string) bool { return true })
+	result = Filter([]string{}, true, func(_ string) bool { return true })
 	if len(result) != 0 {
 		t.Errorf("expected empty slice, got %v", result)
 	}
