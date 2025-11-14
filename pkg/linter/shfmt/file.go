@@ -15,7 +15,7 @@ import (
 	"mvdan.cc/sh/v3/syntax"
 )
 
-func (s *shfmt) formatPath(path string, checkShebang bool) error {
+func (s *shfmt) formatPath(path string, _ bool) error {
 	var readBuf bytes.Buffer
 	var copyBuf = make([]byte, 32*1024)
 
