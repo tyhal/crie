@@ -1,0 +1,4 @@
+enableDefaultRules = true
+
+[rule.package-comments]
+Disabled = true

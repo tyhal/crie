@@ -4,6 +4,6 @@ import (
 	"testing"
 )
 
-func TestProjectSchema(t *testing.T) {
+func TestProjectSchema(_ *testing.T) {
 	Schema()
 }

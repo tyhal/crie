@@ -1,3 +1,4 @@
+// Package main is the main entrypoint for the crie CLI.
 package main
 
 import (

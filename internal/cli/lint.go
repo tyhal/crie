@@ -73,7 +73,7 @@ var ChkCmd = &cobra.Command{
 	Long:              `Check all code standards for coding conventions`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		err := crieRun.Run(runner.LintTypeChk)
 
 		if err != nil {
@@ -89,7 +89,7 @@ var FmtCmd = &cobra.Command{
 	Long:              `Run all formatters in the list`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		err := crieRun.Run(runner.LintTypeFmt)
 
 		if err != nil {

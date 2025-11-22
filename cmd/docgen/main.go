@@ -1,3 +1,4 @@
+// Package main generates CLI reference documentation for crie.
 package main
 
 import (
