@@ -15,6 +15,12 @@ RUN apk --no-cache add gmp libxml2 libffi zstd-libs
 COPY --from=clang_layer /usr/lib/llvm20/lib/libclang-cpp.so.20.1 /usr/lib/llvm20/lib/libclang-cpp.so.20.1
 COPY --from=clang_layer /usr/lib/llvm20/lib/libLLVM.so.20.1 /usr/lib/llvm20/lib/libLLVM.so.20.1
 COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
-RUN apk --no-cache add cppcheck asciidoctor
+RUN apk --no-cache add cppcheck asciidoctor vale
+
+ENV VALE_CONFIG_PATH=/etc/vale/.vale.ini
+COPY --chmod=644 conf/markdown/.vale.ini $VALE_CONFIG_PATH
+RUN chmod -R 755 /etc/vale
+# hadolint ignore=DL3059
+RUN vale sync
 
 USER standards
