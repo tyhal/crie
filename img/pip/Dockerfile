@@ -16,7 +16,9 @@ RUN mkdir /.ansible \
 RUN adduser -D standards
 USER standards
 
-ENV YAMLLINT_CONFIG_FILE=/home/standards/.config/yamllint/config
+ENV XDG_CONFIG_DIR=/etc/.config
+
+ENV YAMLLINT_CONFIG_FILE=$XDG_CONFIG_DIR/yamllint/config
 COPY --chown=standards:standards conf/yaml/.yamllint.yaml $YAMLLINT_CONFIG_FILE
-ENV CMAKELINT_CONFIG_FILE=/home/standards/.config/cmakelintrc
+ENV CMAKELINT_CONFIG_FILE=$XDG_CONFIG_DIR/cmakelintrc
 COPY --chown=standards:standards conf/cmake/.cmakelintrc $CMAKELINT_CONFIG_FILE
