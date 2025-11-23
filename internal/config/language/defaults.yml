@@ -115,7 +115,7 @@ languages:
       type: cli
       exec:
         bin: revive
-        start: ["-config", "/etc/.config/revive.toml", "-set_exit_status"]
+        start: ["-config", "/etc/revive/revive.toml", "-set_exit_status"]
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
   markdown:
