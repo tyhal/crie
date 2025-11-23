@@ -1,12 +1,14 @@
 #!/bin/sh
 set -xe
 
+cd "$(dirname "$0")/.."
+
 has_command() {
 	command -v "$1" >/dev/null 2>&1
 }
 
 install_brew() {
-	xargs brew install <"$(dirname "$0")/pkgs/brew.txt"
+	brew bundle
 }
 
 install_apt() {

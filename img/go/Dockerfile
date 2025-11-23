@@ -7,7 +7,6 @@ FROM go_layer AS golint_layer
 # hadolint ignore=DL3062
 RUN go install github.com/errata-ai/vale@latest \
     && go install github.com/mgechev/revive@latest \
-    && go install golang.org/x/lint/golint@latest \
     && go install github.com/yoheimuta/protolint/cmd/protolint@latest
 
 
@@ -18,7 +17,6 @@ RUN adduser -D standards
 # [ Golang ]
 COPY --from=go_layer /usr/local/go/bin/gofmt /bin/gofmt
 COPY --from=golint_layer /go/bin/revive /bin/revive
-COPY --from=golint_layer /go/bin/golint /bin/golint
 COPY --from=golint_layer /go/bin/vale /bin/vale
 COPY --from=golint_layer /go/bin/protolint /bin/protolint
 

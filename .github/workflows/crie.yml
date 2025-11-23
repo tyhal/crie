@@ -8,6 +8,7 @@ on:
     tags:
       - v*
   pull_request:
+    paths: ['*.go', 'cmd/*', 'internal/*', 'pkg/*']
 jobs:
   crie-test:
     runs-on: ubuntu-latest
