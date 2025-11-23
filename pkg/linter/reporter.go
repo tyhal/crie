@@ -54,7 +54,7 @@ func (r *Runner) Log(rep *Report) error {
 		} else {
 			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
 		}
-		if id != "" {
+		if !r.StrictLogging {
 			_ = r.folder.Stop(id)
 		}
 	}
