@@ -132,7 +132,7 @@ languages:
       type: cli
       exec:
         bin: vale
-      img: "ghcr.io/tyhal/crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   asciidoctor:
     match: ['\.adoc$']
@@ -140,7 +140,7 @@ languages:
       type: cli
       exec:
         bin: vale
-      img: "ghcr.io/tyhal/crie-dep-go"
+      img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   json:
     match: ['\.json$', '\.JSON$']

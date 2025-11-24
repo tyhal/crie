@@ -13,7 +13,7 @@ crie fmt [flags]
 ### Options
 
 ```
-  -e, --continue            show all errors rather than stopping at the first
+  -a, --continue            show all errors rather than stopping at the first
   -g, --git-diff            only check files changed in git
   -t, --git-target string   a target branch to compare against e.g 'remote/branch' or 'branch'
   -h, --help                help for fmt

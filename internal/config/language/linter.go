@@ -22,7 +22,7 @@ func (l Linter) JSONSchema() *jsonschema.Schema {
 
 	var schema jsonschema.Schema
 
-	schema.OneOf = make([]*jsonschema.Schema, 3)
+	schema.OneOf = make([]*jsonschema.Schema, len(linterRefs))
 	// linterRefs are manually added from schema.go
 	for i, ref := range linterRefs {
 		schema.OneOf[i] = &jsonschema.Schema{

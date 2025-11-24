@@ -52,7 +52,10 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "match"
+      ]
     },
     "Languages": {
       "properties": {
@@ -99,6 +102,37 @@
         "exec"
       ]
     },
+    "LintDockFmt": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "dockfmt"
+          ],
+          "description": "a built in Docker formatter thanks to reteps (Pete Stenger)"
+        },
+        "indent_size": {
+          "type": "integer",
+          "description": "Number of spaces to use for indentation"
+        },
+        "trailing_newline": {
+          "type": "boolean",
+          "description": "End the file with a trailing newline"
+        },
+        "space_redirects": {
+          "type": "boolean",
+          "description": "Redirect operators will be followed by a space"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type",
+        "indent_size",
+        "trailing_newline",
+        "space_redirects"
+      ]
+    },
     "LintNoop": {
       "properties": {
         "type": {
@@ -122,7 +156,7 @@
           "enum": [
             "shfmt"
           ],
-          "description": "a built in shell formatter thanks to mvdan"
+          "description": "a built in shell formatter thanks to mvdan (Daniel Martí)"
         },
         "language": {
           "type": "string",
@@ -148,6 +182,9 @@
         },
         {
           "$ref": "#/$defs/LintShfmt"
+        },
+        {
+          "$ref": "#/$defs/LintDockFmt"
         },
         {
           "$ref": "#/$defs/LintNoop"

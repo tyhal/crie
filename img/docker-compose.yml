@@ -1,17 +1,17 @@
 services:
   # apk tools - preferred
   apk:
-    image: docker.io/tyhal/crie-dep-apk
+    image: ghcr.io/tyhal/crie-dep-apk
     build: apk
   # go native tools - TODO shouldn't be needed
   go:
-    image: docker.io/tyhal/crie-dep-go
+    image: ghcr.io/tyhal/crie-dep-go
     build: go
   # js tools
   npm:
-    image: docker.io/tyhal/crie-dep-npm
+    image: ghcr.io/tyhal/crie-dep-npm
     build: npm
   # python tools
   pip:
-    image: docker.io/tyhal/crie-dep-pip
+    image: ghcr.io/tyhal/crie-dep-pip
     build: pip
