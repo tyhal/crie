@@ -56,3 +56,8 @@ language: bash`,
 		})
 	}
 }
+
+func TestConfigLinter_JSONSchema(t *testing.T) {
+	var cl Linter
+	assert.NotPanics(t, func() { _ = cl.JSONSchema() })
+}
