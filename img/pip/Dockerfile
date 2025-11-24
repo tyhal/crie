@@ -12,13 +12,15 @@ RUN apk add --no-cache python3 py3-pip $BUILD_LIBS \
 RUN mkdir /.ansible \
     && chmod -R o+rw /home /.ansible
 
+ENV XDG_CONFIG_DIR=/etc/.config
+ENV YAMLLINT_CONFIG_FILE=$XDG_CONFIG_DIR/yamllint/config
+COPY conf/yaml/.yamllint.yaml $YAMLLINT_CONFIG_FILE
+ENV CMAKELINT_CONFIG_FILE=$XDG_CONFIG_DIR/cmakelintrc
+COPY conf/cmake/.cmakelintrc $CMAKELINT_CONFIG_FILE
+RUN chmod -R 755 $XDG_CONFIG_DIR
+
 # hadolint ignore=DL3059
 RUN adduser -D standards
 USER standards
 
-ENV XDG_CONFIG_DIR=/etc/.config
 
-ENV YAMLLINT_CONFIG_FILE=$XDG_CONFIG_DIR/yamllint/config
-COPY --chown=standards:standards conf/yaml/.yamllint.yaml $YAMLLINT_CONFIG_FILE
-ENV CMAKELINT_CONFIG_FILE=$XDG_CONFIG_DIR/cmakelintrc
-COPY --chown=standards:standards conf/cmake/.cmakelintrc $CMAKELINT_CONFIG_FILE

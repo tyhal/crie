@@ -113,3 +113,4 @@ dist/
 .terraform.d/
 .cache
 .config
+/.local/
