@@ -17,10 +17,10 @@ COPY --from=clang_layer /usr/lib/llvm20/lib/libLLVM.so.20.1 /usr/lib/llvm20/lib/
 COPY --from=clang_layer /usr/bin/clang-format /bin/clang-format
 RUN apk --no-cache add cppcheck asciidoctor vale
 
-ENV VALE_CONFIG_PATH=/etc/vale/.vale.ini
-COPY --chmod=644 conf/markdown/.vale.ini $VALE_CONFIG_PATH
-RUN chmod -R 755 /etc/vale
-# hadolint ignore=DL3059
-RUN vale sync
+# copy config, download deps, allow access for other users
+ENV VALE_CONFIG_DIR=/etc/vale
+ENV VALE_CONFIG_PATH=$VALE_CONFIG_DIR/.vale.ini
+COPY conf/markdown/.vale.ini $VALE_CONFIG_PATH
+RUN vale sync && chmod -R 755 $VALE_CONFIG_DIR
 
 USER standards

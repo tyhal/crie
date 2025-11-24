@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/tyhal/crie/main/res/schema/lang.json
 languages:
-  dockfmt: # looking forward to dockfmt hitting 1.0.0 before adding to the defaults
+  dockfmt: # looking forward to dockerfmt hitting 1.0.0 before adding to the defaults
     match: ['(?i).*(Contain|Docker)file.*']
     fmt:
       type: dockfmt

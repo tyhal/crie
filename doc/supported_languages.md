@@ -8,8 +8,8 @@
 │ cmake       │ cmakelint  │              │ CMakeLists.txt$|\.cmake$            │
 │ cpp         │ cppcheck   │ clang-format │ \.cc$|\.cpp$                        │
 │ cppheaders  │            │ clang-format │ \.h$|\.hpp$                         │
-│ docker      │ hadolint   │              │ Dockerfile$                         │
-│ golang      │ golint     │ gofmt        │ \.go$                               │
+│ docker      │ hadolint   │              │ (?i).*(Contain|Docker)file.*        │
+│ golang      │ revive     │ gofmt        │ \.go$                               │
 │ javascript  │ standard   │ standard     │ \.js$|\.jsx$                        │
 │ json        │ jsonlint   │ jsonlint     │ \.json$|\.JSON$                     │
 │ markdown    │ vale       │ remark       │ \.md$                               │

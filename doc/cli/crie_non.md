@@ -6,7 +6,7 @@ Show what isn't supported for this project
 
 Show what isn't supported for this project
 
-Find the file extensions that dont have an associated regex match within crieRun
+Find the file extensions that dont have an associated regex match within crie
 
 ```
 crie non [flags]
