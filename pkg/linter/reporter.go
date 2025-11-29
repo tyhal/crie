@@ -30,6 +30,8 @@ func (r *Runner) logConditional(reader io.Reader, typeField string, level log.Le
 
 // Log simple takes all fields and pushes them to our using the default logger
 func (r *Runner) Log(rep *Report) error {
+	// TODO too much logic, should have a better defined report type and separate reporters based on settings
+	
 	if rep.Err == nil {
 		if r.ShowPass {
 			if r.StrictLogging {
@@ -72,6 +74,8 @@ func (r *Runner) listen(results chan error, linterReport chan Report) {
 
 // LintFileList simply takes a single Linter and runs it for each file
 func (r *Runner) LintFileList(l Linter, fileList []string) error {
+	// TODO this is part of execution, should be moved
+
 	maxCon := min(l.MaxConcurrency(), len(fileList))
 	if maxCon <= 0 {
 		maxCon = 1

@@ -31,7 +31,8 @@ func (e *HostExecutor) Exec(i Instance, filePath string, stdout io.Writer, stder
 		targetFilePath = filepath.Base(filePath)
 	}
 
-	params := append(i.Start, targetFilePath)
+	params := make([]string, 0, len(i.Start)+1+len(i.End))
+	params = append(i.Start, targetFilePath)
 	params = append(params, i.End...)
 
 	c := exec.Command(i.Bin, params...)

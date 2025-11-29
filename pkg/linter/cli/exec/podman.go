@@ -209,7 +209,8 @@ func (e *PodmanExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 		targetFile = filepath.Base(targetFile)
 	}
 
-	cmd := append([]string{i.Bin}, i.Start...)
+	cmd := make([]string, 0, 1+len(i.Start)+1+len(i.End))
+	cmd = append([]string{i.Bin}, i.Start...)
 	cmd = append(cmd, targetFile)
 	cmd = append(cmd, i.End...)
 
