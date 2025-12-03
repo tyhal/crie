@@ -15,7 +15,7 @@ import (
 type Runner struct {
 	ShowPass      bool
 	StrictLogging bool
-	folder        folding.Folder
+	Folder        folding.Folder
 }
 
 func (r *Runner) logConditional(reader io.Reader, typeField string, level log.Level) {
@@ -31,7 +31,7 @@ func (r *Runner) logConditional(reader io.Reader, typeField string, level log.Le
 // Log simple takes all fields and pushes them to our using the default logger
 func (r *Runner) Log(rep *Report) error {
 	// TODO too much logic, should have a better defined report type and separate reporters based on settings
-	
+
 	if rep.Err == nil {
 		if r.ShowPass {
 			if r.StrictLogging {
@@ -46,7 +46,7 @@ func (r *Runner) Log(rep *Report) error {
 		if r.StrictLogging {
 			log.Printf("fail %v", rep.File)
 		} else {
-			id, _ = r.folder.Start(rep.File, "\u2716", false)
+			id, _ = r.Folder.Start(rep.File, "\u2716", false)
 		}
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
@@ -57,14 +57,14 @@ func (r *Runner) Log(rep *Report) error {
 			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
 		}
 		if !r.StrictLogging {
-			_ = r.folder.Stop(id)
+			_ = r.Folder.Stop(id)
 		}
 	}
 	return rep.Err
 }
 
 func (r *Runner) listen(results chan error, linterReport chan Report) {
-	r.folder = folding.New()
+	r.Folder = folding.New()
 	for report := range linterReport {
 		err := r.Log(&report)
 		results <- err
