@@ -61,3 +61,8 @@ func TestLanguages_Show(t *testing.T) {
 		})
 	}
 }
+
+func Test_getName(t *testing.T) {
+	assert.Empty(t, getName(nil))
+	assert.Equal(t, "noop", getName(&noop.LintNoop{}))
+}

@@ -25,53 +25,6 @@ func disableLogging() func() {
 	}
 }
 
-func Test_getName(t *testing.T) {
-	assert.Empty(t, getName(nil))
-	assert.Equal(t, "noop", getName(&noop.LintNoop{}))
-}
-
-//func TestRunConfiguration_GetLanguage(t *testing.T) {
-//	config := &RunConfiguration{
-//		Languages: map[string]*Language{
-//			"test": {
-//				Chk:       &noop.LintNoop{},
-//				Fmt:       &noop.LintNoop{},
-//				FileMatch: regexp.MustCompile(`\.test$`),
-//			},
-//		},
-//	}
-//
-//	// Test existing language
-//	lang, err := config.GetLanguage("test")
-//	assert.NoError(t, err)
-//	assert.NotNil(t, lang)
-//
-//	// Test non-existent language
-//	_, err = config.GetLanguage("nonexistent")
-//	assert.Error(t, err)
-//	assert.Contains(t, err.Error(), "language 'nonexistent' not found")
-//}
-
-//func TestRunConfiguration_runLinter(t *testing.T) {
-//	config := &RunConfiguration{
-//		Languages: map[string]*Language{
-//			"go": {
-//				Chk:       &noop.LintNoop{},
-//				FileMatch: regexp.MustCompile(`\.go$`),
-//			},
-//		},
-//	}
-//
-//	fileList := []string{"test.go"}
-//
-//	var cleanupGroup sync.WaitGroup
-//	err := config.runLinter(&cleanupGroup, "go", LintTypeChk, fileList)
-//	assert.NoError(t, err)
-//
-//	// Wait for cleanup to complete
-//	cleanupGroup.Wait()
-//}
-
 func TestRunConfiguration_runLinters(t *testing.T) {
 	tests := []struct {
 		name       string

@@ -1,3 +1,6 @@
 brew "pkg-config"
 brew "gpgme"
 brew "gnupg"
+brew "libgpg-error"
+brew "btrfs-progs"
+brew "libassuan"

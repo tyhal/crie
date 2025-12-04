@@ -3,133 +3,12 @@ package runner
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"sort"
-	"strconv"
 	"sync"
 
-	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/errchain"
-	"github.com/tyhal/crie/pkg/folding"
 	"github.com/tyhal/crie/pkg/linter"
 )
-
-func getName(lint linter.Linter) string {
-	if lint == nil {
-		return ""
-	}
-	return lint.Name()
-}
-
-// NoStandards runs all fmt exec commands in languages and in always fmt
-func (s *RunConfiguration) NoStandards() error {
-
-	// GetFiles files not used
-	files, err := s.getFileList()
-	if err != nil {
-		return err
-	}
-	for _, standardizer := range s.Languages {
-		files = Filter(files, false, standardizer.FileMatch.MatchString)
-	}
-
-	// GetFiles extensions or Filename(if no extension) and count occurrences
-	dict := make(map[string]int)
-	for _, str := range files {
-
-		_, s := filepath.Split(str)
-
-		for i := len(str) - 1; i >= 0 && !os.IsPathSeparator(str[i]); i-- {
-			if str[i] == '.' {
-				s = str[i:]
-			}
-		}
-
-		dict[s] = dict[s] + 1
-	}
-
-	// Print dict in order
-	output := map[int][]string{}
-	var values []int
-	for i, file := range dict {
-		output[file] = append(output[file], i)
-	}
-	for i := range output {
-		values = append(values, i)
-	}
-
-	sort.Sort(sort.Reverse(sort.IntSlice(values)))
-
-	// Print the top 10
-	table := tablewriter.NewWriter(os.Stdout)
-	table.Header([]string{"extension", "count"})
-	count := 10
-	for _, i := range values {
-		for _, s := range output[i] {
-			err = table.Append([]string{s, strconv.Itoa(i)})
-			if err != nil {
-				return err
-			}
-			count--
-			if count < 0 {
-				err = table.Render()
-				if err != nil {
-					return err
-				}
-				return nil
-			}
-		}
-	}
-	err = table.Render()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-//func (s *RunConfiguration) runLinter(cleanupGroup *sync.WaitGroup, name string, lintType LintType, list []string) (err error) {
-//	selectedLinter, err := s.Languages[name].GetLinter(lintType)
-//	if err != nil {
-//		return
-//	}
-//	toLog := log.WithFields(log.Fields{"lang": name, "type": lintType.String()})
-//
-//	if selectedLinter == nil {
-//		skip := toLog.WithFields(log.Fields{"flag": "skip"})
-//		skip.Debug("there are no configurations associated for this action")
-//		return
-//	}
-//
-//	// GetFiles the match for this formatter's files.
-//	reg := s.Languages[name].FileMatch
-//
-//	// find the associated files with our given regex to match.
-//	associatedFiles := Filter(list, true, reg.MatchString)
-//
-//	// Skip language as no files found
-//	if len(associatedFiles) == 0 {
-//		return
-//	}
-//
-//	cleanupGroup.Add(1)
-//	defer func() { go selectedLinter.Cleanup(cleanupGroup) }()
-//
-//	err = selectedLinter.WillRun()
-//	if err != nil {
-//		toLog.Error(err)
-//		return
-//	}
-//
-//	toLog.WithFields(log.Fields{"files": len(associatedFiles)}).Infof("running %s", name)
-//	reporter := linter.Runner{
-//		ShowPass:      s.Options.Passes,
-//		StrictLogging: s.Options.StrictLogging,
-//	}
-//	err = reporter.LintFileList(selectedLinter, associatedFiles)
-//	return
-//}
 
 func (s *RunConfiguration) getRunningLanguages() (map[string]*Language, error) {
 	currentLangs := s.Languages
@@ -143,22 +22,76 @@ func (s *RunConfiguration) getRunningLanguages() (map[string]*Language, error) {
 	return currentLangs, nil
 }
 
+// LinterReady is used to communicate the linter that is ready to run
 type LinterReady struct {
-	linter linter.Linter
 	lang   string
+	linter linter.Linter
 }
 
+// FilematchReady is used to communicate a file list is ready to be processed
 type FilematchReady struct {
-	lang string
+	lang  string
+	files []string
 }
 
+// WorkloadReady is a combination of the data needed to start dispatching jobs
 type WorkloadReady struct {
+	files  []string
 	linter linter.Linter
 }
 
 type Job struct {
 	linter linter.Linter
 	file   string
+}
+
+// jobExecutor completes jobs and
+func jobExecutor(jobs chan Job, reports chan linter.Report) {
+	for job := range jobs {
+		if job.linter == nil {
+			log.Error("oh no")
+		} else {
+			reports <- job.linter.Run(job.file)
+		}
+	}
+}
+
+// jobSubmitter is a simple job dispatcher when both requirements are met it pushes jobs into a channel
+func jobSubmitter(jobs chan Job, filesReady chan FilematchReady, lintReady chan LinterReady) {
+	active := make(map[string]WorkloadReady)
+	submit := func(lang string, workload WorkloadReady) {
+		for _, file := range workload.files {
+			jobs <- Job{linter: workload.linter, file: file}
+		}
+	}
+	for {
+		select {
+		case fm, ok := <-filesReady:
+			if !ok {
+				filesReady = nil
+			}
+			if workload, ok := active[fm.lang]; ok {
+				workload.files = fm.files
+				submit(fm.lang, workload)
+			} else {
+				active[fm.lang] = WorkloadReady{files: fm.files}
+			}
+		case lr, ok := <-lintReady:
+			if !ok {
+				lintReady = nil
+			}
+			if workload, ok := active[lr.lang]; ok {
+				workload.linter = lr.linter
+				submit(lr.lang, workload)
+			} else {
+				active[lr.lang] = WorkloadReady{linter: lr.linter}
+			}
+		}
+		if filesReady == nil && lintReady == nil {
+			break
+		}
+	}
+	close(jobs)
 }
 
 func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) error {
@@ -172,9 +105,8 @@ func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) erro
 		return err
 	}
 
-	lintFilesMatched := make(chan FilematchReady, maxWorkloadBacklog)
+	filesReady := make(chan FilematchReady, maxWorkloadBacklog)
 	lintReady := make(chan LinterReady, maxWorkloadBacklog)
-	var linterFiles sync.Map
 
 	var langStartupWG sync.WaitGroup
 	var langFileMatchingWG sync.WaitGroup
@@ -211,76 +143,34 @@ func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) erro
 				}
 			}
 			if hasMatched {
-				// TODO maybe a channel would be faster? this does batches
-				linterFiles.Store(langName, matched)
-				lintFilesMatched <- FilematchReady{
-					lang: langName,
+				filesReady <- FilematchReady{
+					files: matched,
+					lang:  langName,
 				}
 			}
 		})
 	}
 
-	var workersWG sync.WaitGroup
 	jobs := make(chan Job, maxWorkloadBacklog)
 	reports := make(chan linter.Report, maxWorkloadBacklog*16)
+	// start workers
+	var workersWG sync.WaitGroup
 	for range maxWorkers {
 		workersWG.Go(func() {
-			for job := range jobs {
-				if job.linter == nil {
-					log.Error("oh no")
-				} else {
-					job.linter.Run(job.file, reports)
-				}
-			}
+			jobExecutor(jobs, reports)
 		})
 	}
-
 	// submit jobs
-	go func() {
-		active := make(map[string]WorkloadReady)
-		submit := func(lang string, workload WorkloadReady) {
-			if files, ok := linterFiles.Load(lang); ok {
-				for _, file := range files.([]string) {
-					jobs <- Job{linter: workload.linter, file: file}
-				}
-			}
-		}
-		for {
-			select {
-			case fm, ok := <-lintFilesMatched:
-				if !ok {
-					lintFilesMatched = nil
-				}
-				if workload, ok := active[fm.lang]; ok {
-					submit(fm.lang, workload)
-				} else {
-					active[fm.lang] = WorkloadReady{}
-				}
-			case lr, ok := <-lintReady:
-				if !ok {
-					lintReady = nil
-				}
-				if workload, ok := active[lr.lang]; ok {
-					workload.linter = lr.linter
-					submit(lr.lang, workload)
-				} else {
-					active[lr.lang] = WorkloadReady{lr.linter}
-				}
-			}
-			if lintFilesMatched == nil && lintReady == nil {
-				break
-			}
-		}
-		close(jobs)
-	}()
+	go jobSubmitter(jobs, filesReady, lintReady)
 
-	r := linter.Runner{
-		ShowPass:      s.Options.Passes,
-		StrictLogging: s.Options.StrictLogging,
+	var r linter.Reporter
+	if s.Options.StrictLogging {
+		r = linter.NewStructuredReporter(s.Options.Passes)
+	} else {
+		r = linter.NewStandardReporter(s.Options.Passes)
 	}
 	var reportWG sync.WaitGroup
 	reportWG.Go(func() {
-		r.Folder = folding.New()
 		for report := range reports {
 			err := r.Log(&report)
 			log.Error(err)
@@ -289,7 +179,7 @@ func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) erro
 
 	langFileMatchingWG.Wait()
 	langStartupWG.Wait()
-	close(lintFilesMatched)
+	close(filesReady)
 	close(lintReady)
 	workersWG.Wait()
 	close(reports)
