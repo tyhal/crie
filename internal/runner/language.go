@@ -21,6 +21,13 @@ type Language struct {
 // Languages store the name to a singular language configuration within crie
 type Languages map[string]*Language
 
+func getName(l linter.Linter) string {
+	if l == nil {
+		return ""
+	}
+	return l.Name()
+}
+
 // Show to print all languages chkConf fmt and always commands
 func (s Languages) Show(w io.Writer) error {
 	table := tablewriter.NewWriter(w)

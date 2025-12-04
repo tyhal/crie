@@ -2,7 +2,6 @@ package linter
 
 import (
 	"io"
-	"sync"
 )
 
 // Report is used to state what issues a given file has
@@ -17,7 +16,7 @@ type Report struct {
 type Linter interface {
 	Name() string
 	WillRun() error
-	Cleanup(wg *sync.WaitGroup)
+	Cleanup()
 	MaxConcurrency() int
-	Run(filePath string, rep chan Report)
+	Run(filePath string) Report
 }
