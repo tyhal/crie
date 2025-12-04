@@ -51,6 +51,7 @@ func jobExecutor(jobs chan Job, reports chan linter.Report) {
 		if job.linter == nil {
 			log.Error("oh no")
 		} else {
+			// TODO lock on Format
 			reports <- job.linter.Run(job.file)
 		}
 	}
@@ -94,6 +95,46 @@ func jobSubmitter(jobs chan Job, filesReady chan FilematchReady, lintReady chan 
 	close(jobs)
 }
 
+func matchFiles(
+	lintType LintType,
+	langName string,
+	lang *Language,
+	fileList []string,
+	filesReady chan FilematchReady,
+	lintReady chan LinterReady,
+	langStartupWG *sync.WaitGroup,
+) {
+	currLint, err := lang.GetLinter(lintType)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	if currLint == nil {
+		return
+	}
+	reg := lang.FileMatch
+	for _, file := range fileList {
+		if reg.MatchString(file) {
+
+		}
+	}
+}
+
+//			if !hasMatched {
+//				hasMatched = true
+//				langStartupWG.Go(func() {
+//					err := currLint.WillRun()
+//					if err != nil {
+//						log.Error(err)
+//						return
+//					}
+//					lintReady <- LinterReady{
+//						linter: currLint,
+//						lang:   langName,
+//					}
+//				})
+//			}
+
 func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) error {
 
 	// every channel feeding up to workers matches worker count so that workers are priority
@@ -112,42 +153,7 @@ func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) erro
 	var langFileMatchingWG sync.WaitGroup
 	for langName, lang := range currentLangs {
 		langFileMatchingWG.Go(func() {
-			currLint, err := lang.GetLinter(lintType)
-			if err != nil {
-				log.Error(err)
-				return
-			}
-			if currLint == nil {
-				return
-			}
-			var hasMatched bool
-			reg := lang.FileMatch
-			var matched []string
-			for _, file := range fileList {
-				if reg.MatchString(file) {
-					if !hasMatched {
-						hasMatched = true
-						langStartupWG.Go(func() {
-							err := currLint.WillRun()
-							if err != nil {
-								log.Error(err)
-								return
-							}
-							lintReady <- LinterReady{
-								linter: currLint,
-								lang:   langName,
-							}
-						})
-					}
-					matched = append(matched, file)
-				}
-			}
-			if hasMatched {
-				filesReady <- FilematchReady{
-					files: matched,
-					lang:  langName,
-				}
-			}
+			matchFiles(lintType, langName, lang, fileList, filesReady, lintReady, &langStartupWG)
 		})
 	}
 
