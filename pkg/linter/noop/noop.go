@@ -2,7 +2,6 @@ package noop
 
 import (
 	"math"
-	"sync"
 	"time"
 
 	"github.com/tyhal/crie/pkg/linter"
@@ -51,11 +50,10 @@ func (l *LintNoop) WillRun() (err error) {
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *LintNoop) Cleanup(group *sync.WaitGroup) {
+func (l *LintNoop) Cleanup() {
 	if l.setupDuration > 0 {
 		time.Sleep(l.setupDuration)
 	}
-	group.Done()
 }
 
 // MaxConcurrency return max number of parallel files to fmt
@@ -64,9 +62,9 @@ func (l *LintNoop) MaxConcurrency() int {
 }
 
 // Run will just return the configured error as a report
-func (l *LintNoop) Run(filepath string, rep chan linter.Report) {
+func (l *LintNoop) Run(filepath string) linter.Report {
 	if l.lintDuration > 0 {
 		time.Sleep(l.lintDuration)
 	}
-	rep <- linter.Report{File: filepath, Err: l.runErr, StdOut: nil, StdErr: nil}
+	return linter.Report{File: filepath, Err: l.runErr, StdOut: nil, StdErr: nil}
 }

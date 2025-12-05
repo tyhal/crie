@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"sync"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/linter"
 	"github.com/tyhal/crie/pkg/linter/cli/exec"
@@ -67,8 +65,7 @@ func (e *LintCli) WillRun() error {
 }
 
 // Cleanup removes any additional resources created in the process
-func (e *LintCli) Cleanup(group *sync.WaitGroup) {
-	defer group.Done()
+func (e *LintCli) Cleanup() {
 	if e.executor != nil {
 		err := e.executor.Cleanup()
 		if err != nil {
@@ -78,12 +75,12 @@ func (e *LintCli) Cleanup(group *sync.WaitGroup) {
 }
 
 // Run does the work required to lint the given filepath
-func (e *LintCli) Run(filePath string, rep chan linter.Report) {
+func (e *LintCli) Run(filePath string) linter.Report {
 
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 
 	err := e.executor.Exec(e.Exec, filePath, &outB, &errB)
 
-	rep <- linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
+	return linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }

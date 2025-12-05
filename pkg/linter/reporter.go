@@ -29,7 +29,7 @@ func NewStructuredReporter(showPass bool) Reporter {
 	}
 }
 
-// Log simple takes all fields and pushes them to our using the default logger
+// Log simple takes all fields and pushes them to our using the default logFormat
 func (r *StructuredReporter) Log(rep *Report) error {
 	if rep.Err == nil {
 		if r.ShowPass {
@@ -50,47 +50,51 @@ func (r *StructuredReporter) Log(rep *Report) error {
 	return rep.Err
 }
 
+type logFormat struct {
+	Entry *log.Entry
+}
+
+func (l *logFormat) Log(level log.Level, args ...any) {
+	if log.IsLevelEnabled(level) {
+		l.Entry.Log(level)
+		fmt.Println(args...)
+	}
+}
+
 type StandardReporter struct {
 	ShowPass bool
-	SrcOut   *log.Entry
-	SrcErr   *log.Entry
-	SrcInt   *log.Entry
+	SrcOut   logFormat
+	SrcErr   logFormat
+	SrcInt   logFormat
 	Folder   folding.Folder
 }
 
 func NewStandardReporter(showPass bool) Reporter {
 	return &StandardReporter{
 		ShowPass: showPass,
-		SrcOut:   log.WithFields(log.Fields{"src": "stdout"}),
-		SrcErr:   log.WithFields(log.Fields{"src": "stderr"}),
-		SrcInt:   log.WithFields(log.Fields{"src": "internal"}),
+		SrcOut:   logFormat{log.WithFields(log.Fields{"src": "stdout"})},
+		SrcErr:   logFormat{log.WithFields(log.Fields{"src": "stderr"})},
+		SrcInt:   logFormat{log.WithFields(log.Fields{"src": "internal"})},
 		Folder:   folding.New(),
 	}
 }
 
-// Log simple takes all fields and pushes them to our using the default logger
+// Log simple takes all fields and pushes them to our using the default logFormat
 func (r *StandardReporter) Log(rep *Report) error {
 	if rep.Err == nil {
 		if r.ShowPass {
 			fmt.Printf("\u2714 %v\n", rep.File)
-			r.SrcOut.Log(log.DebugLevel)
-			fmt.Println(rep.StdOut)
+			r.SrcOut.Log(log.DebugLevel, rep.StdOut)
 		}
 	} else {
 		id, _ := r.Folder.Start(rep.File, "\u2716", false)
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
-			r.SrcErr.Log(log.ErrorLevel)
-			fmt.Println(rep.StdErr)
-
-			r.SrcOut.Log(log.InfoLevel)
-			fmt.Println(rep.StdOut)
-
-			r.SrcInt.Log(log.DebugLevel)
-			fmt.Println(rep.Err)
+			r.SrcErr.Log(log.ErrorLevel, rep.StdErr)
+			r.SrcOut.Log(log.InfoLevel, rep.StdOut)
+			r.SrcInt.Log(log.DebugLevel, rep.Err)
 		} else {
-			r.SrcInt.Log(log.ErrorLevel)
-			fmt.Println(rep.Err)
+			r.SrcInt.Log(log.ErrorLevel, rep.Err)
 		}
 		_ = r.Folder.Stop(id)
 	}
