@@ -107,6 +107,7 @@ func getPodmanMachineSocket() (socketPath string, err error) {
 // Setup creates and starts a disposable Podman container for executing commands.
 func (e *PodmanExecutor) Setup() error {
 
+	// todo should pass the context all the way from cobra
 	ctx, cancel := context.WithCancel(context.Background())
 	e.cancel = cancel
 

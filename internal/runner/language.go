@@ -2,7 +2,6 @@
 package runner
 
 import (
-	"fmt"
 	"io"
 	"regexp"
 	"sort"
@@ -75,13 +74,13 @@ func (lt LintType) String() string {
 
 // GetLinter returns the linter associated with the provided LintType
 // (either the formatter or the checker) for this language.
-func (l *Language) GetLinter(which LintType) (linter.Linter, error) {
+func (l *Language) GetLinter(which LintType) linter.Linter {
 	switch which {
 	case LintTypeFmt:
-		return l.Fmt, nil
+		return l.Fmt
 	case LintTypeChk:
-		return l.Chk, nil
+		return l.Chk
 	default:
-		return nil, fmt.Errorf("invalid linter type: %d", which)
+		return nil
 	}
 }

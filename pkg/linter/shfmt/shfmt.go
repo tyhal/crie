@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"sync"
 
 	"github.com/tyhal/crie/pkg/linter"
 	"mvdan.cc/sh/v3/syntax"
@@ -30,8 +29,7 @@ func (l *LintShfmt) WillRun() (err error) {
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *LintShfmt) Cleanup(wg *sync.WaitGroup) {
-	wg.Done()
+func (l *LintShfmt) Cleanup() {
 }
 
 // MaxConcurrency return max number of parallel files to fmt
@@ -40,7 +38,7 @@ func (l *LintShfmt) MaxConcurrency() int {
 }
 
 // Run shfmt -w
-func (l *LintShfmt) Run(filepath string, rep chan linter.Report) {
+func (l *LintShfmt) Run(filepath string) linter.Report {
 	var outB, errB bytes.Buffer
 
 	currFmt := shfmt{
@@ -59,8 +57,7 @@ func (l *LintShfmt) Run(filepath string, rep chan linter.Report) {
 		lang = syntax.LangMirBSDKorn
 	default:
 		err := fmt.Errorf("unknown language variant: %s", l.Language)
-		rep <- linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
-		return
+		return linter.Report{File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
 	}
 
 	syntax.Variant(lang)(currFmt.parser)
@@ -72,5 +69,5 @@ func (l *LintShfmt) Run(filepath string, rep chan linter.Report) {
 	syntax.FunctionNextLine(false)(currFmt.printer)
 
 	err := currFmt.formatPath(filepath, true)
-	rep <- linter.Report{File: filepath, Err: linter.Result(err), StdOut: &outB, StdErr: &errB}
+	return linter.Report{File: filepath, Err: linter.Result(err), StdOut: &outB, StdErr: &errB}
 }
