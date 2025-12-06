@@ -2,7 +2,9 @@
 package runner
 
 import (
+	"context"
 	"fmt"
+	"runtime/trace"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/internal/runner/orchestrator"
@@ -22,7 +24,8 @@ func (s *RunConfiguration) getRunningLanguages() (map[string]*Language, error) {
 	return currentLangs, nil
 }
 
-func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) error {
+func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fileList []string) error {
+	defer trace.StartRegion(ctx, "The Main Executor").End()
 	currentLangs, err := s.getRunningLanguages()
 	if err != nil {
 		return err
@@ -36,7 +39,7 @@ func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) erro
 	}
 
 	orch := orchestrator.New(fileList, r)
-	cleanup := orch.Start()
+	cleanup := orch.Start(ctx)
 	defer cleanup()
 
 	for _, lang := range currentLangs {
@@ -45,7 +48,7 @@ func (s *RunConfiguration) runLinters(lintType LintType, fileList []string) erro
 			continue
 		}
 		orch.Dispatchers.Go(func() {
-			orch.Dispatcher(l, lang.FileMatch)
+			orch.Dispatcher(ctx, l, lang.FileMatch)
 		})
 	}
 
@@ -58,7 +61,7 @@ func (s *RunConfiguration) Run(lintType LintType) error {
 	if err != nil {
 		return errchain.From(err).Link("getting files")
 	}
-	err = s.runLinters(lintType, fileList)
+	err = s.runLinters(nil, lintType, fileList)
 	if err != nil {
 		return err
 	}

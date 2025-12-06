@@ -1,14 +1,17 @@
 package runner
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"regexp"
+	"runtime/trace"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -87,7 +90,7 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.config.runLinters(LintTypeChk, tt.files)
+			err := tt.config.runLinters(nil, LintTypeChk, tt.files)
 
 			if tt.expectErr {
 				if assert.Error(t, err) && tt.errMessage != "" {
@@ -120,7 +123,7 @@ func genLangs(count int) Languages {
 	for i := 0; i < count; i++ {
 		langs[strconv.Itoa(i)] = &Language{
 			// use a different linter object for each language
-			Chk:       &noop.LintNoop{},
+			Chk:       noop.WithSleep(time.Millisecond*2, time.Millisecond*10), // &noop.LintNoop{},
 			FileMatch: regexp.MustCompile(fmt.Sprintf(`\.%c$`, charFromIndex(i))),
 		}
 	}
@@ -194,13 +197,48 @@ func BenchmarkRunConfiguration_runLinters(b *testing.B) {
 	for _, tt := range benchs {
 		b.Run(tt.name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				err := tt.config.runLinters(LintTypeChk, tt.files)
+				err := tt.config.runLinters(nil, LintTypeChk, tt.files)
 				if err != nil {
 					b.Fatalf("unexpected error at iteration %d: %v", i, err)
 				}
 			}
 		})
 	}
+}
+
+func TestRunConfiguration_trace_runLinters(t *testing.T) {
+	defer disableLogging()()
+
+	f, err := os.Create("trace.out")
+	if err != nil {
+		panic(err)
+	}
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
+
+	opts := Options{
+		StrictLogging: true,
+	}
+
+	test := struct {
+		config *RunConfiguration
+		files  []string
+	}{
+		config: &RunConfiguration{
+			Options:   opts,
+			Languages: genLangs(100),
+		},
+		files: genFilenames(100),
+	}
+
+	ctx := context.Background()
+	err = trace.Start(f)
+	if err != nil {
+		panic(err)
+	}
+	defer trace.Stop()
+	_ = test.config.runLinters(ctx, LintTypeChk, test.files)
 }
 
 func TestRunConfiguration_Run(t *testing.T) {
