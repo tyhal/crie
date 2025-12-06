@@ -1,11 +1,11 @@
 package orchestrator
 
 import (
-	"fmt"
+	"context"
 	"regexp"
 	"runtime"
+	"runtime/trace"
 	"sync"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/linter"
@@ -26,17 +26,17 @@ type JobOrchestrator struct {
 	report       sync.WaitGroup
 	repQ         chan linter.Report
 	reporter     linter.Reporter
-	maxWorkers   int
+	maxExecutors int
 }
 
 func New(files []string, reporter linter.Reporter) *JobOrchestrator {
 	maxBacklog := 1024
 	orch := &JobOrchestrator{
-		files:      files,
-		maxWorkers: min(runtime.NumCPU(), len(files)),
-		jobQ:       make(chan Job, maxBacklog),
-		repQ:       make(chan linter.Report, maxBacklog),
-		reporter:   reporter,
+		files:        files,
+		maxExecutors: min(runtime.NumCPU(), len(files)),
+		jobQ:         make(chan Job, maxBacklog),
+		repQ:         make(chan linter.Report, maxBacklog),
+		reporter:     reporter,
 	}
 	orch.cleanupStart.Add(1)
 	return orch
@@ -53,8 +53,9 @@ func (d *JobOrchestrator) executor() {
 	}
 }
 
-func (d *JobOrchestrator) Start() func() {
+func (d *JobOrchestrator) Start(ctx context.Context) func() {
 	d.report.Go(func() {
+		defer trace.StartRegion(ctx, "The Reporter").End()
 		for report := range d.repQ {
 			err := d.reporter.Log(&report)
 			if err != nil {
@@ -62,7 +63,8 @@ func (d *JobOrchestrator) Start() func() {
 			}
 		}
 	})
-	for range d.maxWorkers {
+	for range d.maxExecutors {
+		defer trace.StartRegion(ctx, "An Executor").End()
 		d.executors.Go(func() {
 			d.executor()
 		})
@@ -71,7 +73,8 @@ func (d *JobOrchestrator) Start() func() {
 }
 
 // Dispatcher submits jobQ to the workers
-func (d *JobOrchestrator) Dispatcher(l linter.Linter, reg *regexp.Regexp) bool {
+func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) bool {
+	defer trace.StartRegion(ctx, "A Dispatcher Internal").End()
 	var startup sync.WaitGroup
 	var active bool
 	var matched []string
@@ -80,14 +83,15 @@ func (d *JobOrchestrator) Dispatcher(l linter.Linter, reg *regexp.Regexp) bool {
 			if !active {
 				active = true
 				startup.Go(func() {
+					defer trace.StartRegion(ctx, "Startup Linter").End()
 					err := l.WillRun()
-					time.Sleep(time.Second * 1)
 					if err != nil {
 						log.Error(err)
 						return
 					}
 				})
 				d.cleaners.Go(func() {
+					defer trace.StartRegion(ctx, "Cleanup Linter").End()
 					d.cleanupStart.Wait()
 					l.Cleanup()
 				})
@@ -111,6 +115,6 @@ func (d *JobOrchestrator) wait() {
 	d.cleanupStart.Done()
 	close(d.repQ)
 	d.report.Wait()
-	fmt.Println("waiting for cleanup")
+	log.Info("waiting for cleanup")
 	d.cleaners.Wait()
 }
