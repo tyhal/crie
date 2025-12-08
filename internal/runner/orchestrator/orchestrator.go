@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"runtime"
 	"runtime/trace"
@@ -42,13 +43,13 @@ func New(files []string, reporter linter.Reporter) *JobOrchestrator {
 	return orch
 }
 
-func (d *JobOrchestrator) executor() {
+func (d *JobOrchestrator) executor(ctx context.Context) {
 	for job := range d.jobQ {
 		if job.lint == nil {
 			log.Error("oh no")
 		} else {
 			// TODO lock on Format
-			d.repQ <- job.lint.Run(job.file)
+			d.repQ <- job.lint.Run(ctx, job.file)
 		}
 	}
 }
@@ -63,10 +64,10 @@ func (d *JobOrchestrator) Start(ctx context.Context) func() {
 			}
 		}
 	})
-	for range d.maxExecutors {
-		defer trace.StartRegion(ctx, "An Executor").End()
+	for i := range d.maxExecutors {
 		d.executors.Go(func() {
-			d.executor()
+			defer trace.StartRegion(ctx, fmt.Sprintf("Executor %d", i)).End()
+			d.executor(ctx)
 		})
 	}
 	return d.wait
@@ -74,7 +75,7 @@ func (d *JobOrchestrator) Start(ctx context.Context) func() {
 
 // Dispatcher submits jobQ to the workers
 func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) bool {
-	defer trace.StartRegion(ctx, "A Dispatcher Internal").End()
+	defer trace.StartRegion(ctx, "A Dispatcher "+reg.String()).End()
 	var startup sync.WaitGroup
 	var active bool
 	var matched []string
@@ -83,17 +84,15 @@ func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *
 			if !active {
 				active = true
 				startup.Go(func() {
-					defer trace.StartRegion(ctx, "Startup Linter").End()
-					err := l.WillRun()
+					err := l.WillRun(ctx)
 					if err != nil {
 						log.Error(err)
 						return
 					}
-				})
-				d.cleaners.Go(func() {
-					defer trace.StartRegion(ctx, "Cleanup Linter").End()
-					d.cleanupStart.Wait()
-					l.Cleanup()
+					d.cleaners.Go(func() {
+						d.cleanupStart.Wait()
+						l.Cleanup(ctx)
+					})
 				})
 			}
 			matched = append(matched, file)

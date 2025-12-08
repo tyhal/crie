@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path"
 	"regexp"
@@ -118,12 +119,18 @@ func genFilenames(count int) []string {
 	return filenames
 }
 
+func randDuration(min, max int) time.Duration {
+	return time.Duration(rand.Intn(max-min) + min)
+}
+
 func genLangs(count int) Languages {
 	langs := make(Languages, count)
 	for i := 0; i < count; i++ {
 		langs[strconv.Itoa(i)] = &Language{
 			// use a different linter object for each language
-			Chk:       noop.WithSleep(time.Millisecond*2, time.Millisecond*10), // &noop.LintNoop{},
+			//Chk: noop.WithSleep(time.Millisecond*randDuration(5, 10), time.Millisecond*randDuration(50, 100)),
+			Chk: noop.WithSleep(time.Millisecond*10, time.Millisecond*50),
+			//Chk:       &noop.LintNoop{},
 			FileMatch: regexp.MustCompile(fmt.Sprintf(`\.%c$`, charFromIndex(i))),
 		}
 	}
@@ -227,7 +234,7 @@ func TestRunConfiguration_trace_runLinters(t *testing.T) {
 	}{
 		config: &RunConfiguration{
 			Options:   opts,
-			Languages: genLangs(100),
+			Languages: genLangs(10),
 		},
 		files: genFilenames(100),
 	}

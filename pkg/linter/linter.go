@@ -1,6 +1,7 @@
 package linter
 
 import (
+	"context"
 	"io"
 )
 
@@ -15,8 +16,7 @@ type Report struct {
 // Linter is a simple interface to enable a setup and check using WillRun before executing multiple Run's
 type Linter interface {
 	Name() string
-	WillRun() error
-	Cleanup()
-	MaxConcurrency() int
-	Run(filePath string) Report
+	WillRun(ctx context.Context) error
+	Cleanup(ctx context.Context)
+	Run(ctx context.Context, filePath string) Report
 }

@@ -1,7 +1,8 @@
 package noop
 
 import (
-	"math"
+	"context"
+	"runtime/trace"
 	"time"
 
 	"github.com/tyhal/crie/pkg/linter"
@@ -42,28 +43,26 @@ func (l *LintNoop) Name() string {
 }
 
 // WillRun just returns the configured error
-func (l *LintNoop) WillRun() (err error) {
+func (l *LintNoop) WillRun(ctx context.Context) (err error) {
 	if l.setupDuration > 0 {
+		defer trace.StartRegion(ctx, "WillRun").End()
 		time.Sleep(l.setupDuration)
 	}
 	return l.willRunErr
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *LintNoop) Cleanup() {
+func (l *LintNoop) Cleanup(ctx context.Context) {
 	if l.setupDuration > 0 {
+		defer trace.StartRegion(ctx, "Cleanup").End()
 		time.Sleep(l.setupDuration)
 	}
 }
 
-// MaxConcurrency return max number of parallel files to fmt
-func (l *LintNoop) MaxConcurrency() int {
-	return math.MaxInt32
-}
-
 // Run will just return the configured error as a report
-func (l *LintNoop) Run(filepath string) linter.Report {
+func (l *LintNoop) Run(ctx context.Context, filepath string) linter.Report {
 	if l.lintDuration > 0 {
+		defer trace.StartRegion(ctx, "Run "+filepath).End()
 		time.Sleep(l.lintDuration)
 	}
 	return linter.Report{File: filepath, Err: l.runErr, StdOut: nil, StdErr: nil}
