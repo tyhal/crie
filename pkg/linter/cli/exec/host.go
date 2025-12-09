@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"context"
 	"io"
 	"os"
 	"os/exec"
@@ -11,6 +12,8 @@ import (
 
 // HostExecutor runs CLI tools directly on the host operating system.
 type HostExecutor struct {
+	execCtx    context.Context
+	execCancel context.CancelFunc
 }
 
 // WillHost checks whether the given binary can be found on the host PATH.
@@ -20,7 +23,8 @@ func WillHost(bin string) error {
 }
 
 // Setup performs any required initialization for host execution.
-func (e *HostExecutor) Setup() error {
+func (e *HostExecutor) Setup(ctx context.Context) error {
+	e.execCtx, e.execCancel = context.WithCancel(ctx)
 	return nil
 }
 
@@ -35,7 +39,7 @@ func (e *HostExecutor) Exec(i Instance, filePath string, stdout io.Writer, stder
 	params = append(i.Start, targetFilePath)
 	params = append(params, i.End...)
 
-	c := exec.Command(i.Bin, params...)
+	c := exec.CommandContext(e.execCtx, i.Bin, params...)
 	if i.ChDir {
 		c.Dir = filepath.Dir(filePath)
 	} else {
@@ -52,6 +56,9 @@ func (e *HostExecutor) Exec(i Instance, filePath string, stdout io.Writer, stder
 }
 
 // Cleanup releases any resources allocated during host execution setup.
-func (e *HostExecutor) Cleanup() error {
+func (e *HostExecutor) Cleanup(_ context.Context) error {
+	if e.execCancel != nil {
+		defer e.execCancel()
+	}
 	return nil
 }

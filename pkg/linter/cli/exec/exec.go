@@ -1,7 +1,10 @@
 // Package exec allows for a CLI tool to be executed in different contexts
 package exec
 
-import "io"
+import (
+	"context"
+	"io"
+)
 
 // Par represents command-line parameters passed to a linter executable.
 type Par []string
@@ -20,7 +23,7 @@ type Instance struct {
 // Implementations should prepare resources in Setup, execute the tool in Exec,
 // and free resources in Cleanup.
 type Executor interface {
-	Setup() error
+	Setup(ctx context.Context) error
 	Exec(i Instance, filepath string, stdout io.Writer, stderr io.Writer) error
-	Cleanup() error
+	Cleanup(ctx context.Context) error
 }

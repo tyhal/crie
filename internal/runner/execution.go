@@ -26,6 +26,7 @@ func (s *RunConfiguration) getRunningLanguages() (map[string]*Language, error) {
 
 func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fileList []string) error {
 	defer trace.StartRegion(ctx, "The Main Executor").End()
+
 	currentLangs, err := s.getRunningLanguages()
 	if err != nil {
 		return err
@@ -56,12 +57,12 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 }
 
 // Run is the generic way to run everything based on the package configuration
-func (s *RunConfiguration) Run(lintType LintType) error {
+func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) error {
 	fileList, err := s.getFileList()
 	if err != nil {
 		return errchain.From(err).Link("getting files")
 	}
-	err = s.runLinters(nil, lintType, fileList)
+	err = s.runLinters(ctx, lintType, fileList)
 	if err != nil {
 		return err
 	}

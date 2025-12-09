@@ -306,7 +306,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 				_ = file.Close()
 			}()
 
-			err = tt.config.Run(LintTypeChk)
+			err = tt.config.Run(context.Background(), LintTypeChk)
 
 			if tt.expectErr {
 				if assert.Error(t, err) && tt.errMessage != "" {

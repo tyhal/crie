@@ -1,12 +1,15 @@
 package exec
 
-import "io"
+import (
+	"context"
+	"io"
+)
 
 // NoopExecutor is a test/dummy executor that writes fixed strings to stdout and stderr.
 type NoopExecutor struct{}
 
 // Setup initializes the NoopExecutor (no-op).
-func (ne *NoopExecutor) Setup() error {
+func (ne *NoopExecutor) Setup(_ context.Context) error {
 	return nil
 }
 
@@ -24,6 +27,6 @@ func (ne *NoopExecutor) Exec(_ Instance, _ string, stdout io.Writer, stderr io.W
 }
 
 // Cleanup finalizes the NoopExecutor (no-op).
-func (ne *NoopExecutor) Cleanup() error {
+func (ne *NoopExecutor) Cleanup(_ context.Context) error {
 	return nil
 }

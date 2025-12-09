@@ -49,7 +49,7 @@ func (d *JobOrchestrator) executor(ctx context.Context) {
 			log.Error("oh no")
 		} else {
 			// TODO lock on Format
-			d.repQ <- job.lint.Run(ctx, job.file)
+			d.repQ <- job.lint.Run(job.file)
 		}
 	}
 }
@@ -84,7 +84,7 @@ func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *
 			if !active {
 				active = true
 				startup.Go(func() {
-					err := l.WillRun(ctx)
+					err := l.Setup(ctx)
 					if err != nil {
 						log.Error(err)
 						return
@@ -92,6 +92,7 @@ func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *
 					d.cleaners.Go(func() {
 						d.cleanupStart.Wait()
 						l.Cleanup(ctx)
+						// TODO cleanup should probably call cancel on the context of the executors related to this linter
 					})
 				})
 			}

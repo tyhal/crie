@@ -3,6 +3,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 
@@ -41,13 +42,13 @@ func (e *LintCli) imgTagged() string {
 	return e.Img
 }
 
-// WillRun does preflight checks for the 'Run'
-func (e *LintCli) WillRun() error {
+// Setup does preflight checks for the 'Run'
+func (e *LintCli) Setup(ctx context.Context) error {
 
 	img := e.imgTagged()
 
 	switch {
-	case e.isContainer() && exec.WillPodman() == nil:
+	case e.isContainer() && exec.WillPodman(ctx) == nil:
 		e.executor = &exec.PodmanExecutor{Name: e.Exec.Bin, Image: img}
 	case e.isContainer() && exec.WillDocker() == nil:
 		e.executor = &exec.DockerExecutor{Name: e.Exec.Bin, Image: img}
@@ -57,7 +58,7 @@ func (e *LintCli) WillRun() error {
 		return errors.New("could not determine execution mode [podman, docker, local]")
 	}
 
-	if err := e.executor.Setup(); err != nil {
+	if err := e.executor.Setup(ctx); err != nil {
 		return err
 	}
 
@@ -65,13 +66,14 @@ func (e *LintCli) WillRun() error {
 }
 
 // Cleanup removes any additional resources created in the process
-func (e *LintCli) Cleanup() {
+func (e *LintCli) Cleanup(ctx context.Context) error {
 	if e.executor != nil {
-		err := e.executor.Cleanup()
+		err := e.executor.Cleanup(ctx)
 		if err != nil {
 			log.Error(err)
 		}
 	}
+	return nil
 }
 
 // Run does the work required to lint the given filepath
