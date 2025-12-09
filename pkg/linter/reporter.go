@@ -9,10 +9,12 @@ import (
 	"github.com/tyhal/crie/pkg/folding"
 )
 
+// Reporter is used to report results to the user
 type Reporter interface {
 	Log(rep *Report) error
 }
 
+// StructuredReporter is a Reporter that uses structured logging
 type StructuredReporter struct {
 	ShowPass bool
 	SrcOut   *log.Entry
@@ -20,6 +22,7 @@ type StructuredReporter struct {
 	SrcInt   *log.Entry
 }
 
+// NewStructuredReporter creates a new StructuredReporter
 func NewStructuredReporter(showPass bool) Reporter {
 	return &StructuredReporter{
 		ShowPass: showPass,
@@ -54,6 +57,7 @@ type logFormat struct {
 	Entry *log.Entry
 }
 
+// Log prints the log message to stdout
 func (l *logFormat) Log(level log.Level, args ...any) {
 	if log.IsLevelEnabled(level) {
 		l.Entry.Log(level)
@@ -61,6 +65,7 @@ func (l *logFormat) Log(level log.Level, args ...any) {
 	}
 }
 
+// StandardReporter is a Reporter that uses simple logging
 type StandardReporter struct {
 	ShowPass bool
 	SrcOut   logFormat
@@ -69,6 +74,7 @@ type StandardReporter struct {
 	Folder   folding.Folder
 }
 
+// NewStandardReporter creates a new StandardReporter
 func NewStandardReporter(showPass bool) Reporter {
 	return &StandardReporter{
 		ShowPass: showPass,

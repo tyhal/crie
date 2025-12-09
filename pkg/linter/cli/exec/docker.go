@@ -32,6 +32,7 @@ type DockerExecutor struct {
 	execCtx    context.Context
 	execCancel context.CancelFunc
 	id         string
+	willWrite  bool
 }
 
 var dockerInstalled = false
@@ -95,9 +96,10 @@ func (e *DockerExecutor) Setup(ctx context.Context) error {
 		&container.HostConfig{
 			Mounts: []mount.Mount{
 				{
-					Type:   mount.TypeBind,
-					Source: wdHost,
-					Target: wdContainer,
+					Type:     mount.TypeBind,
+					Source:   wdHost,
+					Target:   wdContainer,
+					ReadOnly: !e.willWrite,
 				},
 			},
 		},
