@@ -119,8 +119,8 @@ func genFilenames(count int) []string {
 	return filenames
 }
 
-func randDuration(min, max int) time.Duration {
-	return time.Duration(rand.Intn(max-min) + min)
+func randDuration(minD, maxD int) time.Duration {
+	return time.Duration(rand.Intn(maxD-minD) + minD)
 }
 
 func genLangs(count int) Languages {
@@ -213,7 +213,7 @@ func BenchmarkRunConfiguration_runLinters(b *testing.B) {
 	}
 }
 
-func TestRunConfiguration_trace_runLinters(t *testing.T) {
+func TestRunConfiguration_trace_runLinters(_ *testing.T) {
 	defer disableLogging()()
 
 	f, err := os.Create("trace.out")

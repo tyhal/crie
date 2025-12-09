@@ -12,11 +12,13 @@ import (
 	"github.com/tyhal/crie/pkg/linter"
 )
 
+// Job is a single job to be run by the orchestrator
 type Job struct {
 	lint linter.Linter
 	file string
 }
 
+// JobOrchestrator is responsible for dispatching jobs to workers
 type JobOrchestrator struct {
 	Dispatchers  sync.WaitGroup
 	executors    sync.WaitGroup
@@ -30,11 +32,12 @@ type JobOrchestrator struct {
 	maxExecutors int
 }
 
+// New creates a new JobOrchestrator
 func New(files []string, reporter linter.Reporter) *JobOrchestrator {
 	maxBacklog := 1024
 	orch := &JobOrchestrator{
 		files:        files,
-		maxExecutors: min(runtime.NumCPU(), len(files)),
+		maxExecutors: min(runtime.NumCPU()*2, len(files)),
 		jobQ:         make(chan Job, maxBacklog),
 		repQ:         make(chan linter.Report, maxBacklog),
 		reporter:     reporter,
@@ -43,7 +46,7 @@ func New(files []string, reporter linter.Reporter) *JobOrchestrator {
 	return orch
 }
 
-func (d *JobOrchestrator) executor(ctx context.Context) {
+func (d *JobOrchestrator) executor() {
 	for job := range d.jobQ {
 		if job.lint == nil {
 			log.Error("oh no")
@@ -54,6 +57,7 @@ func (d *JobOrchestrator) executor(ctx context.Context) {
 	}
 }
 
+// Start starts the orchestrator
 func (d *JobOrchestrator) Start(ctx context.Context) func() {
 	d.report.Go(func() {
 		defer trace.StartRegion(ctx, "The Reporter").End()
@@ -67,7 +71,7 @@ func (d *JobOrchestrator) Start(ctx context.Context) func() {
 	for i := range d.maxExecutors {
 		d.executors.Go(func() {
 			defer trace.StartRegion(ctx, fmt.Sprintf("Executor %d", i)).End()
-			d.executor(ctx)
+			d.executor()
 		})
 	}
 	return d.wait
@@ -91,8 +95,11 @@ func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *
 					}
 					d.cleaners.Go(func() {
 						d.cleanupStart.Wait()
-						l.Cleanup(ctx)
-						// TODO cleanup should probably call cancel on the context of the executors related to this linter
+						err := l.Cleanup(ctx)
+						if err != nil {
+							log.Error(err)
+							return
+						}
 					})
 				})
 			}

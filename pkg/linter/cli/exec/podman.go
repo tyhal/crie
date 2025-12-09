@@ -41,6 +41,7 @@ type PodmanExecutor struct {
 	client     *context.Context
 	execCancel context.CancelFunc
 	id         string
+	willWrite  bool
 }
 
 var podmanInstalled = false
@@ -162,12 +163,17 @@ func (e *PodmanExecutor) Setup(ctx context.Context) error {
 	s.NetNS = specgen.Namespace{
 		NSMode: specgen.NoNetwork,
 	}
+	mountPerms := "ro"
+	if e.willWrite {
+		mountPerms = "rw"
+	}
+
 	s.Mounts = []spec.Mount{
 		{
 			Type:        "bind",
 			Source:      wdHost,
 			Destination: wdContainer,
-			Options:     []string{"rbind", "rw", "Z"},
+			Options:     []string{"rbind", mountPerms, "Z"},
 		},
 	}
 
