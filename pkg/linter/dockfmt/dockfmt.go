@@ -1,7 +1,7 @@
 package dockfmt
 
 import (
-	"math"
+	"context"
 
 	"github.com/tyhal/crie/pkg/linter"
 )
@@ -23,18 +23,14 @@ func (l *LintDockFmt) Name() string {
 	return "dockfmt"
 }
 
-// WillRun returns nil as there are no external deps
-func (l *LintDockFmt) WillRun() (err error) {
+// Setup returns nil as there are no external deps
+func (l *LintDockFmt) Setup(_ context.Context) (err error) {
 	return nil
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *LintDockFmt) Cleanup() {
-}
-
-// MaxConcurrency return max number of parallel files to fmt
-func (l *LintDockFmt) MaxConcurrency() int {
-	return math.MaxInt32
+func (l *LintDockFmt) Cleanup(_ context.Context) error {
+	return nil
 }
 
 // Run will just return the configured error as a report

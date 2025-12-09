@@ -36,22 +36,22 @@ import (
 
 // PodmanExecutor runs CLI tools inside a Podman container.
 type PodmanExecutor struct {
-	Name   string
-	Image  string
-	client *context.Context
-	cancel context.CancelFunc
-	id     string
+	Name       string
+	Image      string
+	client     *context.Context
+	execCancel context.CancelFunc
+	id         string
 }
 
 var podmanInstalled = false
 
 // WillPodman checks whether Podman is available and responsive on the host.
-func WillPodman() error {
+func WillPodman(ctx context.Context) error {
 	if podmanInstalled {
 		return nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	uri, err := getPodmanMachineSocket()
@@ -105,11 +105,10 @@ func getPodmanMachineSocket() (socketPath string, err error) {
 }
 
 // Setup creates and starts a disposable Podman container for executing commands.
-func (e *PodmanExecutor) Setup() error {
+func (e *PodmanExecutor) Setup(ctx context.Context) error {
 
-	// todo should pass the context all the way from cobra
-	ctx, cancel := context.WithCancel(context.Background())
-	e.cancel = cancel
+	ctx, cancel := context.WithCancel(ctx)
+	e.execCancel = cancel
 
 	{
 		uri, err := getPodmanMachineSocket()
@@ -187,6 +186,7 @@ func (e *PodmanExecutor) Setup() error {
 }
 
 func (e *PodmanExecutor) pull() error {
+	// need to lock on image pull
 	_, err := images.Pull(*e.client, e.Image, nil)
 	if err != nil {
 		return err
@@ -281,12 +281,12 @@ func (e *PodmanExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 }
 
 // Cleanup stops and removes the temporary Podman container created during Setup.
-func (e *PodmanExecutor) Cleanup() error {
+func (e *PodmanExecutor) Cleanup(_ context.Context) error {
 
 	// TODO cleanup based on labels (project, language)
 
-	if e.cancel != nil {
-		defer e.cancel()
+	if e.execCancel != nil {
+		defer e.execCancel()
 	}
 
 	if e.id != "" {

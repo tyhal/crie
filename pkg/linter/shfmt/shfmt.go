@@ -2,8 +2,8 @@ package shfmt
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/tyhal/crie/pkg/linter"
@@ -23,18 +23,14 @@ func (l *LintShfmt) Name() string {
 	return "shfmt"
 }
 
-// WillRun do nothing as there are no external deps
-func (l *LintShfmt) WillRun() (err error) {
+// Setup will do nothing as there are no external deps
+func (l *LintShfmt) Setup(_ context.Context) (err error) {
 	return nil
 }
 
 // Cleanup removes any additional resources created in the process
-func (l *LintShfmt) Cleanup() {
-}
-
-// MaxConcurrency return max number of parallel files to fmt
-func (l *LintShfmt) MaxConcurrency() int {
-	return math.MaxInt32
+func (l *LintShfmt) Cleanup(_ context.Context) error {
+	return nil
 }
 
 // Run shfmt -w
