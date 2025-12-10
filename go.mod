@@ -6,7 +6,7 @@ toolchain go1.25.5
 
 require (
 	github.com/containerd/platforms v1.0.0-rc.2
-	github.com/containers/podman/v5 v5.7.0
+	github.com/containers/podman/v5 v5.7.1
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/go-git/go-git/v5 v5.16.4
 	github.com/google/renameio v1.0.1
@@ -43,7 +43,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.17.0 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
-	github.com/containers/buildah v1.42.0 // indirect
+	github.com/containers/buildah v1.42.2 // indirect
 	github.com/containers/common v0.64.2 // indirect
 	github.com/containers/gvisor-tap-vsock v0.8.7 // indirect
 	github.com/containers/libhvee v0.10.1-0.20250829163521-178d10e67860 // indirect
@@ -55,7 +55,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/crc-org/vfkit v0.6.1 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467 // indirect
-	github.com/cyphar/filepath-securejoin v0.5.1 // indirect
+	github.com/cyphar/filepath-securejoin v0.5.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/digitalocean/go-libvirt v0.0.0-20220804181439-8648fbde413e // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20250212194115-ee9b0668d242 // indirect
@@ -123,9 +123,9 @@ require (
 	github.com/opencontainers/cgroups v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/opencontainers/runc v1.3.3 // indirect
+	github.com/opencontainers/runc v1.3.4 // indirect
 	github.com/opencontainers/runtime-tools v0.9.1-0.20250523060157-0ea5ed0382a2 // indirect
-	github.com/opencontainers/selinux v1.12.0 // indirect
+	github.com/opencontainers/selinux v1.13.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -165,7 +165,7 @@ require (
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	go.podman.io/common v0.66.0 // indirect
+	go.podman.io/common v0.66.1 // indirect
 	go.podman.io/image/v5 v5.38.0 // indirect
 	go.podman.io/storage v1.61.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
