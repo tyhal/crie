@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"os"
 
+	"github.com/tyhal/crie/internal/runner"
 	"github.com/tyhal/crie/pkg/errchain"
 	"gopkg.in/yaml.v3"
 )
@@ -14,8 +15,20 @@ type Languages struct {
 	Languages map[string]Language `json:"languages" yaml:"languages" jsonschema_description:"a map of languages that crie should be able to run"`
 }
 
-func merge(src *Languages, dst *Languages) {
+// ToRunFormat converts the yaml friendly version to an internal representation used by crie
+func (l Languages) ToRunFormat() (runner.Languages, error) {
+	crieLanguages := make(runner.Languages, len(l.Languages))
+	for langName, lang := range l.Languages {
+		crieLang, err := lang.ToRunFormat()
+		if err != nil {
+			return nil, errchain.From(err).LinkF("parsing language %s", langName)
+		}
+		crieLanguages[langName] = crieLang
+	}
+	return crieLanguages, nil
+}
 
+func merge(src *Languages, dst *Languages) {
 	for langName, lang := range src.Languages {
 		if _, ok := dst.Languages[langName]; !ok {
 			dst.Languages[langName] = lang

@@ -223,7 +223,7 @@ func (e *DockerExecutor) Cleanup(ctx context.Context) error {
 	}
 
 	if e.id != "" {
-		timeoutSeconds := 3
+		timeoutSeconds := 1
 
 		d := log.WithFields(log.Fields{"dockerId": e.id})
 

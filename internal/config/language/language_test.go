@@ -19,7 +19,7 @@ func TestConfigLanguage_toLanguage(t *testing.T) {
 		Chk:       chkLinter,
 	}
 
-	result, err := config.ToCrieLanguage()
+	result, err := config.ToRunFormat()
 	assert.NoError(t, err)
 	assert.Equal(t, regex.Regexp, result.FileMatch)
 	assert.Equal(t, fmtLinter.Linter, result.Fmt)

@@ -37,7 +37,7 @@ func New(files []string, reporter linter.Reporter) *JobOrchestrator {
 	maxBacklog := 1024
 	orch := &JobOrchestrator{
 		files:        files,
-		maxExecutors: min(runtime.NumCPU()*2, len(files)),
+		maxExecutors: min(runtime.NumCPU(), len(files)),
 		jobQ:         make(chan Job, maxBacklog),
 		repQ:         make(chan linter.Report, maxBacklog),
 		reporter:     reporter,

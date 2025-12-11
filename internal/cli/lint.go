@@ -24,13 +24,9 @@ func setCrie(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	crieLanguages := make(map[string]*runner.Language, len(langs.Languages))
-	for langName, lang := range langs.Languages {
-		crieLang, err := lang.ToCrieLanguage()
-		if err != nil {
-			return errchain.From(err).LinkF("parsing language %s", langName)
-		}
-		crieLanguages[langName] = crieLang
+	crieLanguages, err := langs.ToRunFormat()
+	if err != nil {
+		return err
 	}
 
 	var ignore *regexp.Regexp

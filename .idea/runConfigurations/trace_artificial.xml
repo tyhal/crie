@@ -1,7 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="trace" type="GoTestRunConfiguration" factoryName="Go Test">
+  <configuration default="false" name="trace artificial" type="GoTestRunConfiguration" factoryName="Go Test">
     <module name="crie" />
     <working_directory value="$PROJECT_DIR$/internal/runner" />
+    <go_parameters value="-tags trace" />
     <root_directory value="$PROJECT_DIR$" />
     <kind value="PACKAGE" />
     <package value="github.com/tyhal/crie/internal/runner" />
