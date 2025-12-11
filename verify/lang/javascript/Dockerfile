@@ -1,4 +1,4 @@
-FROM node:24.11.1
+FROM node:24.12.0
 COPY src/ /src/
 WORKDIR /src
 RUN npm install
