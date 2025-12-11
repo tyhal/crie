@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime/trace"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/linter"
@@ -44,6 +45,7 @@ func (e *LintCli) imgTagged() string {
 
 // Setup does preflight checks for the 'Run'
 func (e *LintCli) Setup(ctx context.Context) error {
+	defer trace.StartRegion(ctx, "Setup").End()
 
 	img := e.imgTagged()
 
@@ -67,6 +69,8 @@ func (e *LintCli) Setup(ctx context.Context) error {
 
 // Cleanup removes any additional resources created in the process
 func (e *LintCli) Cleanup(ctx context.Context) error {
+	defer trace.StartRegion(ctx, "Cleanup").End()
+
 	if e.executor != nil {
 		err := e.executor.Cleanup(ctx)
 		if err != nil {
@@ -78,7 +82,6 @@ func (e *LintCli) Cleanup(ctx context.Context) error {
 
 // Run does the work required to lint the given filepath
 func (e *LintCli) Run(filePath string) linter.Report {
-
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 

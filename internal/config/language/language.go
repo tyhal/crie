@@ -13,8 +13,8 @@ type Language struct {
 	Chk       Linter `json:"chk,omitempty" yaml:"chk,omitempty" jsonschema_description:"used for the given language when linting/checking"`
 }
 
-// ToCrieLanguage will convert the yaml friendly version to an internal representation used by crie
-func (l Language) ToCrieLanguage() (*runner.Language, error) {
+// ToRunFormat will convert the yaml friendly version to an internal representation used by crie
+func (l Language) ToRunFormat() (*runner.Language, error) {
 	if l.FileMatch == nil {
 		return nil, errors.New("field match is required")
 	}
