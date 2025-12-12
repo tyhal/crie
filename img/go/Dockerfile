@@ -9,7 +9,7 @@ RUN go install github.com/mgechev/revive@latest \
     && go install github.com/yoheimuta/protolint/cmd/protolint@latest
 
 
-FROM alpine:3.22.2
+FROM alpine:3.23.0
 
 RUN adduser -D standards
 
