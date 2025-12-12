@@ -26,12 +26,13 @@ import (
 
 // DockerExecutor runs CLI tools inside a Docker container.
 type DockerExecutor struct {
-	Name   string
-	Image  string
-	client *client.Client
-	ctx    context.Context
-	cancel context.CancelFunc
-	id     string
+	Name       string
+	Image      string
+	client     *client.Client
+	execCtx    context.Context
+	execCancel context.CancelFunc
+	id         string
+	willWrite  bool
 }
 
 var dockerInstalled = false
@@ -50,11 +51,7 @@ func WillDocker() error {
 }
 
 // Setup creates and starts a disposable Docker container for executing commands.
-func (e *DockerExecutor) Setup() error {
-	ctx, cancel := context.WithCancel(context.Background())
-	e.ctx = ctx
-	e.cancel = cancel
-
+func (e *DockerExecutor) Setup(ctx context.Context) error {
 	// Add our clientDocker
 	{
 		c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -64,9 +61,9 @@ func (e *DockerExecutor) Setup() error {
 		e.client = c
 	}
 
-	_, err := e.client.ImageHistory(e.ctx, e.Image)
+	_, err := e.client.ImageHistory(ctx, e.Image)
 	if err != nil {
-		if err := e.pull(); err != nil {
+		if err := e.pull(ctx); err != nil {
 			return err
 		}
 	}
@@ -87,7 +84,7 @@ func (e *DockerExecutor) Setup() error {
 	_, _ = rand.Read(b)
 	shortid := hex.EncodeToString(b)
 
-	resp, err := e.client.ContainerCreate(e.ctx,
+	resp, err := e.client.ContainerCreate(ctx,
 		&container.Config{
 			Entrypoint:      []string{},
 			Cmd:             []string{"/bin/sh", "-c", "tail -f /dev/null"},
@@ -99,9 +96,10 @@ func (e *DockerExecutor) Setup() error {
 		&container.HostConfig{
 			Mounts: []mount.Mount{
 				{
-					Type:   mount.TypeBind,
-					Source: wdHost,
-					Target: wdContainer,
+					Type:     mount.TypeBind,
+					Source:   wdHost,
+					Target:   wdContainer,
+					ReadOnly: !e.willWrite,
 				},
 			},
 		},
@@ -114,13 +112,16 @@ func (e *DockerExecutor) Setup() error {
 	}
 	e.id = resp.ID
 
-	return e.client.ContainerStart(e.ctx, resp.ID, container.StartOptions{})
+	e.execCtx, e.execCancel = context.WithCancel(ctx)
+	return e.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 }
 
-func (e *DockerExecutor) pull() error {
+func (e *DockerExecutor) pull(ctx context.Context) error {
+
+	// TODO lock on image pull
 
 	// Ensure we have the Image downloaded
-	pullstat, err := e.client.ImagePull(e.ctx, e.Image, image.PullOptions{})
+	pullstat, err := e.client.ImagePull(ctx, e.Image, image.PullOptions{})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"stage": "docker pull",
@@ -156,7 +157,8 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 		targetFile = filepath.Base(targetFile)
 	}
 
-	cmd := append([]string{i.Bin}, i.Start...)
+	cmd := make([]string, 0, 1+len(i.Start)+1+len(i.End))
+	cmd = append([]string{i.Bin}, i.Start...)
 	cmd = append(cmd, targetFile)
 	cmd = append(cmd, i.End...)
 
@@ -169,7 +171,7 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 		AttachStdout: true,
 		Tty:          false,
 	}
-	execResp, err := e.client.ContainerExecCreate(e.ctx, e.id, config)
+	execResp, err := e.client.ContainerExecCreate(e.execCtx, e.id, config)
 	if err != nil {
 		return err
 	}
@@ -178,7 +180,7 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 		Detach: false,
 		Tty:    false,
 	}
-	attach, err := e.client.ContainerExecAttach(e.ctx, execResp.ID, startConfig)
+	attach, err := e.client.ContainerExecAttach(e.execCtx, execResp.ID, startConfig)
 	if err != nil {
 		return err
 	}
@@ -199,7 +201,7 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 		case <-timeout:
 			return errors.New("exec timed out")
 		case <-check:
-			inspect, err := e.client.ContainerExecInspect(e.ctx, execResp.ID)
+			inspect, err := e.client.ContainerExecInspect(e.execCtx, execResp.ID)
 			if err != nil {
 				return err
 			}
@@ -214,25 +216,23 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 }
 
 // Cleanup stops and removes the temporary Docker container created during Setup.
-func (e *DockerExecutor) Cleanup() error {
+func (e *DockerExecutor) Cleanup(ctx context.Context) error {
 
-	if e.cancel != nil {
-		defer e.cancel()
+	if e.execCancel != nil {
+		defer e.execCancel()
 	}
 
-	// TODO cleanup based on labels (project, language)
-
 	if e.id != "" {
-		timeoutSeconds := 3
+		timeoutSeconds := 1
 
 		d := log.WithFields(log.Fields{"dockerId": e.id})
 
 		d.Debug("stopping container")
-		if err := e.client.ContainerStop(e.ctx, e.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
+		if err := e.client.ContainerStop(ctx, e.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
 			return err
 		}
 		d.Debug("removing container")
-		if err := e.client.ContainerRemove(e.ctx, e.id, container.RemoveOptions{}); err != nil {
+		if err := e.client.ContainerRemove(ctx, e.id, container.RemoveOptions{}); err != nil {
 			return err
 		}
 		e.id = ""

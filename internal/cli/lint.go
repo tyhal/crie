@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -23,13 +24,9 @@ func setCrie(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	crieLanguages := make(map[string]*runner.Language, len(langs.Languages))
-	for langName, lang := range langs.Languages {
-		crieLang, err := lang.ToCrieLanguage()
-		if err != nil {
-			return errchain.From(err).LinkF("parsing language %s", langName)
-		}
-		crieLanguages[langName] = crieLang
+	crieLanguages, err := langs.ToRunFormat()
+	if err != nil {
+		return err
 	}
 
 	var ignore *regexp.Regexp
@@ -73,8 +70,8 @@ var ChkCmd = &cobra.Command{
 	Long:              `Check all code standards for coding conventions`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
-		err := crieRun.Run(runner.LintTypeChk)
+	Run: func(cmd *cobra.Command, _ []string) {
+		err := crieRun.Run(cmd.Context(), runner.LintTypeChk)
 
 		if err != nil {
 			log.Fatal(errchain.From(err).Link("crie check"))
@@ -89,8 +86,8 @@ var FmtCmd = &cobra.Command{
 	Long:              `Run all formatters in the list`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
-		err := crieRun.Run(runner.LintTypeFmt)
+	Run: func(cmd *cobra.Command, _ []string) {
+		err := crieRun.Run(cmd.Context(), runner.LintTypeFmt)
 
 		if err != nil {
 			log.Fatal(errchain.From(err).Link("crie format"))
@@ -98,9 +95,9 @@ var FmtCmd = &cobra.Command{
 	},
 }
 
-func stage(lintType runner.LintType) error {
+func stage(ctx context.Context, lintType runner.LintType) error {
 	log.Infof("❨ %s ❩", lintType.String())
-	err := crieRun.Run(lintType)
+	err := crieRun.Run(ctx, lintType)
 	if err != nil {
 		return errchain.From(err).LinkF("crie %s", lintType)
 	}
@@ -115,12 +112,12 @@ var LntCmd = &cobra.Command{
 	Long:              `Runs both format and then check`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		stages := []runner.LintType{runner.LintTypeFmt, runner.LintTypeChk}
 		var failedStages []string
 
 		for _, lintType := range stages {
-			if err := stage(lintType); err != nil {
+			if err := stage(cmd.Context(), lintType); err != nil {
 				if crieRun.Options.Continue {
 					failedStages = append(failedStages, lintType.String())
 				} else {
