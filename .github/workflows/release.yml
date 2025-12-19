@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@e7dd8719facad339784251420c063a2ca4f5bc96 # main
+        uses: Homebrew/actions/setup-homebrew@696ef0de3166f256259af861e4b6dcbb7b99d84b # main
       - name: Configure git
         run: |
           git config --global user.name "github-actions[bot]"
