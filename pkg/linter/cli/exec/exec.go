@@ -17,7 +17,7 @@ type Instance struct {
 	Start     Par    `json:"start,flow,omitempty" yaml:"start,flow,omitempty" jsonschema_description:"parameters that will be put in front of the file path"`
 	End       Par    `json:"end,flow,omitempty" yaml:"end,flow,omitempty" jsonschema_description:"parameters that will be put behind the file path"`
 	ChDir     bool   `json:"chdir,omitempty" yaml:"chdir,omitempty" jsonschema_description:"if true the tool will change directory to where the target file is located"`
-	WillWrite bool   `json:"will_write,omitempty" yaml:"will_write,omitempty" jsonschema_description:"if the tool will write to the file system, if unset for container execution it will mount with read-only privileges"`
+	WillWrite bool   `json:"will_write,omitempty" yaml:"will_write,omitempty" jsonschema_description:"whether the tool will write to the file system, if unset for container execution will mount with read-only privileges"`
 }
 
 // Executor abstracts how a CLI tool is executed (host, Docker, Podman, etc.).

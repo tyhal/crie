@@ -94,7 +94,7 @@ echo "hello world"
 
 			report := <-rep
 
-			assert.Equal(t, testFilePath, report.File)
+			assert.Equal(t, testFilePath, report.Target)
 			if tt.error {
 				assert.Error(t, report.Err)
 			} else {

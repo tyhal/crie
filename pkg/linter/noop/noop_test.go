@@ -41,7 +41,7 @@ func TestLint_Run(t *testing.T) {
 	l.Run("test.txt", rep)
 
 	report := <-rep
-	assert.Equal(t, "test.txt", report.File)
+	assert.Equal(t, "test.txt", report.Target)
 	assert.NoError(t, report.Err)
 	assert.Nil(t, report.StdOut)
 	assert.Nil(t, report.StdErr)

@@ -8,6 +8,7 @@ import (
 // noopExecutor is a test/dummy executor that writes fixed strings to stdout and stderr.
 type noopExecutor struct{}
 
+// NewNoop creates an executor that does nothing
 func NewNoop() Executor {
 	return &noopExecutor{}
 }

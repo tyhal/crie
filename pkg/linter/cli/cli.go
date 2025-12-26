@@ -87,5 +87,5 @@ func (e *LintCli) Run(filePath string) linter.Report {
 
 	err := e.executor.Exec(filePath, &outB, &errB)
 
-	return linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
+	return linter.Report{Target: filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }

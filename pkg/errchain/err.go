@@ -1,6 +1,8 @@
 // Package errchain keeps consistency of displaying error messages with more context.
 package errchain
 
+// TODO use a public multi-error package or just have a custom printer for CLI's
+
 import "fmt"
 
 // Chain represents a helper that wraps an existing error and allows

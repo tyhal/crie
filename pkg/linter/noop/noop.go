@@ -69,5 +69,5 @@ func (l *LintNoop) Run(filepath string) linter.Report {
 		defer trace.StartRegion(l.execCtx, "Run "+filepath).End()
 		time.Sleep(l.lintDuration)
 	}
-	return linter.Report{File: filepath, Err: l.runErr, StdOut: nil, StdErr: nil}
+	return linter.Report{Target: filepath, Err: l.runErr, StdOut: nil, StdErr: nil}
 }

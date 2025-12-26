@@ -34,6 +34,7 @@ type dockerExecutor struct {
 	id         string
 }
 
+// NewDocker creates an executor using containers managed by the docker client.
 func NewDocker(image string) Executor {
 	return &dockerExecutor{
 		image: image,

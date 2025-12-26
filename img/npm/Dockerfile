@@ -6,5 +6,5 @@ RUN adduser -D standards
 RUN apk add --no-cache npm && npm install -g jsonlint2 remark-cli remark-preset-lint-recommended standard
 
 # hadolint ignore=DL3059
-RUN mkdir /.standard-v14-cache \
-    && chmod -R o+rw /home /.standard-v14-cache
+RUN mkdir /.standard-cache \
+    && chmod -R o+rw /home /.standard-cache

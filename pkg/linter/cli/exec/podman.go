@@ -32,6 +32,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
 	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/errchain"
 	"github.com/tyhal/crie/pkg/linter"
 )
 
@@ -44,6 +45,7 @@ type podmanExecutor struct {
 	id         string
 }
 
+// NewPodman creates an executor using containers managed by the podman client.
 func NewPodman(image string) Executor {
 	return &podmanExecutor{
 		image: image,
@@ -113,6 +115,7 @@ func getPodmanMachineSocket() (socketPath string, err error) {
 
 // Setup creates and starts a disposable Podman container for executing commands.
 func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
+	e.Instance = i
 
 	ctx, cancel := context.WithCancel(ctx)
 	e.execCancel = cancel
@@ -172,6 +175,7 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	mountPerms := "ro" // should be used for static-only
 	if e.WillWrite {
 		mountPerms = "rw" // should be used for formatters
+		log.Debugln("allowing writes to host filesystem")
 	}
 
 	s.Mounts = []spec.Mount{
@@ -180,7 +184,6 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 			Source:      wdHost,
 			Destination: wdContainer,
 			// we are using "z" instead of "Z" because we run multiple containers in parallel
-			// TODO Look into the implications of this. It might be required to have an option to force private mounts and then run each container sequentially
 			Options: []string{"rbind", mountPerms, "z"},
 		},
 	}
@@ -215,7 +218,7 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	targetFile := ToLinuxPath(filePath)
 	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
-		return err
+		return errchain.From(err).Link("getting workdir")
 	}
 
 	if e.ChDir {
@@ -231,7 +234,7 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	log.Debug(cmd)
 	currentUser, err := user.Current()
 	if err != nil {
-		return err
+		return errchain.From(err).Link("getting current user")
 	}
 
 	execCreateConfig := handlers.ExecCreateConfig{
@@ -249,30 +252,41 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 
 	execID, err := containers.ExecCreate(e.client, e.id, &execCreateConfig)
 	if err != nil {
-		return err
+		return errchain.From(err).Link("creating exec")
 	}
 
 	logs, err := attachedExecStart(e.client, execID, &containers.ExecStartOptions{})
 	if err != nil {
-		return err
+		return errchain.From(err).Link("attaching to created exec")
 	}
 
+	// TODO log processing and cleanup and no proper error reporting
 	defer func() {
 		_, err := stdcopy.StdCopy(stdout, stderr, logs)
 		if err != nil {
-			log.Errorf("Link demultiplexing logs: %v", err)
-			return
+			log.Errorf("Error demultiplexing logs: %v", err)
 		}
 
 		err = logs.Close()
 		if err != nil {
-			log.Error(err)
+			log.Error(errchain.From(err).Link("closing logs"))
 		}
-		_ = containers.ExecRemove(e.client, execID, &containers.ExecRemoveOptions{})
+
+		err = containers.ExecRemove(e.client, execID, &containers.ExecRemoveOptions{})
+		if err != nil {
+			log.Error(errchain.From(err).Link("closing exec"))
+		}
 	}()
 
 	timeout := time.After(5 * time.Second)
-	check := time.Tick(100 * time.Millisecond)
+
+	// TODO this is bad
+	check := time.Tick(3 * time.Second)
+
+	// TODO wtf is this, polling an exec with magic values
+	// it was literally blasting the podman API... stop doing that
+
+	// TODO redesign, or detect podman machine running and serialize calls to API to avoid rejection
 
 	for {
 		select {
@@ -281,7 +295,7 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 		case <-check:
 			inspect, err := containers.ExecInspect(e.client, execID, &containers.ExecInspectOptions{})
 			if err != nil {
-				return err
+				return errchain.From(err).Link("polling exec")
 			}
 			if inspect.Running == false {
 				if inspect.ExitCode != 0 {
@@ -354,7 +368,7 @@ func attachedExecStart(ctx context.Context, sessionID string, options *container
 	}
 
 	resp, err := conn.DoRequest(ctx, bytes.NewReader(bodyJSON), http.MethodPost, "/exec/%s/start", nil, nil, sessionID)
-	if resp == nil {
+	if resp == nil || err != nil {
 		return nil, err
 	}
 

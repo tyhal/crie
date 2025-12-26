@@ -24,7 +24,7 @@ func (s *RunConfiguration) getRunningLanguages() (map[string]*Language, error) {
 	return currentLangs, nil
 }
 
-func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fileList []string) error {
+func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fileList []string) (err error) {
 	defer trace.StartRegion(ctx, "Crie Lint").End()
 
 	currentLangs, err := s.getRunningLanguages()
@@ -42,9 +42,9 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 	// NOTE an (obvious) assumption is made that formatters need file locking while linters do not
 	locking := lintType == LintTypeFmt
 
-	orch := orchestrator.New(fileList, r, locking)
+	orch := orchestrator.New(fileList, r, locking, !s.Options.Continue)
 	waitForCompletion := orch.Start(ctx)
-	defer waitForCompletion()
+	defer func() { err = waitForCompletion() }()
 
 	for _, lang := range currentLangs {
 		l := lang.GetLinter(lintType)
@@ -56,7 +56,7 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 		})
 	}
 
-	return nil
+	return
 }
 
 // Run is the generic way to run everything based on the package configuration

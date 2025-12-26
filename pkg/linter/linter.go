@@ -7,7 +7,7 @@ import (
 
 // Report is used to state what issues a given file has
 type Report struct {
-	File   string
+	Target string
 	Err    error
 	StdOut io.Reader
 	StdErr io.Reader

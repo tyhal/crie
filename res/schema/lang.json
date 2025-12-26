@@ -20,6 +20,10 @@
         "chdir": {
           "type": "boolean",
           "description": "if true the tool will change directory to where the target file is located"
+        },
+        "will_write": {
+          "type": "boolean",
+          "description": "whether the tool will write to the file system, if unset for container execution it will mount with read-only privileges"
         }
       },
       "additionalProperties": false,

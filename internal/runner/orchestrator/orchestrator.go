@@ -9,7 +9,6 @@ import (
 	"runtime/trace"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/errchain"
 	"github.com/tyhal/crie/pkg/linter"
 	"golang.org/x/sync/errgroup"
@@ -22,16 +21,18 @@ type Job struct {
 	lintJobs *sync.WaitGroup
 }
 
-type FileLocker struct {
+// fileLocker is used to lock files to prevent concurrent writes from formatters
+type fileLocker struct {
 	locks map[string]*sync.Mutex
 }
 
-func NewFileLocker(files []string) *FileLocker {
+// newFileLocker creates a new fileLocker from a file list
+func newFileLocker(files []string) *fileLocker {
 	m := make(map[string]*sync.Mutex, len(files))
 	for _, f := range files {
 		m[f] = &sync.Mutex{}
 	}
-	return &FileLocker{locks: m}
+	return &fileLocker{locks: m}
 }
 
 // JobOrchestrator is responsible for dispatching jobs to workers
@@ -40,20 +41,21 @@ type JobOrchestrator struct {
 	executors    sync.WaitGroup
 	files        []string
 	jobQ         chan Job
-	report       sync.WaitGroup
+	report       errgroup.Group
 	repQ         chan linter.Report
 	reporter     linter.Reporter
 	maxExecutors int
-	locker       *FileLocker
+	locker       *fileLocker
+	failFast     bool
 }
 
 // New creates a new JobOrchestrator
 // locking decides if we should have an exclusive lock per file due to potential writes
-func New(files []string, reporter linter.Reporter, locking bool) *JobOrchestrator {
+func New(files []string, reporter linter.Reporter, locking, failFast bool) *JobOrchestrator {
 	maxBacklog := 1024
-	var locker *FileLocker
+	var locker *fileLocker
 	if locking {
-		locker = NewFileLocker(files)
+		locker = newFileLocker(files)
 	}
 	orch := &JobOrchestrator{
 		files:        files,
@@ -62,6 +64,7 @@ func New(files []string, reporter linter.Reporter, locking bool) *JobOrchestrato
 		repQ:         make(chan linter.Report, maxBacklog),
 		reporter:     reporter,
 		locker:       locker,
+		failFast:     failFast,
 	}
 	return orch
 }
@@ -69,7 +72,7 @@ func New(files []string, reporter linter.Reporter, locking bool) *JobOrchestrato
 func (d *JobOrchestrator) executor() {
 	for job := range d.jobQ {
 		if job.lint == nil {
-			d.repQ <- linter.Report{Err: fmt.Errorf("no linter for %s", job.file), File: job.file}
+			d.repQ <- linter.Report{Err: fmt.Errorf("no linter for %s", job.file), Target: job.file}
 		} else {
 			d.repQ <- job.lint.Run(job.file)
 			job.lintJobs.Done()
@@ -80,11 +83,11 @@ func (d *JobOrchestrator) executor() {
 func (d *JobOrchestrator) lockExecutor() {
 	for job := range d.jobQ {
 		if job.lint == nil {
-			d.repQ <- linter.Report{Err: errors.New("no linter found"), File: job.file}
+			d.repQ <- linter.Report{Err: errors.New("no linter found"), Target: job.file}
 		} else {
 			mu, ok := d.locker.locks[job.file]
 			if !ok {
-				d.repQ <- linter.Report{Err: errors.New("no lock for found"), File: job.file}
+				d.repQ <- linter.Report{Err: errors.New("no lock found"), Target: job.file}
 				continue
 			}
 			func() {
@@ -98,15 +101,22 @@ func (d *JobOrchestrator) lockExecutor() {
 }
 
 // Start starts the orchestrator
-func (d *JobOrchestrator) Start(ctx context.Context) func() {
-	d.report.Go(func() {
+func (d *JobOrchestrator) Start(ctx context.Context) func() error {
+	d.report.Go(func() error {
 		defer trace.StartRegion(ctx, "The Reporter").End()
+		var anyErr error
 		for report := range d.repQ {
 			err := d.reporter.Log(&report)
 			if err != nil {
-				log.Error(err)
+				if d.failFast {
+					return anyErr
+				}
+				if anyErr == nil {
+					anyErr = errors.New("failures occurred")
+				}
 			}
 		}
+		return anyErr
 	})
 
 	for i := range d.maxExecutors {
@@ -120,11 +130,18 @@ func (d *JobOrchestrator) Start(ctx context.Context) func() {
 		})
 	}
 
-	return d.Wait
+	return d.wait
 }
 
 // Dispatcher submits jobQ to the workers
-func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) error {
+func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) {
+	err := d.dispatcher(ctx, l, reg)
+	if err != nil {
+		d.repQ <- linter.Report{Err: err, Target: l.Name()}
+	}
+}
+
+func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) (err error) {
 	defer trace.StartRegion(ctx, "A Dispatcher "+reg.String()).End()
 
 	// startup signals when the linter is ready to accept jobs
@@ -147,9 +164,23 @@ func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *
 		return nil
 	}
 
-	err := startup.Wait()
+	defer func() {
+		cleanupErr := l.Cleanup(ctx)
+		if cleanupErr != nil {
+			if err == nil {
+				err = cleanupErr
+			} else {
+				// TODO errchain package isn't multiple errors it just adds call stack information
+				// should be able to have parallel errors with depth
+				err = errchain.From(err).Link(cleanupErr.Error())
+			}
+		}
+	}()
+
+	err = startup.Wait()
 	if err != nil {
-		return errchain.From(err).LinkF("failed to setup linter %s", l.Name())
+		err = errchain.From(err).Link("failed to setup linter")
+		return
 	}
 
 	var lintJobs sync.WaitGroup
@@ -162,15 +193,17 @@ func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *
 	lintJobs.Wait()
 	err = l.Cleanup(ctx)
 	if err != nil {
-		return errchain.From(err).LinkF("failed to cleanup linter %s", l.Name())
+		err = errchain.From(err).Link("failed to cleanup linter")
+		return
 	}
-	return nil
+
+	return
 }
 
-func (d *JobOrchestrator) Wait() {
+func (d *JobOrchestrator) wait() error {
 	d.Dispatchers.Wait()
 	close(d.jobQ)
 	d.executors.Wait()
 	close(d.repQ)
-	d.report.Wait()
+	return d.report.Wait()
 }
