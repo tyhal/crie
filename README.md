@@ -25,9 +25,12 @@
     brew install tyhal/tap/crie
 ```
 
-from source:
+or from source:
 
 ```shell
+    export GOFLAGS='-tags="exclude_graphdriver_btrfs containers_image_openpgp"'
+    export CGO=0
+    
     go install github.com/tyhal/crie/cmd/crie@latest
 ```
 

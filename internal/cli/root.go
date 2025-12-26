@@ -40,7 +40,7 @@ format all python files
 	Long: `
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can sanity check any codebase.`,
-	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 
 		viper.SetConfigFile(projectConfigPath)
 		viper.SetConfigType("yml")
@@ -54,7 +54,7 @@ format all python files
 			return err
 		}
 
-		setLogging()
+		setLogging(cmd)
 
 		// enable git diff if target is set
 		if projectConfig.Lint.GitTarget != "" {
