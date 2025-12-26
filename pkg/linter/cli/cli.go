@@ -51,16 +51,16 @@ func (e *LintCli) Setup(ctx context.Context) error {
 
 	switch {
 	case e.isContainer() && exec.WillPodman(ctx) == nil:
-		e.executor = &exec.PodmanExecutor{Name: e.Exec.Bin, Image: img}
+		e.executor = exec.NewPodman(img)
 	case e.isContainer() && exec.WillDocker() == nil:
-		e.executor = &exec.DockerExecutor{Name: e.Exec.Bin, Image: img}
+		e.executor = exec.NewDocker(img)
 	case exec.WillHost(e.Exec.Bin) == nil:
-		e.executor = &exec.HostExecutor{}
+		e.executor = exec.NewHost()
 	default:
 		return errors.New("could not determine execution mode [podman, docker, local]")
 	}
 
-	if err := e.executor.Setup(ctx); err != nil {
+	if err := e.executor.Setup(ctx, e.Exec); err != nil {
 		return err
 	}
 
@@ -85,7 +85,7 @@ func (e *LintCli) Run(filePath string) linter.Report {
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 
-	err := e.executor.Exec(e.Exec, filePath, &outB, &errB)
+	err := e.executor.Exec(filePath, &outB, &errB)
 
 	return linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }

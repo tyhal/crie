@@ -24,15 +24,20 @@ import (
 	"github.com/tyhal/crie/pkg/linter"
 )
 
-// DockerExecutor runs CLI tools inside a Docker container.
-type DockerExecutor struct {
-	Name       string
-	Image      string
+// dockerExecutor runs CLI tools inside a Docker container.
+type dockerExecutor struct {
+	Instance
+	image      string
 	client     *client.Client
 	execCtx    context.Context
 	execCancel context.CancelFunc
 	id         string
-	willWrite  bool
+}
+
+func NewDocker(image string) Executor {
+	return &dockerExecutor{
+		image: image,
+	}
 }
 
 var dockerInstalled = false
@@ -51,7 +56,9 @@ func WillDocker() error {
 }
 
 // Setup creates and starts a disposable Docker container for executing commands.
-func (e *DockerExecutor) Setup(ctx context.Context) error {
+func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
+	e.Instance = i
+
 	// Add our clientDocker
 	{
 		c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -61,7 +68,7 @@ func (e *DockerExecutor) Setup(ctx context.Context) error {
 		e.client = c
 	}
 
-	_, err := e.client.ImageHistory(ctx, e.Image)
+	_, err := e.client.ImageHistory(ctx, e.image)
 	if err != nil {
 		if err := e.pull(ctx); err != nil {
 			return err
@@ -88,7 +95,7 @@ func (e *DockerExecutor) Setup(ctx context.Context) error {
 		&container.Config{
 			Entrypoint:      []string{},
 			Cmd:             []string{"/bin/sh", "-c", "tail -f /dev/null"},
-			Image:           e.Image,
+			Image:           e.image,
 			WorkingDir:      wdContainer,
 			NetworkDisabled: true,
 			User:            fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()),
@@ -99,13 +106,13 @@ func (e *DockerExecutor) Setup(ctx context.Context) error {
 					Type:     mount.TypeBind,
 					Source:   wdHost,
 					Target:   wdContainer,
-					ReadOnly: !e.willWrite,
+					ReadOnly: !e.WillWrite,
 				},
 			},
 		},
 		nil,
 		&currPlatform,
-		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Name), shortid),
+		fmt.Sprintf("crie-%s-%s", filepath.Base(e.Bin), shortid),
 	)
 	if err != nil {
 		return err
@@ -116,16 +123,16 @@ func (e *DockerExecutor) Setup(ctx context.Context) error {
 	return e.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 }
 
-func (e *DockerExecutor) pull(ctx context.Context) error {
+func (e *dockerExecutor) pull(ctx context.Context) error {
 
 	// TODO lock on image pull
 
-	// Ensure we have the Image downloaded
-	pullstat, err := e.client.ImagePull(ctx, e.Image, image.PullOptions{})
+	// Ensure we have the image downloaded
+	pullstat, err := e.client.ImagePull(ctx, e.image, image.PullOptions{})
 	if err != nil {
 		log.WithFields(log.Fields{
 			"stage": "docker pull",
-			"image": e.Image,
+			"image": e.image,
 		}).Fatal(err)
 		return err
 	}
@@ -139,7 +146,7 @@ func (e *DockerExecutor) pull(ctx context.Context) error {
 }
 
 // Exec runs the configured command inside the prepared Docker container.
-func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, stderr io.Writer) error {
+func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer) error {
 
 	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
 
@@ -150,17 +157,15 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 		return err
 	}
 
-	if i.ChDir {
+	if e.ChDir {
 		wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
-	}
-	if i.ChDir {
 		targetFile = filepath.Base(targetFile)
 	}
 
-	cmd := make([]string, 0, 1+len(i.Start)+1+len(i.End))
-	cmd = append([]string{i.Bin}, i.Start...)
+	cmd := make([]string, 0, 1+len(e.Start)+1+len(e.End))
+	cmd = append([]string{e.Bin}, e.Start...)
 	cmd = append(cmd, targetFile)
-	cmd = append(cmd, i.End...)
+	cmd = append(cmd, e.End...)
 
 	log.Trace(cmd)
 	config := container.ExecOptions{
@@ -216,7 +221,7 @@ func (e *DockerExecutor) Exec(i Instance, filePath string, stdout io.Writer, std
 }
 
 // Cleanup stops and removes the temporary Docker container created during Setup.
-func (e *DockerExecutor) Cleanup(ctx context.Context) error {
+func (e *dockerExecutor) Cleanup(ctx context.Context) error {
 
 	if e.execCancel != nil {
 		defer e.execCancel()

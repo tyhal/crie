@@ -16,7 +16,7 @@ func TestWillHost(t *testing.T) {
 }
 
 func TestHostExecutor_Setup(t *testing.T) {
-	e := &HostExecutor{}
+	e := &hostExecutor{}
 	assert.NoError(t, e.Setup())
 }
 
@@ -31,7 +31,7 @@ func TestHostExecutor_Run(t *testing.T) {
 		}
 	}
 
-	e := &HostExecutor{}
+	e := &hostExecutor{}
 
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "hello.txt")
@@ -79,6 +79,6 @@ func TestHostExecutor_Run(t *testing.T) {
 }
 
 func TestHostExecutor_Cleanup(t *testing.T) {
-	e := &HostExecutor{}
+	e := &hostExecutor{}
 	assert.NoError(t, e.Cleanup())
 }
