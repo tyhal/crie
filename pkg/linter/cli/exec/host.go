@@ -17,6 +17,7 @@ type hostExecutor struct {
 	execCancel context.CancelFunc
 }
 
+// NewHost creates an executor that uses direct exec calls
 func NewHost() Executor {
 	return &hostExecutor{}
 }

@@ -70,13 +70,13 @@ var ChkCmd = &cobra.Command{
 	Long:              `Check all code standards for coding conventions`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
+	SilenceUsage:      true,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		err := crieRun.Run(cmd.Context(), runner.LintTypeChk)
 		if err != nil {
-			err = errchain.From(err).Link("crie check")
-			log.Error(err)
+			return errchain.From(err).Link("crie check")
 		}
-		return err
+		return nil
 	},
 }
 
@@ -86,14 +86,14 @@ var FmtCmd = &cobra.Command{
 	Short:             "Run formatters",
 	Long:              `Run all formatters in the list`,
 	Args:              cobra.NoArgs,
+	SilenceUsage:      true,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		err := crieRun.Run(cmd.Context(), runner.LintTypeFmt)
 		if err != nil {
-			err = errchain.From(err).Link("crie format")
-			log.Error(err)
+			return errchain.From(err).Link("crie format")
 		}
-		return err
+		return nil
 	},
 }
 
@@ -114,6 +114,7 @@ var LntCmd = &cobra.Command{
 	Long:              `Runs both format and then check`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
+	SilenceUsage:      true,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		stages := []runner.LintType{runner.LintTypeFmt, runner.LintTypeChk}
 		var failedStages []string
@@ -123,7 +124,6 @@ var LntCmd = &cobra.Command{
 				if crieRun.Options.Continue {
 					failedStages = append(failedStages, lintType.String())
 				} else {
-					log.Error(err)
 					return err
 				}
 			}

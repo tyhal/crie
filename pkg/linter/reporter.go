@@ -26,9 +26,9 @@ type StructuredReporter struct {
 func NewStructuredReporter(showPass bool) Reporter {
 	return &StructuredReporter{
 		ShowPass: showPass,
-		SrcOut:   log.WithFields(log.Fields{"src": "stdout"}),
-		SrcErr:   log.WithFields(log.Fields{"src": "stderr"}),
-		SrcInt:   log.WithFields(log.Fields{"src": "internal"}),
+		SrcOut:   log.WithField("src", "stdout"),
+		SrcErr:   log.WithField("src", "stderr"),
+		SrcInt:   log.WithField("src", "internal"),
 	}
 }
 
@@ -36,20 +36,21 @@ func NewStructuredReporter(showPass bool) Reporter {
 func (r *StructuredReporter) Log(rep *Report) error {
 	if rep.Err == nil {
 		if r.ShowPass {
-			log.Printf("pass %v", rep.File)
+			log.WithField("target", rep.Target).Printf("pass")
 			r.SrcOut.Debug(rep.StdOut)
 		}
 	} else {
-		log.Printf("fail %v", rep.File)
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
-			r.SrcErr.Error(rep.StdErr)
-			r.SrcOut.Info(rep.StdOut)
-			r.SrcInt.Debug(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
+			// TODO do this better
+			r.SrcErr.WithField("target", rep.Target).Error(rep.StdErr)
+			r.SrcOut.WithField("target", rep.Target).Info(rep.StdOut)
+			r.SrcInt.WithField("target", rep.Target).Debug(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
 		} else {
-			r.SrcInt.Error(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
+			r.SrcInt.WithField("target", rep.Target).Error(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
 		}
 	}
+
 	return rep.Err
 }
 
@@ -89,11 +90,11 @@ func NewStandardReporter(showPass bool) Reporter {
 func (r *StandardReporter) Log(rep *Report) error {
 	if rep.Err == nil {
 		if r.ShowPass {
-			fmt.Printf("\u2714 %v\n", rep.File)
+			fmt.Printf("\u2714 %v\n", rep.Target)
 			r.SrcOut.Log(log.DebugLevel, rep.StdOut)
 		}
 	} else {
-		id, _ := r.Folder.Start(rep.File, "\u2716", false)
+		id, _ := r.Folder.Start(rep.Target, "\u2716", false)
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
 			r.SrcErr.Log(log.ErrorLevel, rep.StdErr)
@@ -104,5 +105,6 @@ func (r *StandardReporter) Log(rep *Report) error {
 		}
 		_ = r.Folder.Stop(id)
 	}
+
 	return rep.Err
 }

@@ -36,5 +36,5 @@ func (l *LintDockFmt) Cleanup(_ context.Context) error {
 // Run will just return the configured error as a report
 func (l *LintDockFmt) Run(filepath string) linter.Report {
 	err := l.format(filepath)
-	return linter.Report{File: filepath, Err: err, StdOut: nil, StdErr: nil}
+	return linter.Report{Target: filepath, Err: err, StdOut: nil, StdErr: nil}
 }
