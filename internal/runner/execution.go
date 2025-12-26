@@ -39,9 +39,12 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 		r = linter.NewStandardReporter(s.Options.Passes)
 	}
 
-	orch := orchestrator.New(fileList, r)
-	cleanup := orch.Start(ctx)
-	defer cleanup()
+	// NOTE an (obvious) assumption is made that formatters need file locking while linters do not
+	locking := lintType == LintTypeFmt
+
+	orch := orchestrator.New(fileList, r, locking)
+	waitForCompletion := orch.Start(ctx)
+	defer waitForCompletion()
 
 	for _, lang := range currentLangs {
 		l := lang.GetLinter(lintType)

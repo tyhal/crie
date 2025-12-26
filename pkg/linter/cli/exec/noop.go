@@ -5,16 +5,20 @@ import (
 	"io"
 )
 
-// NoopExecutor is a test/dummy executor that writes fixed strings to stdout and stderr.
-type NoopExecutor struct{}
+// noopExecutor is a test/dummy executor that writes fixed strings to stdout and stderr.
+type noopExecutor struct{}
 
-// Setup initializes the NoopExecutor (no-op).
-func (ne *NoopExecutor) Setup(_ context.Context) error {
+func NewNoop() Executor {
+	return &noopExecutor{}
+}
+
+// Setup initializes the noopExecutor (no-op).
+func (ne *noopExecutor) Setup(_ context.Context, _ Instance) error {
 	return nil
 }
 
 // Exec writes sample output to stdout and stderr and returns nil.
-func (ne *NoopExecutor) Exec(_ Instance, _ string, stdout io.Writer, stderr io.Writer) error {
+func (ne *noopExecutor) Exec(_ string, stdout io.Writer, stderr io.Writer) error {
 	_, err := stdout.Write([]byte("stdout"))
 	if err != nil {
 		return err
@@ -26,7 +30,7 @@ func (ne *NoopExecutor) Exec(_ Instance, _ string, stdout io.Writer, stderr io.W
 	return nil
 }
 
-// Cleanup finalizes the NoopExecutor (no-op).
-func (ne *NoopExecutor) Cleanup(_ context.Context) error {
+// Cleanup finalizes the noopExecutor (no-op).
+func (ne *noopExecutor) Cleanup(_ context.Context) error {
 	return nil
 }
