@@ -3,10 +3,10 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
-
-	"sync"
+	"runtime/trace"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/linter"
@@ -43,23 +43,24 @@ func (e *LintCli) imgTagged() string {
 	return e.Img
 }
 
-// WillRun does preflight checks for the 'Run'
-func (e *LintCli) WillRun() error {
+// Setup does preflight checks for the 'Run'
+func (e *LintCli) Setup(ctx context.Context) error {
+	defer trace.StartRegion(ctx, "Setup").End()
 
 	img := e.imgTagged()
 
 	switch {
-	case e.isContainer() && exec.WillPodman() == nil:
-		e.executor = &exec.PodmanExecutor{Name: e.Exec.Bin, Image: img}
+	case e.isContainer() && exec.WillPodman(ctx) == nil:
+		e.executor = exec.NewPodman(img)
 	case e.isContainer() && exec.WillDocker() == nil:
-		e.executor = &exec.DockerExecutor{Name: e.Exec.Bin, Image: img}
+		e.executor = exec.NewDocker(img)
 	case exec.WillHost(e.Exec.Bin) == nil:
-		e.executor = &exec.HostExecutor{}
+		e.executor = exec.NewHost()
 	default:
 		return errors.New("could not determine execution mode [podman, docker, local]")
 	}
 
-	if err := e.executor.Setup(); err != nil {
+	if err := e.executor.Setup(ctx, e.Exec); err != nil {
 		return err
 	}
 
@@ -67,23 +68,24 @@ func (e *LintCli) WillRun() error {
 }
 
 // Cleanup removes any additional resources created in the process
-func (e *LintCli) Cleanup(group *sync.WaitGroup) {
-	defer group.Done()
+func (e *LintCli) Cleanup(ctx context.Context) error {
+	defer trace.StartRegion(ctx, "Cleanup").End()
+
 	if e.executor != nil {
-		err := e.executor.Cleanup()
+		err := e.executor.Cleanup(ctx)
 		if err != nil {
 			log.Error(err)
 		}
 	}
+	return nil
 }
 
 // Run does the work required to lint the given filepath
-func (e *LintCli) Run(filePath string, rep chan linter.Report) {
-
+func (e *LintCli) Run(filePath string) linter.Report {
 	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 
-	err := e.executor.Exec(e.Exec, filePath, &outB, &errB)
+	err := e.executor.Exec(filePath, &outB, &errB)
 
-	rep <- linter.Report{File: filePath, Err: err, StdOut: &outB, StdErr: &errB}
+	return linter.Report{Target: filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }
