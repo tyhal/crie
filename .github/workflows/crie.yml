@@ -8,6 +8,9 @@ on:
     tags:
       - v*
   pull_request:
+env:
+  GOFLAGS: "-tags=exclude_graphdriver_btrfs containers_image_openpgp"
+  CGO: 0
 jobs:
   crie-test:
     runs-on: ubuntu-latest
@@ -16,14 +19,6 @@ jobs:
       - name: Fetch base ref for PR
         if: github.event_name == 'pull_request'
         run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
-      - name: Read package list
-        id: packages
-        run: echo "list=$(cat script/pkgs/apt.txt | tr '\n' ' ')" >> $GITHUB_OUTPUT
-      - name: Cache apt packages
-        uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # latest
-        with:
-          packages: ${{ steps.packages.outputs.list }}
-          version: 1.0
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         with:
           go-version-file: 'go.mod'

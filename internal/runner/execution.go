@@ -63,7 +63,6 @@ func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) error {
 	if err != nil {
 		return errchain.From(err).Link("getting files")
 	}
-	fmt.Println(fileList)
 	err = s.runLinters(ctx, lintType, fileList)
 	if err != nil {
 		return err

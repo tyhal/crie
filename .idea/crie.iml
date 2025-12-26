@@ -5,6 +5,8 @@
       <option name="customFlags">
         <array>
           <option value="trace" />
+          <option value="exclude_graphdriver_btrfs" />
+          <option value="containers_image_openpgp" />
         </array>
       </option>
     </buildTags>

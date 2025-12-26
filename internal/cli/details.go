@@ -40,10 +40,12 @@ var NonCmd = &cobra.Command{
 Find the file extensions that dont have an associated regex match within crie`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		err := crieRun.NoStandards()
 		if err != nil {
-			log.Fatal(errchain.From(err).Link("finding unassociated files"))
+			err = errchain.From(err).Link("finding unassociated files")
+			log.Error(err)
 		}
+		return err
 	},
 }
