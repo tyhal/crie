@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"os"
 	"sort"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 func msgLast(fields []string) {
@@ -19,7 +19,8 @@ func msgLast(fields []string) {
 	})
 }
 
-func setLogging() {
+func setLogging(cmd *cobra.Command) {
+	log.SetOutput(cmd.OutOrStdout())
 	if projectConfig.Log.Trace {
 		log.SetLevel(log.TraceLevel)
 	}
@@ -33,7 +34,6 @@ func setLogging() {
 		log.SetFormatter(&log.JSONFormatter{})
 		projectConfig.Lint.StrictLogging = true
 	} else {
-		log.SetOutput(os.Stdout)
 		log.SetFormatter(&log.TextFormatter{
 			SortingFunc:      msgLast,
 			DisableQuote:     true,

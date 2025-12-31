@@ -102,7 +102,7 @@ its a test to see what happens when you run dockfmt on a file that isn't a docke
 
 			report := <-rep
 
-			assert.Equal(t, testFilePath, report.File)
+			assert.Equal(t, testFilePath, report.Target)
 			if tt.error {
 				assert.Error(t, report.Err)
 			} else {

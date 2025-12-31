@@ -42,7 +42,7 @@ func TestLint_imgTagged(t *testing.T) {
 
 func TestLint_Cleanup(t *testing.T) {
 	{
-		l := &LintCli{executor: &exec.NoopExecutor{}}
+		l := &LintCli{executor: &exec.noopExecutor{}}
 		var wg sync.WaitGroup
 		wg.Add(1)
 		assert.NotPanics(t, func() { l.Cleanup(&wg) })
@@ -58,13 +58,13 @@ func TestLint_Cleanup(t *testing.T) {
 }
 
 func TestLint_Run(t *testing.T) {
-	l := &LintCli{executor: &exec.NoopExecutor{}} // TODO test with no executor setup
+	l := &LintCli{executor: &exec.noopExecutor{}} // TODO test with no executor setup
 	rep := make(chan linter.Report, 1)
 
 	l.Run("test.txt", rep)
 
 	report := <-rep
-	assert.Equal(t, "test.txt", report.File)
+	assert.Equal(t, "test.txt", report.Target)
 	assert.NoError(t, report.Err)
 	assert.Equal(t, "stdout", report.StdOut.(*bytes.Buffer).String())
 	assert.Equal(t, "stderr", report.StdErr.(*bytes.Buffer).String())
