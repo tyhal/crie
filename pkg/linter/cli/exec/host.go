@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"context"
 	"io"
 	"os"
 	"os/exec"
@@ -9,8 +10,16 @@ import (
 	"github.com/tyhal/crie/pkg/linter"
 )
 
-// HostExecutor runs CLI tools directly on the host operating system.
-type HostExecutor struct {
+// hostExecutor runs CLI tools directly on the host operating system.
+type hostExecutor struct {
+	Instance
+	execCtx    context.Context
+	execCancel context.CancelFunc
+}
+
+// NewHost creates an executor that uses direct exec calls
+func NewHost() Executor {
+	return &hostExecutor{}
 }
 
 // WillHost checks whether the given binary can be found on the host PATH.
@@ -20,22 +29,25 @@ func WillHost(bin string) error {
 }
 
 // Setup performs any required initialization for host execution.
-func (e *HostExecutor) Setup() error {
+func (e *hostExecutor) Setup(ctx context.Context, i Instance) error {
+	e.Instance = i
+	e.execCtx, e.execCancel = context.WithCancel(ctx)
 	return nil
 }
 
 // Exec runs the configured CLI tool on the host against the provided file.
-func (e *HostExecutor) Exec(i Instance, filePath string, stdout io.Writer, stderr io.Writer) error {
+func (e *hostExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer) error {
 	targetFilePath := filePath
-	if i.ChDir {
+	if e.ChDir {
 		targetFilePath = filepath.Base(filePath)
 	}
 
-	params := append(i.Start, targetFilePath)
-	params = append(params, i.End...)
+	params := make([]string, 0, len(e.Start)+1+len(e.End))
+	params = append(e.Start, targetFilePath)
+	params = append(params, e.End...)
 
-	c := exec.Command(i.Bin, params...)
-	if i.ChDir {
+	c := exec.CommandContext(e.execCtx, e.Bin, params...)
+	if e.ChDir {
 		c.Dir = filepath.Dir(filePath)
 	} else {
 		cwd, err := os.Getwd()
@@ -51,6 +63,9 @@ func (e *HostExecutor) Exec(i Instance, filePath string, stdout io.Writer, stder
 }
 
 // Cleanup releases any resources allocated during host execution setup.
-func (e *HostExecutor) Cleanup() error {
+func (e *hostExecutor) Cleanup(_ context.Context) error {
+	if e.execCancel != nil {
+		defer e.execCancel()
+	}
 	return nil
 }

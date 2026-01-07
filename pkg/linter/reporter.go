@@ -3,125 +3,108 @@ package linter
 import (
 	"errors"
 	"fmt"
-	"io"
 	"strings"
-	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/folding"
 )
 
-// Runner will handle parallel runs of linters
-type Runner struct {
-	ShowPass      bool
-	StrictLogging bool
-	folder        folding.Folder
+// Reporter is used to report results to the user
+type Reporter interface {
+	Log(rep *Report) error
 }
 
-func (r *Runner) logConditional(reader io.Reader, typeField string, level log.Level) {
-	field := log.WithFields(log.Fields{"type": typeField})
-	if r.StrictLogging || level == log.DebugLevel {
-		field.Log(level, reader)
-	} else {
-		field.Log(level)
-		fmt.Println(reader)
+// StructuredReporter is a Reporter that uses structured logging
+type StructuredReporter struct {
+	ShowPass bool
+	SrcOut   *log.Entry
+	SrcErr   *log.Entry
+	SrcInt   *log.Entry
+}
+
+// NewStructuredReporter creates a new StructuredReporter
+func NewStructuredReporter(showPass bool) Reporter {
+	return &StructuredReporter{
+		ShowPass: showPass,
+		SrcOut:   log.WithField("src", "stdout"),
+		SrcErr:   log.WithField("src", "stderr"),
+		SrcInt:   log.WithField("src", "internal"),
 	}
 }
 
-// Log simple takes all fields and pushes them to our using the default logger
-func (r *Runner) Log(rep *Report) error {
+// Log simple takes all fields and pushes them to our using the default logFormat
+func (r *StructuredReporter) Log(rep *Report) error {
 	if rep.Err == nil {
 		if r.ShowPass {
-			if r.StrictLogging {
-				log.Printf("pass %v", rep.File)
-			} else {
-				fmt.Printf("\u2714 %v\n", rep.File)
-			}
-			r.logConditional(rep.StdOut, "stdout", log.DebugLevel)
+			log.WithField("target", rep.Target).Printf("pass")
+			r.SrcOut.Debug(rep.StdOut)
 		}
 	} else {
-		var id string
-		if r.StrictLogging {
-			log.Printf("fail %v", rep.File)
-		} else {
-			id, _ = r.folder.Start(rep.File, "\u2716", false)
-		}
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
-			r.logConditional(rep.StdErr, "stderr", log.ErrorLevel)
-			r.logConditional(rep.StdOut, "stdout", log.InfoLevel)
-			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
+			// TODO do this better
+			r.SrcErr.WithField("target", rep.Target).Error(rep.StdErr)
+			r.SrcOut.WithField("target", rep.Target).Info(rep.StdOut)
+			r.SrcInt.WithField("target", rep.Target).Debug(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
 		} else {
-			r.logConditional(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
-		}
-		if !r.StrictLogging {
-			_ = r.folder.Stop(id)
+			r.SrcInt.WithField("target", rep.Target).Error(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
 		}
 	}
+
 	return rep.Err
 }
 
-func (r *Runner) listen(results chan error, linterReport chan Report) {
-	r.folder = folding.New()
-	for report := range linterReport {
-		err := r.Log(&report)
-		results <- err
-	}
-	close(results)
+type logFormat struct {
+	Entry *log.Entry
 }
 
-// LintFileList simply takes a single Linter and runs it for each file
-func (r *Runner) LintFileList(l Linter, fileList []string) error {
-	maxCon := min(l.MaxConcurrency(), len(fileList))
-	if maxCon <= 0 {
-		maxCon = 1
+// Log prints the log message to stdout
+func (l *logFormat) Log(level log.Level, args ...any) {
+	if log.IsLevelEnabled(level) {
+		l.Entry.Log(level)
+		fmt.Println(args...)
 	}
+}
 
-	// job queue and response
-	jobs := make(chan string, len(fileList))
+// StandardReporter is a Reporter that uses simple logging
+type StandardReporter struct {
+	ShowPass bool
+	SrcOut   logFormat
+	SrcErr   logFormat
+	SrcInt   logFormat
+	Folder   folding.Folder
+}
 
-	// reporting routine
-	linterReport := make(chan Report, maxCon)
-	results := make(chan error, len(fileList))
-	go r.listen(results, linterReport)
-
-	// create workers
-	var wg sync.WaitGroup
-	for i := 0; i < maxCon; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for {
-				path, ok := <-jobs
-				if !ok {
-					return // Channel closed, exit worker
-				}
-				l.Run(path, linterReport)
-			}
-		}()
+// NewStandardReporter creates a new StandardReporter
+func NewStandardReporter(showPass bool) Reporter {
+	return &StandardReporter{
+		ShowPass: showPass,
+		SrcOut:   logFormat{log.WithFields(log.Fields{"src": "stdout"})},
+		SrcErr:   logFormat{log.WithFields(log.Fields{"src": "stderr"})},
+		SrcInt:   logFormat{log.WithFields(log.Fields{"src": "internal"})},
+		Folder:   folding.New(),
 	}
+}
 
-	// submit jobs
-	for _, codePath := range fileList {
-		jobs <- codePath
-	}
-	close(jobs)
-	// wait for workers to exit
-	go func() {
-		wg.Wait()
-		close(linterReport)
-	}()
-
-	// read results
-	hasErrors := false
-	for i := 0; i < len(fileList); i++ {
-		if err := <-results; err != nil {
-			hasErrors = true
+// Log simple takes all fields and pushes them to our using the default logFormat
+func (r *StandardReporter) Log(rep *Report) error {
+	if rep.Err == nil {
+		if r.ShowPass {
+			fmt.Printf("\u2714 %v\n", rep.Target)
+			r.SrcOut.Log(log.DebugLevel, rep.StdOut)
 		}
+	} else {
+		id, _ := r.Folder.Start(rep.Target, "\u2716", false)
+		var failedResultErr *FailedResultError
+		if errors.As(rep.Err, &failedResultErr) {
+			r.SrcErr.Log(log.ErrorLevel, rep.StdErr)
+			r.SrcOut.Log(log.InfoLevel, rep.StdOut)
+			r.SrcInt.Log(log.DebugLevel, rep.Err)
+		} else {
+			r.SrcInt.Log(log.ErrorLevel, rep.Err)
+		}
+		_ = r.Folder.Stop(id)
 	}
 
-	if hasErrors {
-		return errors.New("some files failed to pass (" + l.Name() + ")")
-	}
-	return nil
+	return rep.Err
 }

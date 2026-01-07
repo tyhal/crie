@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="benchmark" type="GoTestRunConfiguration" factoryName="Go Test">
+    <module name="crie" />
+    <working_directory value="$PROJECT_DIR$/internal/runner" />
+    <root_directory value="$PROJECT_DIR$" />
+    <kind value="PACKAGE" />
+    <package value="github.com/tyhal/crie/internal/runner" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <framework value="gobench" />
+    <pattern value="^\QBenchmarkRunConfiguration_runLinters\E$" />
+    <method v="2" />
+  </configuration>
+</component>

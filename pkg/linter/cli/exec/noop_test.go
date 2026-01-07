@@ -8,12 +8,12 @@ import (
 )
 
 func TestNoopExecutor_Setup(t *testing.T) {
-	executor := NoopExecutor{}
+	executor := noopExecutor{}
 	assert.NoError(t, executor.Setup())
 }
 
 func TestNoopExecutor_Exec(t *testing.T) {
-	executor := NoopExecutor{}
+	executor := noopExecutor{}
 
 	var outB, errB bytes.Buffer
 
@@ -25,6 +25,6 @@ func TestNoopExecutor_Exec(t *testing.T) {
 }
 
 func TestNoopExecutor_Cleanup(t *testing.T) {
-	executor := NoopExecutor{}
+	executor := noopExecutor{}
 	assert.NoError(t, executor.Cleanup())
 }
