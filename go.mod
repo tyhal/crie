@@ -14,7 +14,7 @@ require (
 	github.com/olekukonko/tablewriter v1.1.2
 	github.com/opencontainers/runtime-spec v1.2.1
 	github.com/reteps/dockerfmt v0.3.9
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
