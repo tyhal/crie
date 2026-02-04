@@ -254,57 +254,40 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	if err != nil {
 		return errchain.From(err).Link("creating exec")
 	}
-
-	logs, err := attachedExecStart(e.client, execID, &containers.ExecStartOptions{})
-	if err != nil {
-		return errchain.From(err).Link("attaching to created exec")
-	}
-
-	// TODO log processing and cleanup and no proper error reporting
 	defer func() {
-		_, err := stdcopy.StdCopy(stdout, stderr, logs)
-		if err != nil {
-			log.Errorf("Error demultiplexing logs: %v", err)
-		}
-
-		err = logs.Close()
-		if err != nil {
-			log.Error(errchain.From(err).Link("closing logs"))
-		}
-
 		err = containers.ExecRemove(e.client, execID, &containers.ExecRemoveOptions{})
 		if err != nil {
 			log.Error(errchain.From(err).Link("closing exec"))
 		}
 	}()
 
-	timeout := time.After(5 * time.Second)
-
-	// TODO this is bad
-	check := time.Tick(3 * time.Second)
-
-	// TODO wtf is this, polling an exec with magic values
-	// it was literally blasting the podman API... stop doing that
-
-	// TODO redesign, or detect podman machine running and serialize calls to API to avoid rejection
-
-	for {
-		select {
-		case <-timeout:
-			return errors.New("exec timed out")
-		case <-check:
-			inspect, err := containers.ExecInspect(e.client, execID, &containers.ExecInspectOptions{})
-			if err != nil {
-				return errchain.From(err).Link("polling exec")
-			}
-			if inspect.Running == false {
-				if inspect.ExitCode != 0 {
-					return linter.Result(errors.New("exit code " + strconv.Itoa(inspect.ExitCode)))
-				}
-				return nil
-			}
-		}
+	logs, err := attachedExecStart(e.client, execID, &containers.ExecStartOptions{})
+	if err != nil {
+		return errchain.From(err).Link("attaching to created exec")
 	}
+	defer func() {
+		err := logs.Close()
+		if err != nil {
+			log.Error(errchain.From(err).Link("closing logs"))
+		}
+	}()
+
+	_, err = stdcopy.StdCopy(stdout, stderr, logs)
+	if err != nil {
+		log.Errorf("Error demultiplexing logs: %v", err)
+	}
+
+	inspect, err := containers.ExecInspect(e.client, execID, &containers.ExecInspectOptions{})
+	if err != nil {
+		return errchain.From(err).Link("inspecting exec")
+	}
+	if inspect.Running {
+		return errors.New("container still running after end of attach output stream")
+	}
+	if inspect.ExitCode != 0 {
+		return linter.Result(errors.New("exit code " + strconv.Itoa(inspect.ExitCode)))
+	}
+	return nil
 }
 
 // Cleanup stops and removes the temporary Podman container created during Setup.

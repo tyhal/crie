@@ -7,12 +7,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
-	"time"
 
 	"github.com/containerd/platforms"
 	"github.com/docker/docker/api/types/container"
@@ -191,34 +188,23 @@ func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 		return err
 	}
 	defer attach.Close()
-	go func() {
-		_, err := stdcopy.StdCopy(stdout, stderr, attach.Reader)
-		if err != nil {
-			log.Errorf("Link demultiplexing logs: %v", err)
-			return
-		}
-	}()
 
-	timeout := time.After(5 * time.Second)
-	check := time.Tick(100 * time.Millisecond)
-
-	for {
-		select {
-		case <-timeout:
-			return errors.New("exec timed out")
-		case <-check:
-			inspect, err := e.client.ContainerExecInspect(e.execCtx, execResp.ID)
-			if err != nil {
-				return err
-			}
-			if inspect.Running == false {
-				if inspect.ExitCode != 0 {
-					return linter.Result(errors.New("exit code " + strconv.Itoa(inspect.ExitCode)))
-				}
-				return nil
-			}
-		}
+	_, err = stdcopy.StdCopy(stdout, stderr, attach.Reader)
+	if err != nil {
+		log.Errorf("Error demultiplexing logs: %v", err)
 	}
+
+	inspect, err := e.client.ContainerExecInspect(e.execCtx, execResp.ID)
+	if err != nil {
+		return err
+	}
+	if inspect.Running {
+		return errors.New("container still running after end of attach output stream")
+	}
+	if inspect.ExitCode != 0 {
+		return linter.Result(fmt.Errorf("exit code %d", inspect.ExitCode))
+	}
+	return nil
 }
 
 // Cleanup stops and removes the temporary Docker container created during Setup.

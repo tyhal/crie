@@ -141,11 +141,8 @@ func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *
 	}
 }
 
-func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) (err error) {
+func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) error {
 	defer trace.StartRegion(ctx, "A Dispatcher "+reg.String()).End()
-
-	// startup signals when the linter is ready to accept jobs
-	var startup errgroup.Group
 
 	var active bool
 	var matched []string
@@ -153,34 +150,16 @@ func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *
 		if reg.MatchString(file) {
 			if !active {
 				active = true
-				startup.Go(func() error {
-					return l.Setup(ctx)
-				})
+				err := l.Setup(ctx)
+				if err != nil {
+					return errchain.From(err).Link("failed to setup linter")
+				}
 			}
 			matched = append(matched, file)
 		}
 	}
 	if !active {
 		return nil
-	}
-
-	defer func() {
-		cleanupErr := l.Cleanup(ctx)
-		if cleanupErr != nil {
-			if err == nil {
-				err = cleanupErr
-			} else {
-				// TODO errchain package isn't multiple errors it just adds call stack information
-				// should be able to have parallel errors with depth
-				err = errchain.From(err).Link(cleanupErr.Error())
-			}
-		}
-	}()
-
-	err = startup.Wait()
-	if err != nil {
-		err = errchain.From(err).Link("failed to setup linter")
-		return
 	}
 
 	var lintJobs sync.WaitGroup
@@ -191,13 +170,13 @@ func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *
 	}
 
 	lintJobs.Wait()
-	err = l.Cleanup(ctx)
+
+	err := l.Cleanup(ctx)
 	if err != nil {
-		err = errchain.From(err).Link("failed to cleanup linter")
-		return
+		return errchain.From(err).Link("failed to cleanup linter")
 	}
 
-	return
+	return nil
 }
 
 func (d *JobOrchestrator) wait() error {
