@@ -2,11 +2,11 @@ package dockfmt
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/reteps/dockerfmt/lib"
-	"github.com/tyhal/crie/pkg/errchain"
 )
 
 func (l *LintDockFmt) format(filepath string) error {
@@ -21,7 +21,7 @@ func (l *LintDockFmt) format(filepath string) error {
 
 	src, err := os.ReadFile(filepath)
 	if err != nil {
-		return errchain.From(err).LinkF("failed to read from file %s", filepath)
+		return fmt.Errorf("failed to read from file %s: %w", filepath, err)
 	}
 
 	lines := strings.SplitAfter(strings.TrimSuffix(string(src), "\n"), "\n")
@@ -33,7 +33,7 @@ func (l *LintDockFmt) format(filepath string) error {
 
 	err = os.WriteFile(filepath, []byte(dst), 0644)
 	if err != nil {
-		return errchain.From(err).LinkF("failed to write to file %s", filepath)
+		return fmt.Errorf("failed to write to file %s: %w", filepath, err)
 	}
 
 	return nil

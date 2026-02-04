@@ -10,7 +10,6 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/tyhal/crie/pkg/errchain"
 )
 
 // GetGitRepo opens a git repository rooted at dir (or its parents when .git is detected)
@@ -20,7 +19,7 @@ func GetGitRepo(dir string) (*git.Repository, error) {
 		DetectDotGit: true,
 	})
 	if err != nil {
-		return nil, errchain.From(err).Link("opening git repo")
+		return nil, fmt.Errorf("opening git repo: %w", err)
 	}
 	return repo, nil
 }
@@ -53,7 +52,7 @@ func FromGitRepo(dir string, repo *git.Repository, diff bool, target string) ([]
 		files, err = all(repo)
 	}
 	if err != nil {
-		return nil, errchain.From(err).Link(action)
+		return nil, fmt.Errorf("%s: %w", action, err)
 	}
 
 	prefix, err := getPrefixInRepo(dir, repo)

@@ -61,7 +61,7 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 	{
 		c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create docker client: %w", err)
 		}
 		e.client = c
 	}
@@ -168,7 +168,7 @@ func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	log.Trace(cmd)
 	config := container.ExecOptions{
 		Cmd:          cmd,
-		User:         fmt.Sprintf("%d:%d", os.Getuid(), os.Getgid()),
+		User:         fmt.Sprintf("%d", os.Getuid()),
 		WorkingDir:   wdContainer,
 		AttachStderr: true,
 		AttachStdout: true,

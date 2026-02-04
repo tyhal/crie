@@ -9,7 +9,6 @@ import (
 	"runtime/trace"
 	"sync"
 
-	"github.com/tyhal/crie/pkg/errchain"
 	"github.com/tyhal/crie/pkg/linter"
 	"golang.org/x/sync/errgroup"
 )
@@ -152,7 +151,7 @@ func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *
 				active = true
 				err := l.Setup(ctx)
 				if err != nil {
-					return errchain.From(err).Link("failed to setup linter")
+					return fmt.Errorf("failed to setup linter: %w", err)
 				}
 			}
 			matched = append(matched, file)
@@ -173,7 +172,7 @@ func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *
 
 	err := l.Cleanup(ctx)
 	if err != nil {
-		return errchain.From(err).Link("failed to cleanup linter")
+		return fmt.Errorf("failed to cleanup linter: %w", err)
 	}
 
 	return nil

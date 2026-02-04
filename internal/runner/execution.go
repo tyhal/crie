@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/internal/runner/orchestrator"
-	"github.com/tyhal/crie/pkg/errchain"
+
 	"github.com/tyhal/crie/pkg/linter"
 )
 
@@ -64,7 +64,7 @@ func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) error {
 	defer trace.StartRegion(ctx, "Crie Run").End()
 	fileList, err := s.getFileList()
 	if err != nil {
-		return errchain.From(err).Link("getting files")
+		return fmt.Errorf("getting files: %w", err)
 	}
 	err = s.runLinters(ctx, lintType, fileList)
 	if err != nil {
