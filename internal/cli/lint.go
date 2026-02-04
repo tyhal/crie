@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/runner"
-	"github.com/tyhal/crie/pkg/errchain"
 )
 
 var crieRun runner.RunConfiguration
@@ -74,7 +73,7 @@ var ChkCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		err := crieRun.Run(cmd.Context(), runner.LintTypeChk)
 		if err != nil {
-			return errchain.From(err).Link("crie check")
+			return fmt.Errorf("crie check: %w", err)
 		}
 		return nil
 	},
@@ -91,7 +90,7 @@ var FmtCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		err := crieRun.Run(cmd.Context(), runner.LintTypeFmt)
 		if err != nil {
-			return errchain.From(err).Link("crie format")
+			return fmt.Errorf("crie format: %w", err)
 		}
 		return nil
 	},
@@ -101,7 +100,7 @@ func stage(ctx context.Context, lintType runner.LintType) error {
 	log.Infof("❨ %s ❩", lintType.String())
 	err := crieRun.Run(ctx, lintType)
 	if err != nil {
-		return errchain.From(err).LinkF("crie %s", lintType)
+		return fmt.Errorf("crie %s: %w", lintType.String(), err)
 	}
 	return nil
 }

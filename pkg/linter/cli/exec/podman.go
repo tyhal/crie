@@ -32,7 +32,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/pkg/errchain"
+
 	"github.com/tyhal/crie/pkg/linter"
 )
 
@@ -123,12 +123,12 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	{
 		uri, err := getPodmanMachineSocket()
 		if err != nil {
-			return err
+			return fmt.Errorf("getting podman machine socket: %w", err)
 		}
 
 		c, err := bindings.NewConnection(ctx, uri)
 		if err != nil {
-			return err
+			return fmt.Errorf("creating podman client: %w", err)
 		}
 		e.client = c
 	}
@@ -139,7 +139,7 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	}
 	if !exists {
 		if err := e.pull(); err != nil {
-			return err
+			return fmt.Errorf("failed to pull image: %w", err)
 		}
 	}
 
@@ -149,11 +149,11 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 
 	wdHost, err := os.Getwd()
 	if err != nil {
-		return err
+		return fmt.Errorf("getting working directory: %w", err)
 	}
 	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
-		return err
+		return fmt.Errorf("getting workdir as a linux path: %w", err)
 	}
 
 	currPlatform := platforms.DefaultSpec()
@@ -166,9 +166,10 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	s.Entrypoint = []string{"/bin/sh", "-c"}
 	s.Command = []string{"tail -f /dev/null"}
 	s.WorkDir = wdContainer
-	s.UserNS = specgen.Namespace{
-		NSMode: "keep-id",
-	}
+	//s.UserNS = specgen.Namespace{
+	//	NSMode: "keep-id",
+	//}
+	s.User = fmt.Sprintf("%d", os.Getuid())
 	s.NetNS = specgen.Namespace{
 		NSMode: specgen.NoNetwork,
 	}
@@ -184,19 +185,19 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 			Source:      wdHost,
 			Destination: wdContainer,
 			// we are using "z" instead of "Z" because we run multiple containers in parallel
-			Options: []string{"rbind", mountPerms, "z"},
+			Options: []string{"rbind", mountPerms, "z", "U"},
 		},
 	}
 
 	createResponse, err := containers.CreateWithSpec(e.client, s, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("creating container: %w", err)
 	}
 	e.id = createResponse.ID
 
 	startOptions := containers.StartOptions{}
 	if err := containers.Start(e.client, e.id, &startOptions); err != nil {
-		return err
+		return fmt.Errorf("starting container: %w", err)
 	}
 
 	return nil
@@ -218,7 +219,7 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	targetFile := ToLinuxPath(filePath)
 	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
-		return errchain.From(err).Link("getting workdir")
+		return fmt.Errorf("getting workdir: %w", err)
 	}
 
 	if e.ChDir {
@@ -234,7 +235,7 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	log.Debug(cmd)
 	currentUser, err := user.Current()
 	if err != nil {
-		return errchain.From(err).Link("getting current user")
+		return fmt.Errorf("getting current user: %w", err)
 	}
 
 	execCreateConfig := handlers.ExecCreateConfig{
@@ -252,23 +253,23 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 
 	execID, err := containers.ExecCreate(e.client, e.id, &execCreateConfig)
 	if err != nil {
-		return errchain.From(err).Link("creating exec")
+		return fmt.Errorf("creating exec: %w", err)
 	}
 	defer func() {
 		err = containers.ExecRemove(e.client, execID, &containers.ExecRemoveOptions{})
 		if err != nil {
-			log.Error(errchain.From(err).Link("closing exec"))
+			log.Error(fmt.Errorf("closing exec: %w", err))
 		}
 	}()
 
 	logs, err := attachedExecStart(e.client, execID, &containers.ExecStartOptions{})
 	if err != nil {
-		return errchain.From(err).Link("attaching to created exec")
+		return fmt.Errorf("attaching to created exec: %w", err)
 	}
 	defer func() {
 		err := logs.Close()
 		if err != nil {
-			log.Error(errchain.From(err).Link("closing logs"))
+			log.Error(fmt.Errorf("closing logs: %w", err))
 		}
 	}()
 
@@ -279,7 +280,7 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 
 	inspect, err := containers.ExecInspect(e.client, execID, &containers.ExecInspectOptions{})
 	if err != nil {
-		return errchain.From(err).Link("inspecting exec")
+		return fmt.Errorf("inspecting exec: %w", err)
 	}
 	if inspect.Running {
 		return errors.New("container still running after end of attach output stream")

@@ -3,10 +3,11 @@ package language
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 
 	"github.com/tyhal/crie/internal/runner"
-	"github.com/tyhal/crie/pkg/errchain"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,7 +22,7 @@ func (l Languages) ToRunFormat() (runner.Languages, error) {
 	for langName, lang := range l.Languages {
 		crieLang, err := lang.ToRunFormat()
 		if err != nil {
-			return nil, errchain.From(err).LinkF("parsing language %s", langName)
+			return nil, fmt.Errorf("parsing language %s: %w", langName, err)
 		}
 		crieLanguages[langName] = crieLang
 	}
@@ -67,12 +68,12 @@ func LoadFile(path string) (*Languages, error) {
 
 	configData, err := os.ReadFile(path)
 	if err != nil {
-		return nil, errchain.From(err).LinkF("readding config file %s", path)
+		return nil, fmt.Errorf("reading config file %s: %w", path, err)
 	}
 
 	var c Languages
 	if err = yaml.Unmarshal(configData, &c); err != nil {
-		return nil, errchain.From(err).LinkF("parsing config file %s", path)
+		return nil, fmt.Errorf("parsing config file %s: %w", path, err)
 	}
 
 	merge(&defaultLanguageConfig, &c)

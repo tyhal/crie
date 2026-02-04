@@ -1,13 +1,13 @@
 package cli
 
 import (
+	"fmt"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/project"
-	"github.com/tyhal/crie/pkg/errchain"
 )
 
 //`
@@ -72,7 +72,7 @@ var projectConfig project.Config
 
 func errFatal(err error) {
 	if err != nil {
-		log.Fatal(errchain.From(err).Link("incorrect viper configuration"))
+		log.Fatal(fmt.Errorf("incorrect viper configuration: %w", err))
 	}
 }
 

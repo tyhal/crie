@@ -61,7 +61,7 @@ func (e *LintCli) Setup(ctx context.Context) error {
 	}
 
 	if err := e.executor.Setup(ctx, e.Exec); err != nil {
-		return err
+		return fmt.Errorf("setting up executor %T: %w", e.executor, err)
 	}
 
 	return nil
