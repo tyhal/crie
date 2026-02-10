@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine3.22 AS go_layer
+FROM golang:1.26-alpine3.22 AS go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
