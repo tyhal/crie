@@ -2,7 +2,7 @@ module github.com/tyhal/crie
 
 go 1.25.0
 
-toolchain go1.25.7
+toolchain go1.26.0
 
 require (
 	github.com/containerd/platforms v1.0.0-rc.2
