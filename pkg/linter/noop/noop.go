@@ -9,6 +9,9 @@ import (
 	"github.com/tyhal/crie/pkg/linter"
 )
 
+// ErrMissedSetup is returned when a linter wasn't setup before running or cleaning up
+var ErrMissedSetup = errors.New("setup was not called first")
+
 // LintNoop performs no operations, as a template implementation of cries' linter.Linter
 type LintNoop struct {
 	Type          string `json:"type" yaml:"type" jsonschema:"enum=noop" jsonschema_description:"a linter type to do nothing"`
@@ -58,7 +61,7 @@ func (l *LintNoop) Setup(ctx context.Context) error {
 // Cleanup removes any additional resources created in the process
 func (l *LintNoop) Cleanup(ctx context.Context) error {
 	if l.execCancel == nil {
-		return errors.New("cleanup called before setup")
+		return ErrMissedSetup
 	}
 	defer l.execCancel()
 	if l.setupDuration > 0 {
@@ -71,7 +74,7 @@ func (l *LintNoop) Cleanup(ctx context.Context) error {
 // Run will just return the configured error as a report
 func (l *LintNoop) Run(filepath string) linter.Report {
 	if l.execCancel == nil {
-		return linter.Report{Target: filepath, Err: errors.New("run called before setup"), StdOut: nil, StdErr: nil}
+		return linter.Report{Target: filepath, Err: ErrMissedSetup, StdOut: nil, StdErr: nil}
 	}
 	if l.lintDuration > 0 {
 		defer trace.StartRegion(l.execCtx, "Run "+filepath).End()

@@ -13,6 +13,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// ErrBadDispatch is returned when a dispatcher is created with bad parameters
 var ErrBadDispatch = errors.New("ctx, linter and regexp must be provided")
 
 // Job is a single job to be run by the orchestrator
