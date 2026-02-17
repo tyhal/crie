@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestRunConfiguration_trace_runLinters(_ *testing.T) {
+func TestRunConfiguration_trace_runLinters(t *testing.T) {
 	defer disableLogging()()
 
 	f, err := os.Create("artificial_trace.out")
@@ -36,7 +36,7 @@ func TestRunConfiguration_trace_runLinters(_ *testing.T) {
 		files: genFilenames(100),
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	err = trace.Start(f)
 	if err != nil {
 		panic(err)

@@ -17,7 +17,7 @@ func TestWillHost(t *testing.T) {
 
 func TestHostExecutor_Setup(t *testing.T) {
 	e := &hostExecutor{}
-	assert.NoError(t, e.Setup())
+	assert.NoError(t, e.Setup(t.Context(), Instance{}))
 }
 
 func TestHostExecutor_Run(t *testing.T) {
@@ -31,8 +31,6 @@ func TestHostExecutor_Run(t *testing.T) {
 		}
 	}
 
-	e := &hostExecutor{}
-
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "hello.txt")
 	assert.NoError(t, os.WriteFile(filePath, []byte("hello"), 0o644))
@@ -43,11 +41,13 @@ func TestHostExecutor_Run(t *testing.T) {
 	front := []string{"-c", script, "_"}
 	var out bytes.Buffer
 
-	ei := Instance{
+	e := &hostExecutor{}
+	err := e.Setup(t.Context(), Instance{
 		Bin:   bin,
 		Start: front,
 		End:   nil,
-	}
+	})
+	assert.NoError(t, err)
 
 	cwd, err := os.Getwd()
 	assert.NoError(t, err)
@@ -65,8 +65,8 @@ func TestHostExecutor_Run(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			out.Reset()
-			ei.ChDir = tc.chdir
-			err = e.Exec(ei, filePath, &out, &out)
+			e.Instance.ChDir = tc.chdir
+			err = e.Exec(filePath, &out, &out)
 			assert.NoError(t, err, "exec with %s should succeed", tc.name)
 			stdout := out.String()
 			assert.Contains(t, stdout, "PWD="+tc.expPWD)
@@ -80,5 +80,5 @@ func TestHostExecutor_Run(t *testing.T) {
 
 func TestHostExecutor_Cleanup(t *testing.T) {
 	e := &hostExecutor{}
-	assert.NoError(t, e.Cleanup())
+	assert.NoError(t, e.Cleanup(t.Context()))
 }

@@ -9,7 +9,7 @@ on:
       - v*
   pull_request:
 env:
-  GOFLAGS: '-tags="exclude_graphdriver_btrfs containers_image_openpgp"'
+  GOFLAGS: -tags=exclude_graphdriver_btrfs,containers_image_openpgp
   CGO: 0
 jobs:
   crie-test:

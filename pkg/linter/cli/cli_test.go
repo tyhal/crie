@@ -5,11 +5,9 @@ package cli
 import (
 	"bytes"
 
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tyhal/crie/pkg/linter"
 	"github.com/tyhal/crie/pkg/linter/cli/exec"
 )
 
@@ -42,28 +40,25 @@ func TestLint_imgTagged(t *testing.T) {
 
 func TestLint_Cleanup(t *testing.T) {
 	{
-		l := &LintCli{executor: &exec.noopExecutor{}}
-		var wg sync.WaitGroup
-		wg.Add(1)
-		assert.NotPanics(t, func() { l.Cleanup(&wg) })
-		wg.Wait()
+		l := &LintCli{executor: exec.NewNoop()}
+		assert.NotPanics(t, func() {
+			err := l.Cleanup(t.Context())
+			assert.NoError(t, err)
+		})
 	}
 	{
 		l := &LintCli{executor: nil}
-		var wg sync.WaitGroup
-		wg.Add(1)
-		assert.NotPanics(t, func() { l.Cleanup(&wg) })
-		wg.Wait()
+		assert.NotPanics(t, func() {
+			err := l.Cleanup(t.Context())
+			assert.NoError(t, err)
+		})
 	}
 }
 
 func TestLint_Run(t *testing.T) {
-	l := &LintCli{executor: &exec.noopExecutor{}} // TODO test with no executor setup
-	rep := make(chan linter.Report, 1)
+	l := &LintCli{executor: exec.NewNoop()} // TODO test with no executor setup
 
-	l.Run("test.txt", rep)
-
-	report := <-rep
+	report := l.Run("test.txt")
 	assert.Equal(t, "test.txt", report.Target)
 	assert.NoError(t, report.Err)
 	assert.Equal(t, "stdout", report.StdOut.(*bytes.Buffer).String())

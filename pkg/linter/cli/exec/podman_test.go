@@ -8,12 +8,12 @@ import (
 
 func TestWillPodman(t *testing.T) {
 	assert.NotPanics(t, func() {
-		_ = WillPodman()
+		_ = WillPodman(t.Context())
 	}, "WillPodman should not panic")
 }
 
 func TestPodman_SocketGet(t *testing.T) {
-	if WillPodman() != nil {
+	if WillPodman(t.Context()) != nil {
 		t.Skip()
 	}
 

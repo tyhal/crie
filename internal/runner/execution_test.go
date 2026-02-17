@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -88,7 +87,7 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.config.runLinters(nil, LintTypeChk, tt.files)
+			err := tt.config.runLinters(t.Context(), LintTypeChk, tt.files)
 
 			if tt.expectErr {
 				if assert.Error(t, err) && tt.errMessage != "" {
@@ -191,7 +190,7 @@ func BenchmarkRunConfiguration_runLinters(b *testing.B) {
 	}
 
 	b.ResetTimer()
-	ctx := context.Background()
+	ctx := b.Context()
 	for _, tt := range benchs {
 		b.Run(tt.name, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
@@ -234,7 +233,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 				},
 			},
 			expectErr:  true,
-			errMessage: "1 language(s) failed while chk'ing",
+			errMessage: "startup err",
 		},
 		{
 			name: "linter run error",
@@ -247,7 +246,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 				},
 			},
 			expectErr:  true,
-			errMessage: "1 language(s) failed while chk'ing",
+			errMessage: "run err",
 		},
 	}
 
@@ -262,7 +261,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 				_ = file.Close()
 			}()
 
-			err = tt.config.Run(context.Background(), LintTypeChk)
+			err = tt.config.Run(t.Context(), LintTypeChk)
 
 			if tt.expectErr {
 				if assert.Error(t, err) && tt.errMessage != "" {

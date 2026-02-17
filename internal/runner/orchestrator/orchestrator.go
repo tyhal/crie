@@ -103,19 +103,18 @@ func (d *JobOrchestrator) lockExecutor() {
 func (d *JobOrchestrator) Start(ctx context.Context) func() error {
 	d.report.Go(func() error {
 		defer trace.StartRegion(ctx, "The Reporter").End()
-		var anyErr error
+		var allErrs []error
 		for report := range d.repQ {
 			err := d.reporter.Log(&report)
 			if err != nil {
+				err = fmt.Errorf("failed on %s: %w", report.Target, err)
 				if d.failFast {
-					return anyErr
+					return err
 				}
-				if anyErr == nil {
-					anyErr = errors.New("failures occurred")
-				}
+				allErrs = append(allErrs, err)
 			}
 		}
-		return anyErr
+		return errors.Join(allErrs...)
 	})
 
 	for i := range d.maxExecutors {
@@ -151,7 +150,7 @@ func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *
 				active = true
 				err := l.Setup(ctx)
 				if err != nil {
-					return fmt.Errorf("failed to setup linter: %w", err)
+					return fmt.Errorf("failed to setup %s linter: %w", l.Name(), err)
 				}
 			}
 			matched = append(matched, file)

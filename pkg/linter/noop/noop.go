@@ -2,6 +2,7 @@ package noop
 
 import (
 	"context"
+	"errors"
 	"runtime/trace"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 // LintNoop performs no operations, as a template implementation of cries' linter.Linter
 type LintNoop struct {
 	Type          string `json:"type" yaml:"type" jsonschema:"enum=noop" jsonschema_description:"a linter type to do nothing"`
-	willRunErr    error
+	setupErr      error
 	runErr        error
 	lintDuration  time.Duration
 	setupDuration time.Duration
@@ -20,11 +21,11 @@ type LintNoop struct {
 }
 
 // WithErr creates a new LintNoop with the given errors
-func WithErr(willRunErr error, runErr error) *LintNoop {
+func WithErr(setupErr error, runErr error) *LintNoop {
 	return &LintNoop{
-		Type:       "noop",
-		runErr:     runErr,
-		willRunErr: willRunErr,
+		Type:     "noop",
+		runErr:   runErr,
+		setupErr: setupErr,
 	}
 }
 
@@ -45,17 +46,21 @@ func (l *LintNoop) Name() string {
 }
 
 // Setup just returns the configured error
-func (l *LintNoop) Setup(ctx context.Context) (err error) {
+func (l *LintNoop) Setup(ctx context.Context) error {
 	if l.setupDuration > 0 {
 		defer trace.StartRegion(ctx, "Setup").End()
 		time.Sleep(l.setupDuration)
 	}
 	l.execCtx, l.execCancel = context.WithCancel(ctx)
-	return l.willRunErr
+	return l.setupErr
 }
 
 // Cleanup removes any additional resources created in the process
 func (l *LintNoop) Cleanup(ctx context.Context) error {
+	if l.execCancel == nil {
+		return errors.New("cleanup called before setup")
+	}
+	defer l.execCancel()
 	if l.setupDuration > 0 {
 		defer trace.StartRegion(ctx, "Cleanup").End()
 		time.Sleep(l.setupDuration)
@@ -65,6 +70,9 @@ func (l *LintNoop) Cleanup(ctx context.Context) error {
 
 // Run will just return the configured error as a report
 func (l *LintNoop) Run(filepath string) linter.Report {
+	if l.execCancel == nil {
+		return linter.Report{Target: filepath, Err: errors.New("run called before setup"), StdOut: nil, StdErr: nil}
+	}
 	if l.lintDuration > 0 {
 		defer trace.StartRegion(l.execCtx, "Run "+filepath).End()
 		time.Sleep(l.lintDuration)

@@ -9,7 +9,7 @@ import (
 
 func TestNoopExecutor_Setup(t *testing.T) {
 	executor := noopExecutor{}
-	assert.NoError(t, executor.Setup())
+	assert.NoError(t, executor.Setup(t.Context(), Instance{}))
 }
 
 func TestNoopExecutor_Exec(t *testing.T) {
@@ -17,7 +17,7 @@ func TestNoopExecutor_Exec(t *testing.T) {
 
 	var outB, errB bytes.Buffer
 
-	err := executor.Exec(Instance{}, "test.txt", &outB, &errB)
+	err := executor.Exec("test.txt", &outB, &errB)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "stdout", outB.String())
@@ -26,5 +26,5 @@ func TestNoopExecutor_Exec(t *testing.T) {
 
 func TestNoopExecutor_Cleanup(t *testing.T) {
 	executor := noopExecutor{}
-	assert.NoError(t, executor.Cleanup())
+	assert.NoError(t, executor.Cleanup(t.Context()))
 }

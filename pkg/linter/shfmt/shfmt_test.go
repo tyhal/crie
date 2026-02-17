@@ -3,15 +3,12 @@ package shfmt
 // NOTE This mostly exists to just to be an easy boilerplate for testing other linter implementations
 
 import (
-	"math"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tyhal/crie/pkg/linter"
 )
 
 func TestLint_Name(t *testing.T) {
@@ -19,22 +16,15 @@ func TestLint_Name(t *testing.T) {
 	assert.Equal(t, "shfmt", l.Name())
 }
 
-func TestLint_WillRun(t *testing.T) {
+func TestLint_Setup(t *testing.T) {
 	l := &LintShfmt{}
-	assert.NoError(t, l.WillRun())
+	assert.NoError(t, l.Setup(t.Context()))
 }
 
-func TestLint_Cleanup(_ *testing.T) {
+func TestLint_Cleanup(t *testing.T) {
 	l := &LintShfmt{}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	l.Cleanup(&wg)
-	wg.Wait()
-}
-
-func TestLint_MaxConcurrency(t *testing.T) {
-	l := &LintShfmt{}
-	assert.Equal(t, math.MaxInt32, l.MaxConcurrency())
+	err := l.Cleanup(t.Context())
+	assert.NoError(t, err)
 }
 
 func TestLint_Run(t *testing.T) {
@@ -88,11 +78,8 @@ echo "hello world"
 			l := &LintShfmt{
 				Language: tt.lang,
 			}
-			rep := make(chan linter.Report, 1)
-
-			l.Run(testFilePath, rep)
-
-			report := <-rep
+			
+			report := l.Run(testFilePath)
 
 			assert.Equal(t, testFilePath, report.Target)
 			if tt.error {

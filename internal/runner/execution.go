@@ -18,7 +18,7 @@ func (s *RunConfiguration) getRunningLanguages() (map[string]*Language, error) {
 		if lang, ok := s.Languages[s.Options.Only]; ok {
 			currentLangs = map[string]*Language{s.Options.Only: lang}
 		} else {
-			return nil, fmt.Errorf("language %s not found", s.Options.Only)
+			return nil, fmt.Errorf("language '%s' not found", s.Options.Only)
 		}
 	}
 	return currentLangs, nil
@@ -68,8 +68,8 @@ func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) error {
 	}
 	err = s.runLinters(ctx, lintType, fileList)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed %s: %w", lintType, err)
 	}
-	log.Println("\u26c5  " + lintType.String() + "'ing passed")
+	log.Printf("\u26c5  passed %s \n", lintType)
 	return nil
 }

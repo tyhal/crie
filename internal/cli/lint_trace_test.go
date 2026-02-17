@@ -62,7 +62,7 @@ func TestRunConfiguration_trace_Run(t *testing.T) {
 		Languages: langs,
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	err = trace.Start(f)
 	if err != nil {
 		panic(err)
