@@ -5,13 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"path"
 	"regexp"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -118,17 +116,10 @@ func genFilenames(count int) []string {
 	return filenames
 }
 
-func randDuration(minD, maxD int) time.Duration {
-	return time.Duration(rand.Intn(maxD-minD) + minD)
-}
-
 func genLangs(count int) Languages {
 	langs := make(Languages, count)
 	for i := 0; i < count; i++ {
 		langs[strconv.Itoa(i)] = &Language{
-			// use a different linter object for each language
-			//Chk: noop.WithSleep(time.Millisecond*randDuration(5, 10), time.Millisecond*randDuration(50, 100)),
-			//Chk: noop.WithSleep(time.Millisecond*10, time.Millisecond*50),
 			Chk:       &noop.LintNoop{},
 			FileMatch: regexp.MustCompile(fmt.Sprintf(`\.%c$`, charFromIndex(i))),
 		}
