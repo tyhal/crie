@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tyhal/crie/pkg/linter/cli/exec"
+	"github.com/tyhal/crie/pkg/linter/cli/executor"
 )
 
 func TestLintCli_isContainer(t *testing.T) {
@@ -23,7 +23,7 @@ func TestLintCli_isContainer(t *testing.T) {
 }
 
 func TestLint_Name(t *testing.T) {
-	l := &LintCli{Exec: exec.Instance{Bin: "test"}}
+	l := &LintCli{Exec: executor.Instance{Bin: "test"}}
 	assert.Equal(t, "test", l.Name())
 }
 
@@ -40,7 +40,7 @@ func TestLint_imgTagged(t *testing.T) {
 
 func TestLint_Cleanup(t *testing.T) {
 	{
-		l := &LintCli{executor: exec.NewNoop()}
+		l := &LintCli{executor: executor.NewNoop()}
 		assert.NotPanics(t, func() {
 			err := l.Cleanup(t.Context())
 			assert.NoError(t, err)
@@ -56,7 +56,7 @@ func TestLint_Cleanup(t *testing.T) {
 }
 
 func TestLint_Run(t *testing.T) {
-	l := &LintCli{executor: exec.NewNoop()} // TODO test with no executor setup
+	l := &LintCli{executor: executor.NewNoop()} // TODO test with no executor setup
 
 	report := l.Run("test.txt")
 	assert.Equal(t, "test.txt", report.Target)

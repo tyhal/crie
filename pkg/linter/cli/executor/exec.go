@@ -1,5 +1,5 @@
 // Package exec allows for a CLI tool to be executed in different contexts
-package exec
+package executor
 
 import (
 	"context"

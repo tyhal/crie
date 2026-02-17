@@ -10,7 +10,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/linter"
-	"github.com/tyhal/crie/pkg/linter/cli/exec"
+	"github.com/tyhal/crie/pkg/linter/cli/executor"
 )
 
 // Version used to match img tags with crie versions
@@ -18,11 +18,11 @@ var Version = "latest"
 
 // LintCli defines a predefined command to run against a file
 type LintCli struct {
-	Type           string        `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
-	Exec           exec.Instance `json:"exec" yaml:"exec" jsonschema_required:"true" jsonschema_description:"settings for the command to run" `
-	Img            string        `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
-	TagCrieVersion bool          `json:"tag_crie_version,omitempty" yaml:"tag_crie_version,omitempty" jsonschema_description:"if an image tag should be appended with cries current version"`
-	executor       exec.Executor
+	Type           string            `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
+	Exec           executor.Instance `json:"exec" yaml:"exec" jsonschema_required:"true" jsonschema_description:"settings for the command to run" `
+	Img            string            `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
+	TagCrieVersion bool              `json:"tag_crie_version,omitempty" yaml:"tag_crie_version,omitempty" jsonschema_description:"if an image tag should be appended with cries current version"`
+	executor       executor.Executor
 }
 
 var _ linter.Linter = (*LintCli)(nil)
@@ -50,12 +50,12 @@ func (e *LintCli) Setup(ctx context.Context) error {
 	img := e.imgTagged()
 
 	switch {
-	case e.isContainer() && exec.WillPodman(ctx) == nil:
-		e.executor = exec.NewPodman(img)
-	case e.isContainer() && exec.WillDocker() == nil:
-		e.executor = exec.NewDocker(img)
-	case exec.WillHost(e.Exec.Bin) == nil:
-		e.executor = exec.NewHost()
+	case e.isContainer() && executor.WillPodman(ctx) == nil:
+		e.executor = executor.NewPodman(img)
+	case e.isContainer() && executor.WillDocker() == nil:
+		e.executor = executor.NewDocker(img)
+	case executor.WillHost(e.Exec.Bin) == nil:
+		e.executor = executor.NewHost()
 	default:
 		return errors.New("could not determine execution mode [podman, docker, local]")
 	}
