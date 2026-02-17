@@ -13,6 +13,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var ErrBadDispatch = errors.New("ctx, linter and regexp must be provided")
+
 // Job is a single job to be run by the orchestrator
 type Job struct {
 	lint     linter.Linter
@@ -34,9 +36,9 @@ func newFileLocker(files []string) *fileLocker {
 	return &fileLocker{locks: m}
 }
 
-// JobOrchestrator is responsible for dispatching jobs to workers
+// JobOrchestrator is responsible for dispatching jobs to dispatchers
 type JobOrchestrator struct {
-	Dispatchers  sync.WaitGroup
+	dispatchers  sync.WaitGroup
 	executors    sync.WaitGroup
 	files        []string
 	jobQ         chan Job
@@ -131,16 +133,22 @@ func (d *JobOrchestrator) Start(ctx context.Context) func() error {
 	return d.wait
 }
 
-// Dispatcher submits jobQ to the workers
-func (d *JobOrchestrator) Dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) {
-	err := d.dispatcher(ctx, l, reg)
-	if err != nil {
-		d.repQ <- linter.Report{Err: err, Target: l.Name()}
+// CreateDispatcher submits jobQ to the dispatchers
+func (d *JobOrchestrator) CreateDispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) error {
+	if l == nil || reg == nil || ctx == nil {
+		return ErrBadDispatch
 	}
+	d.dispatchers.Go(func() {
+		err := d.dispatcher(ctx, l, reg)
+		if err != nil {
+			d.repQ <- linter.Report{Err: err, Target: l.Name()}
+		}
+	})
+	return nil
 }
 
 func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) error {
-	defer trace.StartRegion(ctx, "A Dispatcher "+reg.String()).End()
+	defer trace.StartRegion(ctx, "A CreateDispatcher "+reg.String()).End()
 
 	var active bool
 	var matched []string
@@ -178,7 +186,7 @@ func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *
 }
 
 func (d *JobOrchestrator) wait() error {
-	d.Dispatchers.Wait()
+	d.dispatchers.Wait()
 	close(d.jobQ)
 	d.executors.Wait()
 	close(d.repQ)

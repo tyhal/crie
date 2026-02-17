@@ -51,9 +51,7 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 		if l == nil {
 			continue
 		}
-		orch.Dispatchers.Go(func() {
-			orch.Dispatcher(ctx, l, lang.FileMatch)
-		})
+		orch.CreateDispatcher(ctx, l, lang.FileMatch)
 	}
 
 	return
