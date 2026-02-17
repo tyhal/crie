@@ -78,7 +78,7 @@ echo "hello world"
 			l := &LintShfmt{
 				Language: tt.lang,
 			}
-			
+
 			report := l.Run(testFilePath)
 
 			assert.Equal(t, testFilePath, report.Target)
