@@ -73,6 +73,7 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 		}
 	}
 
+	// TODO do these both in some common container helpers
 	wdHost, err := os.Getwd()
 	if err != nil {
 		return err
@@ -81,6 +82,16 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 	if err != nil {
 		return err
 	}
+	cacheHost, err := os.UserCacheDir()
+	if err != nil {
+		return fmt.Errorf("getting cache dir: %w", err)
+	}
+	cacheHost = filepath.Join(cacheHost, "crie")
+	err = os.MkdirAll(cacheHost, 0755)
+	if err != nil {
+		return err
+	}
+	cacheContaineer := "/tmp/crie_cache"
 
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
@@ -91,8 +102,11 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 
 	resp, err := e.client.ContainerCreate(ctx,
 		&container.Config{
-			Entrypoint:      []string{},
-			Cmd:             []string{"/bin/sh", "-c", "tail -f /dev/null"},
+			Entrypoint: []string{},
+			Cmd:        []string{"/bin/sh", "-c", "tail -f /dev/null"},
+			Env: []string{
+				"XDG_CACHE_HOME=" + cacheContaineer,
+			},
 			Image:           e.image,
 			WorkingDir:      wdContainer,
 			NetworkDisabled: true,
@@ -105,6 +119,12 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 					Source:   wdHost,
 					Target:   wdContainer,
 					ReadOnly: !e.WillWrite,
+				},
+				{
+					Type:     "bind",
+					Source:   cacheHost,
+					Target:   cacheContaineer,
+					ReadOnly: false,
 				},
 			},
 		},

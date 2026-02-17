@@ -155,6 +155,16 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	if err != nil {
 		return fmt.Errorf("getting workdir as a linux path: %w", err)
 	}
+	cacheHost, err := os.UserCacheDir()
+	if err != nil {
+		return fmt.Errorf("getting cache dir: %w", err)
+	}
+	cacheHost = filepath.Join(cacheHost, "crie")
+	err = os.MkdirAll(cacheHost, 0755)
+	if err != nil {
+		return err
+	}
+	cacheContaineer := "/tmp/crie_cache"
 
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
@@ -165,6 +175,9 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	s.Name = fmt.Sprintf("crie-%s-%s", filepath.Base(e.Bin), shortid)
 	s.Entrypoint = []string{"/bin/sh", "-c"}
 	s.Command = []string{"tail -f /dev/null"}
+	s.Env = map[string]string{
+		"XDG_CACHE_HOME": cacheContaineer,
+	}
 	s.WorkDir = wdContainer
 	//s.UserNS = specgen.Namespace{
 	//	NSMode: "keep-id",
@@ -186,6 +199,12 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 			Destination: wdContainer,
 			// we are using "z" instead of "Z" because we run multiple containers in parallel
 			Options: []string{"rbind", mountPerms, "z", "U"},
+		},
+		{
+			Type:        "bind",
+			Source:      cacheHost,
+			Destination: cacheContaineer,
+			Options:     []string{"rbind", "rw", "z", "U"},
 		},
 	}
 
