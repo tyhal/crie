@@ -11,13 +11,13 @@ import (
 
 func TestLanguages_Show(t *testing.T) {
 	tests := []struct {
-		name      string
-		languages Languages
-		expected  []string // Substrings we expect to be in the output
+		name     string
+		matchers NamedMatches
+		expected []string // Substrings we expect to be in the output
 	}{
 		{
-			name: "two languages",
-			languages: Languages{
+			name: "two matchers",
+			matchers: NamedMatches{
 				"python": {
 					FileMatch: regexp.MustCompile(`\.py$`),
 					Chk:       &noop.LintNoop{},
@@ -31,7 +31,7 @@ func TestLanguages_Show(t *testing.T) {
 		},
 		{
 			name: "one language",
-			languages: Languages{
+			matchers: NamedMatches{
 				"yaml": {
 					FileMatch: regexp.MustCompile(`\.ya?ml$`),
 					Chk:       &noop.LintNoop{},
@@ -40,9 +40,9 @@ func TestLanguages_Show(t *testing.T) {
 			expected: []string{"yaml", "noop", "", "\\.ya?ml$"},
 		},
 		{
-			name:      "no languages",
-			languages: Languages{},
-			expected:  []string{"LANGUAGE", "CHECKER", "FORMATTER", "ASSOCIATED FILES"},
+			name:     "no matchers",
+			matchers: NamedMatches{},
+			expected: []string{"LANGUAGE", "CHECKER", "FORMATTER", "ASSOCIATED FILES"},
 		},
 	}
 
@@ -50,7 +50,7 @@ func TestLanguages_Show(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
 
-			err := tt.languages.Show(&buf)
+			err := tt.matchers.Show(&buf)
 			assert.NoError(t, err)
 
 			output := buf.String()

@@ -36,7 +36,7 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 		{
 			name: "default runLinters - happy path",
 			config: &RunConfiguration{
-				Languages: map[string]*Language{
+				NamedMatches: NamedMatches{
 					"go": {
 						Chk:       &noop.LintNoop{},
 						FileMatch: regexp.MustCompile(`\.go$`),
@@ -49,7 +49,7 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 		{
 			name: "runLinters with single valid language (go)",
 			config: &RunConfiguration{
-				Languages: map[string]*Language{
+				NamedMatches: NamedMatches{
 					"go": {
 						Chk:       &noop.LintNoop{},
 						FileMatch: regexp.MustCompile(`\.go$`),
@@ -69,7 +69,7 @@ func TestRunConfiguration_runLinters(t *testing.T) {
 		{
 			name: "runLinters with nonexistent language in 'Only' option",
 			config: &RunConfiguration{
-				Languages: map[string]*Language{
+				NamedMatches: NamedMatches{
 					"go": {
 						Chk:       &noop.LintNoop{},
 						FileMatch: regexp.MustCompile(`\.go$`),
@@ -115,10 +115,10 @@ func genFilenames(count int) []string {
 	return filenames
 }
 
-func genLangs(count int) Languages {
-	langs := make(Languages, count)
+func genLangs(count int) NamedMatches {
+	langs := make(NamedMatches, count)
 	for i := 0; i < count; i++ {
-		langs[strconv.Itoa(i)] = &Language{
+		langs[strconv.Itoa(i)] = LinterMatch{
 			Chk:       &noop.LintNoop{},
 			FileMatch: regexp.MustCompile(fmt.Sprintf(`\.%c$`, charFromIndex(i))),
 		}
@@ -142,48 +142,48 @@ func BenchmarkRunConfiguration_runLinters(b *testing.B) {
 		{
 			name: "noskip-20F-20L",
 			config: &RunConfiguration{
-				Options:   opts,
-				Languages: genLangs(20),
+				Options:      opts,
+				NamedMatches: genLangs(20),
 			},
 			files: genFilenames(20),
 		},
 		{
 			name: "halfskip-100F-10L",
 			config: &RunConfiguration{
-				Options:   opts,
-				Languages: genLangs(10),
+				Options:      opts,
+				NamedMatches: genLangs(10),
 			},
 			files: genFilenames(100),
 		},
 		{
 			name: "noskip-100F-20L",
 			config: &RunConfiguration{
-				Options:   opts,
-				Languages: genLangs(20),
+				Options:      opts,
+				NamedMatches: genLangs(20),
 			},
 			files: genFilenames(100),
 		},
 		{
 			name: "halfskip-10F-100L",
 			config: &RunConfiguration{
-				Options:   opts,
-				Languages: genLangs(100),
+				Options:      opts,
+				NamedMatches: genLangs(100),
 			},
 			files: genFilenames(10),
 		},
 		{
 			name: "noskip-20F-100L",
 			config: &RunConfiguration{
-				Options:   opts,
-				Languages: genLangs(100),
+				Options:      opts,
+				NamedMatches: genLangs(100),
 			},
 			files: genFilenames(20),
 		},
 		{
 			name: "noskip-100F-100L",
 			config: &RunConfiguration{
-				Options:   opts,
-				Languages: genLangs(100),
+				Options:      opts,
+				NamedMatches: genLangs(100),
 			},
 			files: genFilenames(100),
 		},
@@ -213,7 +213,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 		{
 			name: "no errors",
 			config: &RunConfiguration{
-				Languages: map[string]*Language{
+				NamedMatches: NamedMatches{
 					"go": {
 						Chk:       noop.WithErr(nil, nil),
 						FileMatch: regexp.MustCompile(`\.go$`),
@@ -225,7 +225,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 		{
 			name: "linter startup error",
 			config: &RunConfiguration{
-				Languages: map[string]*Language{
+				NamedMatches: NamedMatches{
 					"go": {
 						Chk:       noop.WithErr(errors.New("startup err"), nil),
 						FileMatch: regexp.MustCompile(`\.go$`),
@@ -238,7 +238,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 		{
 			name: "linter run error",
 			config: &RunConfiguration{
-				Languages: map[string]*Language{
+				NamedMatches: NamedMatches{
 					"go": {
 						Chk:       noop.WithErr(nil, errors.New("run err")),
 						FileMatch: regexp.MustCompile(`\.go$`),

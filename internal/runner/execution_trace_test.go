@@ -30,8 +30,8 @@ func TestRunConfiguration_trace_runLinters(t *testing.T) {
 		files  []string
 	}{
 		config: &RunConfiguration{
-			Options:   opts,
-			Languages: genLangs(10),
+			Options:      opts,
+			NamedMatches: genLangs(10),
 		},
 		files: genFilenames(100),
 	}

@@ -59,7 +59,7 @@ func TestRunConfiguration_trace_Run(t *testing.T) {
 			Continue:      true,
 			Passes:        true,
 		},
-		Languages: langs,
+		NamedMatches: langs,
 	}
 
 	ctx := t.Context()

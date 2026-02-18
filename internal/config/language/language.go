@@ -14,11 +14,11 @@ type Language struct {
 }
 
 // ToRunFormat will convert the yaml friendly version to an internal representation used by crie
-func (l Language) ToRunFormat() (*runner.Language, error) {
+func (l Language) ToRunFormat() (runner.LinterMatch, error) {
 	if l.FileMatch == nil {
-		return nil, errors.New("field match is required")
+		return runner.LinterMatch{}, errors.New("field match is required")
 	}
-	return &runner.Language{
+	return runner.LinterMatch{
 		FileMatch: l.FileMatch.Regexp,
 		Fmt:       l.Fmt.Linter,
 		Chk:       l.Chk.Linter,

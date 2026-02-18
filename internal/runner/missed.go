@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -9,37 +10,24 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// NoStandards runs all fmt exec commands in languages and in always fmt
-func (s *RunConfiguration) NoStandards() error {
-
+// NoStandards runs all fmt exec commands in matchers and in always fmt
+func (s *RunConfiguration) NoStandards(w io.Writer) error {
 	// GetFiles files not used
 	files, err := s.getFileList()
 	if err != nil {
 		return err
 	}
-	for _, standardizer := range s.Languages {
-		files = Filter(files, false, standardizer.FileMatch.MatchString)
-	}
 
-	// GetFiles extensions or Filename(if no extension) and count occurrences
-	dict := make(map[string]int)
-	for _, str := range files {
+	counts := s.noCoverageStats(files)
 
-		_, s := filepath.Split(str)
+	return printCoverageStats(w, counts)
+}
 
-		for i := len(str) - 1; i >= 0 && !os.IsPathSeparator(str[i]); i-- {
-			if str[i] == '.' {
-				s = str[i:]
-			}
-		}
-
-		dict[s] = dict[s] + 1
-	}
-
+func printCoverageStats(w io.Writer, counts map[string]int) error {
 	// Print dict in order
 	output := map[int][]string{}
 	var values []int
-	for i, file := range dict {
+	for i, file := range counts {
 		output[file] = append(output[file], i)
 	}
 	for i := range output {
@@ -49,12 +37,13 @@ func (s *RunConfiguration) NoStandards() error {
 	sort.Sort(sort.Reverse(sort.IntSlice(values)))
 
 	// Print the top 10
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(w)
+	defer table.Close()
 	table.Header([]string{"extension", "count"})
 	count := 10
-	for _, i := range values {
-		for _, s := range output[i] {
-			err = table.Append([]string{s, strconv.Itoa(i)})
+	for _, i := range counts {
+		for _, ext := range output[i] {
+			err := table.Append([]string{ext, strconv.Itoa(i)})
 			if err != nil {
 				return err
 			}
@@ -68,9 +57,32 @@ func (s *RunConfiguration) NoStandards() error {
 			}
 		}
 	}
-	err = table.Render()
+	err := table.Render()
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (s *RunConfiguration) noCoverageStats(files []string) map[string]int {
+	for _, standardizer := range s.NamedMatches {
+		files = Filter(files, false, standardizer.FileMatch.MatchString)
+	}
+
+	// GetFiles extensions or Filename(if no extension) and count occurrences
+	extCount := make(map[string]int)
+	for _, str := range files {
+
+		_, s := filepath.Split(str)
+
+		for i := len(str) - 1; i >= 0 && !os.IsPathSeparator(str[i]); i-- {
+			if str[i] == '.' {
+				s = str[i:]
+			}
+		}
+
+		extCount[s] = extCount[s] + 1
+	}
+
+	return extCount
 }

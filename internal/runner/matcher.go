@@ -10,15 +10,15 @@ import (
 	"github.com/tyhal/crie/pkg/linter"
 )
 
-// Language is used to associate a file pattern with the relevant tools to check and format
-type Language struct {
+// LinterMatch is used to associate a file pattern with the relevant tools to check and format
+type LinterMatch struct {
 	FileMatch *regexp.Regexp
 	Fmt       linter.Linter
 	Chk       linter.Linter
 }
 
-// Languages store the name to a singular language configuration within crie
-type Languages map[string]*Language
+// NamedMatches store the name for a LinterMatch to make referencing them easier
+type NamedMatches map[string]LinterMatch
 
 func getName(l linter.Linter) string {
 	if l == nil {
@@ -27,8 +27,8 @@ func getName(l linter.Linter) string {
 	return l.Name()
 }
 
-// Show to print all languages chkConf fmt and always commands
-func (s Languages) Show(w io.Writer) error {
+// Show all linters and their associated file types
+func (s NamedMatches) Show(w io.Writer) error {
 	table := tablewriter.NewWriter(w)
 	table.Header([]string{"language", "checker", "formatter", "associated files"})
 
@@ -74,7 +74,7 @@ func (lt LintType) String() string {
 
 // GetLinter returns the linter associated with the provided LintType
 // (either the formatter or the checker) for this language.
-func (l *Language) GetLinter(which LintType) linter.Linter {
+func (l *LinterMatch) GetLinter(which LintType) linter.Linter {
 	switch which {
 	case LintTypeFmt:
 		return l.Fmt

@@ -17,8 +17,8 @@ type Languages struct {
 }
 
 // ToRunFormat converts the yaml friendly version to an internal representation used by crie
-func (l Languages) ToRunFormat() (runner.Languages, error) {
-	crieLanguages := make(runner.Languages, len(l.Languages))
+func (l Languages) ToRunFormat() (runner.NamedMatches, error) {
+	crieLanguages := make(runner.NamedMatches, len(l.Languages))
 	for langName, lang := range l.Languages {
 		crieLang, err := lang.ToRunFormat()
 		if err != nil {

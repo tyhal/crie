@@ -12,11 +12,12 @@ import (
 	"github.com/tyhal/crie/pkg/linter"
 )
 
-func (s *RunConfiguration) getRunningLanguages() (map[string]*Language, error) {
-	currentLangs := s.Languages
+func (s *RunConfiguration) getRunningLanguages() (NamedMatches, error) {
+	currentLangs := s.NamedMatches
 	if s.Options.Only != "" {
-		if lang, ok := s.Languages[s.Options.Only]; ok {
-			currentLangs = map[string]*Language{s.Options.Only: lang}
+		if lang, ok := s.NamedMatches[s.Options.Only]; ok {
+			// if we have the specific language, drop all others
+			currentLangs = NamedMatches{s.Options.Only: lang}
 		} else {
 			return nil, fmt.Errorf("language '%s' not found", s.Options.Only)
 		}

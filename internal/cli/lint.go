@@ -15,7 +15,7 @@ import (
 
 var crieRun runner.RunConfiguration
 
-// setCrie pushes the Languages to the crie.RunConfiguration
+// setCrie pushes the NamedMatches to the crie.RunConfiguration
 func setCrie(_ *cobra.Command, _ []string) error {
 
 	langs, err := language.LoadFile(languageConfigPath)
@@ -33,7 +33,7 @@ func setCrie(_ *cobra.Command, _ []string) error {
 		ignore = regexp.MustCompile(strings.Join(projectConfig.Ignore, "|"))
 	}
 
-	crieRun = runner.RunConfiguration{Options: projectConfig.Lint, Ignore: ignore, Languages: crieLanguages}
+	crieRun = runner.RunConfiguration{Options: projectConfig.Lint, Ignore: ignore, NamedMatches: crieLanguages}
 
 	return nil
 }

@@ -16,7 +16,7 @@ type Options struct {
 
 // RunConfiguration is the entire working set of information to process a project
 type RunConfiguration struct {
-	Options   Options
-	Ignore    *regexp.Regexp
-	Languages Languages
+	Options      Options
+	Ignore       *regexp.Regexp
+	NamedMatches NamedMatches
 }
