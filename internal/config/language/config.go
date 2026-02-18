@@ -3,9 +3,11 @@ package language
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 
-	"github.com/tyhal/crie/pkg/errchain"
+	"github.com/tyhal/crie/internal/runner"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -14,8 +16,20 @@ type Languages struct {
 	Languages map[string]Language `json:"languages" yaml:"languages" jsonschema_description:"a map of languages that crie should be able to run"`
 }
 
-func merge(src *Languages, dst *Languages) {
+// ToRunFormat converts the yaml friendly version to an internal representation used by crie
+func (l Languages) ToRunFormat() (runner.NamedMatches, error) {
+	crieLanguages := make(runner.NamedMatches, len(l.Languages))
+	for langName, lang := range l.Languages {
+		crieLang, err := lang.ToRunFormat()
+		if err != nil {
+			return nil, fmt.Errorf("parsing language %s: %w", langName, err)
+		}
+		crieLanguages[langName] = crieLang
+	}
+	return crieLanguages, nil
+}
 
+func merge(src *Languages, dst *Languages) {
 	for langName, lang := range src.Languages {
 		if _, ok := dst.Languages[langName]; !ok {
 			dst.Languages[langName] = lang
@@ -54,12 +68,12 @@ func LoadFile(path string) (*Languages, error) {
 
 	configData, err := os.ReadFile(path)
 	if err != nil {
-		return nil, errchain.From(err).LinkF("readding config file %s", path)
+		return nil, fmt.Errorf("reading config file %s: %w", path, err)
 	}
 
 	var c Languages
 	if err = yaml.Unmarshal(configData, &c); err != nil {
-		return nil, errchain.From(err).LinkF("parsing config file %s", path)
+		return nil, fmt.Errorf("parsing config file %s: %w", path, err)
 	}
 
 	merge(&defaultLanguageConfig, &c)

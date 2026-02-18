@@ -1,13 +1,13 @@
 package cli
 
 import (
+	"fmt"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/project"
-	"github.com/tyhal/crie/pkg/errchain"
 )
 
 //`
@@ -40,7 +40,7 @@ format all python files
 	Long: `
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can sanity check any codebase.`,
-	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 
 		viper.SetConfigFile(projectConfigPath)
 		viper.SetConfigType("yml")
@@ -54,7 +54,7 @@ format all python files
 			return err
 		}
 
-		setLogging()
+		setLogging(cmd)
 
 		// enable git diff if target is set
 		if projectConfig.Lint.GitTarget != "" {
@@ -72,7 +72,7 @@ var projectConfig project.Config
 
 func errFatal(err error) {
 	if err != nil {
-		log.Fatal(errchain.From(err).Link("incorrect viper configuration"))
+		log.Fatal(fmt.Errorf("incorrect viper configuration: %w", err))
 	}
 }
 

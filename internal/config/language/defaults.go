@@ -11,6 +11,11 @@ import (
 var defaultLanguageConfigYaml []byte
 var defaultLanguageConfig Languages
 
+// DefaultLanguageConfig returns the default language config
+func DefaultLanguageConfig() Languages {
+	return defaultLanguageConfig
+}
+
 func init() {
 	err := yaml.Unmarshal(defaultLanguageConfigYaml, &defaultLanguageConfig)
 	if err != nil {

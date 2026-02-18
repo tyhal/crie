@@ -1,15 +1,12 @@
 package dockfmt
 
 import (
-	"math"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tyhal/crie/pkg/linter"
 )
 
 func TestLint_Name(t *testing.T) {
@@ -19,20 +16,13 @@ func TestLint_Name(t *testing.T) {
 
 func TestLint_WillRun(t *testing.T) {
 	l := &LintDockFmt{}
-	assert.NoError(t, l.WillRun())
+	assert.NoError(t, l.Setup(t.Context()))
 }
 
-func TestLint_Cleanup(_ *testing.T) {
+func TestLint_Cleanup(t *testing.T) {
 	l := &LintDockFmt{}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	l.Cleanup(&wg)
-	wg.Wait()
-}
-
-func TestLint_MaxConcurrency(t *testing.T) {
-	l := &LintDockFmt{}
-	assert.Equal(t, math.MaxInt32, l.MaxConcurrency())
+	err := l.Cleanup(t.Context())
+	assert.NoError(t, err)
 }
 
 func TestLint_Run(t *testing.T) {
@@ -96,13 +86,9 @@ its a test to see what happens when you run dockfmt on a file that isn't a docke
 			err := os.WriteFile(testFilePath, []byte(tt.input), 0644)
 			assert.NoError(t, err)
 
-			rep := make(chan linter.Report, 1)
+			report := tt.linter.Run(testFilePath)
 
-			tt.linter.Run(testFilePath, rep)
-
-			report := <-rep
-
-			assert.Equal(t, testFilePath, report.File)
+			assert.Equal(t, testFilePath, report.Target)
 			if tt.error {
 				assert.Error(t, report.Err)
 			} else {

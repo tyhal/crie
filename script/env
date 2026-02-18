@@ -1,0 +1,3 @@
+#!/bin/sh
+export GOFLAGS="-tags=exclude_graphdriver_btrfs,containers_image_openpgp"
+export CGO=0

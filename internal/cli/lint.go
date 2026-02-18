@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -10,12 +11,11 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/runner"
-	"github.com/tyhal/crie/pkg/errchain"
 )
 
 var crieRun runner.RunConfiguration
 
-// setCrie pushes the Languages to the crie.RunConfiguration
+// setCrie pushes the NamedMatches to the crie.RunConfiguration
 func setCrie(_ *cobra.Command, _ []string) error {
 
 	langs, err := language.LoadFile(languageConfigPath)
@@ -23,13 +23,9 @@ func setCrie(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	crieLanguages := make(map[string]*runner.Language, len(langs.Languages))
-	for langName, lang := range langs.Languages {
-		crieLang, err := lang.ToCrieLanguage()
-		if err != nil {
-			return errchain.From(err).LinkF("parsing language %s", langName)
-		}
-		crieLanguages[langName] = crieLang
+	crieLanguages, err := langs.ToRunFormat()
+	if err != nil {
+		return err
 	}
 
 	var ignore *regexp.Regexp
@@ -37,7 +33,7 @@ func setCrie(_ *cobra.Command, _ []string) error {
 		ignore = regexp.MustCompile(strings.Join(projectConfig.Ignore, "|"))
 	}
 
-	crieRun = runner.RunConfiguration{Options: projectConfig.Lint, Ignore: ignore, Languages: crieLanguages}
+	crieRun = runner.RunConfiguration{Options: projectConfig.Lint, Ignore: ignore, NamedMatches: crieLanguages}
 
 	return nil
 }
@@ -73,12 +69,13 @@ var ChkCmd = &cobra.Command{
 	Long:              `Check all code standards for coding conventions`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
-		err := crieRun.Run(runner.LintTypeChk)
-
+	SilenceUsage:      true,
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		err := crieRun.Run(cmd.Context(), runner.LintTypeChk)
 		if err != nil {
-			log.Fatal(errchain.From(err).Link("crie check"))
+			return fmt.Errorf("crie check: %w", err)
 		}
+		return nil
 	},
 }
 
@@ -88,21 +85,22 @@ var FmtCmd = &cobra.Command{
 	Short:             "Run formatters",
 	Long:              `Run all formatters in the list`,
 	Args:              cobra.NoArgs,
+	SilenceUsage:      true,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
-		err := crieRun.Run(runner.LintTypeFmt)
-
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		err := crieRun.Run(cmd.Context(), runner.LintTypeFmt)
 		if err != nil {
-			log.Fatal(errchain.From(err).Link("crie format"))
+			return fmt.Errorf("crie format: %w", err)
 		}
+		return nil
 	},
 }
 
-func stage(lintType runner.LintType) error {
+func stage(ctx context.Context, lintType runner.LintType) error {
 	log.Infof("❨ %s ❩", lintType.String())
-	err := crieRun.Run(lintType)
+	err := crieRun.Run(ctx, lintType)
 	if err != nil {
-		return errchain.From(err).LinkF("crie %s", lintType)
+		return fmt.Errorf("crie %s: %w", lintType.String(), err)
 	}
 	return nil
 }
@@ -115,22 +113,26 @@ var LntCmd = &cobra.Command{
 	Long:              `Runs both format and then check`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
+	SilenceUsage:      true,
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		stages := []runner.LintType{runner.LintTypeFmt, runner.LintTypeChk}
 		var failedStages []string
 
 		for _, lintType := range stages {
-			if err := stage(lintType); err != nil {
+			if err := stage(cmd.Context(), lintType); err != nil {
 				if crieRun.Options.Continue {
 					failedStages = append(failedStages, lintType.String())
 				} else {
-					log.Fatal(err)
+					return err
 				}
 			}
 		}
 
+		var err error
 		if len(failedStages) > 0 {
-			log.Fatal(fmt.Errorf("crie stages failed: %s", strings.Join(failedStages, ", ")))
+			err = fmt.Errorf("crie stages failed: %s", strings.Join(failedStages, ", "))
+			log.Error(err)
 		}
+		return err
 	},
 }

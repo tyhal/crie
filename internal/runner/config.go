@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"fmt"
 	"regexp"
 )
 
@@ -17,15 +16,7 @@ type Options struct {
 
 // RunConfiguration is the entire working set of information to process a project
 type RunConfiguration struct {
-	Options   Options
-	Ignore    *regexp.Regexp
-	Languages Languages
-}
-
-// GetLanguage returns the Language configuration by its name or an error if it does not exist.
-func (s *RunConfiguration) GetLanguage(only string) (*Language, error) {
-	if lang, ok := s.Languages[only]; ok {
-		return lang, nil
-	}
-	return nil, fmt.Errorf("language '%s' not found", only)
+	Options      Options
+	Ignore       *regexp.Regexp
+	NamedMatches NamedMatches
 }

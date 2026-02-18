@@ -1,4 +1,4 @@
-package exec
+package executor
 
 import (
 	"bytes"
@@ -8,16 +8,16 @@ import (
 )
 
 func TestNoopExecutor_Setup(t *testing.T) {
-	executor := NoopExecutor{}
-	assert.NoError(t, executor.Setup())
+	executor := noopExecutor{}
+	assert.NoError(t, executor.Setup(t.Context(), Instance{}))
 }
 
 func TestNoopExecutor_Exec(t *testing.T) {
-	executor := NoopExecutor{}
+	executor := noopExecutor{}
 
 	var outB, errB bytes.Buffer
 
-	err := executor.Exec(Instance{}, "test.txt", &outB, &errB)
+	err := executor.Exec("test.txt", &outB, &errB)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "stdout", outB.String())
@@ -25,6 +25,6 @@ func TestNoopExecutor_Exec(t *testing.T) {
 }
 
 func TestNoopExecutor_Cleanup(t *testing.T) {
-	executor := NoopExecutor{}
-	assert.NoError(t, executor.Cleanup())
+	executor := noopExecutor{}
+	assert.NoError(t, executor.Cleanup(t.Context()))
 }

@@ -1,11 +1,11 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/tyhal/crie/pkg/errchain"
 )
 
 // addCrieCommand is the same as addLintCommand but only to ensure the languages are loaded
@@ -23,9 +23,9 @@ var LsCmd = &cobra.Command{
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
 	Run: func(_ *cobra.Command, _ []string) {
-		err := crieRun.Languages.Show(os.Stdout)
+		err := crieRun.NamedMatches.Show(os.Stdout)
 		if err != nil {
-			log.Fatal(errchain.From(err).Link("crie list failed"))
+			log.Fatal(fmt.Errorf("crie list failed: %w", err))
 		}
 	},
 }
@@ -40,10 +40,12 @@ var NonCmd = &cobra.Command{
 Find the file extensions that dont have an associated regex match within crie`,
 	Args:              cobra.NoArgs,
 	ValidArgsFunction: cobra.FixedCompletions(nil, cobra.ShellCompDirectiveNoFileComp),
-	Run: func(_ *cobra.Command, _ []string) {
-		err := crieRun.NoStandards()
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		err := crieRun.NoStandards(cmd.OutOrStdout())
 		if err != nil {
-			log.Fatal(errchain.From(err).Link("finding unassociated files"))
+			err = fmt.Errorf("finding unassociated files: %w", err)
+			log.Error(err)
 		}
+		return err
 	},
 }
