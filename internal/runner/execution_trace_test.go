@@ -1,10 +1,8 @@
 //go:build trace
-// +build trace
 
 package runner
 
 import (
-	"context"
 	"os"
 	"runtime/trace"
 	"testing"

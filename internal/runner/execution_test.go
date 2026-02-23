@@ -109,7 +109,7 @@ func charFromIndex(i int) byte {
 // genFilenames generates a list of filenames based on the given count [ 0.a 1.b 2.c ... 19.t 20.a ]
 func genFilenames(count int) []string {
 	filenames := make([]string, count)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		filenames = append(filenames, fmt.Sprintf("%d.%c", i, charFromIndex(i)))
 	}
 	return filenames
@@ -117,7 +117,7 @@ func genFilenames(count int) []string {
 
 func genLangs(count int) NamedMatches {
 	langs := make(NamedMatches, count)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		langs[strconv.Itoa(i)] = LinterMatch{
 			Chk:       &noop.LintNoop{},
 			FileMatch: regexp.MustCompile(fmt.Sprintf(`\.%c$`, charFromIndex(i))),

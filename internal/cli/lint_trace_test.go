@@ -1,10 +1,8 @@
 //go:build trace
-// +build trace
 
 package cli
 
 import (
-	"context"
 	"io"
 	"os"
 	"runtime/trace"
