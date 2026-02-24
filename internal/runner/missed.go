@@ -23,7 +23,7 @@ func (s *RunConfiguration) NoStandards(w io.Writer) error {
 	return printCoverageStats(w, counts)
 }
 
-func cellStyle(row, col int) lipgloss.Style {
+func cellStyle(_, _ int) lipgloss.Style {
 	return lipgloss.NewStyle().Padding(0, 1)
 }
 
