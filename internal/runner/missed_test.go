@@ -13,12 +13,12 @@ func Test_printCoverageStats(t *testing.T) {
 	err := printCoverageStats(buf, map[string]int{".bash": 1, ".go": 2})
 	assert.NoError(t, err)
 	exp := `
-┌───────────┬───────┐
-│ EXTENSION │ COUNT │
-├───────────┼───────┤
-│ .bash     │ 1     │
-│ .go       │ 2     │
-└───────────┴───────┘
+╭───────┬───╮
+│ ext   │ # │
+├───────┼───┤
+│ .go   │ 2 │
+│ .bash │ 1 │
+╰───────┴───╯
 `
 	assert.Equal(t, exp, "\n"+buf.String())
 }
