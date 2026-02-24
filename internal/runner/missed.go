@@ -1,13 +1,13 @@
 package runner
 
 import (
+	"fmt"
 	"io"
-	"os"
 	"path/filepath"
-	"sort"
-	"strconv"
+	"slices"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 )
 
 // NoStandards runs all fmt exec commands in matchers and in always fmt
@@ -23,45 +23,24 @@ func (s *RunConfiguration) NoStandards(w io.Writer) error {
 	return printCoverageStats(w, counts)
 }
 
-func printCoverageStats(w io.Writer, counts map[string]int) error {
-	// Print dict in order
-	output := map[int][]string{}
-	var values []int
-	for i, file := range counts {
-		output[file] = append(output[file], i)
-	}
-	for i := range output {
-		values = append(values, i)
-	}
+func cellStyle(_, _ int) lipgloss.Style {
+	return lipgloss.NewStyle().Padding(0, 1)
+}
 
-	sort.Sort(sort.Reverse(sort.IntSlice(values)))
+func printCoverageStats(w io.Writer, counts map[string]int) error {
+	fm := flatten(counts)
+	slices.SortFunc(fm, fm.cmpV(true))
 
 	// Print the top 10
-	table := tablewriter.NewWriter(w)
-	defer table.Close()
-	table.Header([]string{"extension", "count"})
-	count := 10
-	for _, i := range counts {
-		for _, ext := range output[i] {
-			err := table.Append([]string{ext, strconv.Itoa(i)})
-			if err != nil {
-				return err
-			}
-			count--
-			if count < 0 {
-				err = table.Render()
-				if err != nil {
-					return err
-				}
-				return nil
-			}
-		}
+	t := table.New()
+	t.StyleFunc(cellStyle)
+	t.Headers("ext", "#")
+	for _, kv := range fm[:min(len(fm), 10)] {
+		t.Row(kv.k, fmt.Sprintf("%d", kv.v))
 	}
-	err := table.Render()
-	if err != nil {
-		return err
-	}
-	return nil
+
+	_, err := fmt.Fprintln(w, t.Render())
+	return err
 }
 
 func (s *RunConfiguration) noCoverageStats(files []string) map[string]int {
@@ -69,19 +48,13 @@ func (s *RunConfiguration) noCoverageStats(files []string) map[string]int {
 		files = Filter(files, false, standardizer.FileMatch.MatchString)
 	}
 
-	// GetFiles extensions or Filename(if no extension) and count occurrences
 	extCount := make(map[string]int)
-	for _, str := range files {
-
-		_, s := filepath.Split(str)
-
-		for i := len(str) - 1; i >= 0 && !os.IsPathSeparator(str[i]); i-- {
-			if str[i] == '.' {
-				s = str[i:]
-			}
+	for _, path := range files {
+		ext := filepath.Ext(path)
+		if ext == "" {
+			ext = filepath.Base(path)
 		}
-
-		extCount[s] = extCount[s] + 1
+		extCount[ext]++
 	}
 
 	return extCount
