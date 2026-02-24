@@ -112,8 +112,8 @@ func prefixFilter(prefix string, filepaths ...string) []string {
 	}
 	var filtered []string
 	for _, file := range filepaths {
-		if strings.HasPrefix(file, prefix) {
-			filtered = append(filtered, strings.TrimPrefix(file, prefix))
+		if after, ok := strings.CutPrefix(file, prefix); ok {
+			filtered = append(filtered, after)
 		}
 	}
 	return filtered
