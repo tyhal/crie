@@ -9,6 +9,10 @@
           "$ref": "#/$defs/LoggingConfig",
           "description": "logging options"
         },
+        "dir": {
+          "type": "string",
+          "description": "the directory to run crie in"
+        },
         "lint": {
           "$ref": "#/$defs/Options",
           "description": "options for commands that lint"
@@ -22,7 +26,12 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "log",
+        "dir",
+        "lint"
+      ]
     },
     "LoggingConfig": {
       "properties": {

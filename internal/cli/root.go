@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -51,7 +52,14 @@ format all python files
 		_ = viper.ReadInConfig()
 		err := viper.Unmarshal(&projectConfig)
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to unmarshal project config: %w", err)
+		}
+
+		if projectConfig.Dir != "" {
+			err = os.Chdir(projectConfig.Dir)
+			if err != nil {
+				return fmt.Errorf("unable to change directory: %w", err)
+			}
 		}
 
 		setLogging(cmd)
@@ -86,18 +94,24 @@ func init() {
 	errFatal(viper.BindPFlag("Language.Conf", RootCmd.PersistentFlags().Lookup("lang-conf")))
 	errFatal(RootCmd.RegisterFlagCompletionFunc("lang-conf", completeYml))
 
+	RootCmd.PersistentFlags().StringVarP(&projectConfig.Dir, "dir", "d", "", "the directory to run crie in")
+	errFatal(viper.BindPFlag("Dir", RootCmd.PersistentFlags().Lookup("dir")))
+	errFatal(RootCmd.MarkPersistentFlagDirname("dir"))
+
 	RootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.JSON, "json", "j", projectConfig.Log.JSON, "turn on json output")
 	errFatal(viper.BindPFlag("Log.JSON", RootCmd.PersistentFlags().Lookup("json")))
 
 	RootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Verbose, "verbose", "v", projectConfig.Log.Verbose, "turn on verbose printing for reports")
 	errFatal(viper.BindPFlag("Log.Verbose", RootCmd.PersistentFlags().Lookup("verbose")))
 
-	RootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Quiet, "quiet", "q", projectConfig.Log.Quiet, "only prints critical errors (suppresses verbose)")
+	RootCmd.PersistentFlags().BoolVarP(&projectConfig.Log.Quiet, "quiet", "q", projectConfig.Log.Quiet, "only prints critical errors")
 	errFatal(viper.BindPFlag("Log.Quiet", RootCmd.PersistentFlags().Lookup("quiet")))
 
 	RootCmd.PersistentFlags().BoolVar(&projectConfig.Log.Trace, "trace", projectConfig.Log.Trace, "turn on trace printing for reports")
 	errFatal(viper.BindPFlag("Log.Trace", RootCmd.PersistentFlags().Lookup("trace")))
 	errFatal(RootCmd.PersistentFlags().MarkHidden("trace"))
+
+	RootCmd.MarkFlagsMutuallyExclusive("verbose", "quiet", "trace")
 
 	viper.SetDefault("Ignore", []string{})
 
