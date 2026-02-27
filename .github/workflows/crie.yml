@@ -33,7 +33,7 @@ jobs:
       - name: install crie
         run: go install ./cmd/crie
       - name: Run crie all
-        uses: tyhal/crie-action@43834890ac97736b2911277b11158952cdc3edb7 # main
+        uses: tyhal/crie-action@283048b00daf6ce74442d38aa76e77f9472b581b # main
         with:
           command: lnt
           lint_continue: 'true'
