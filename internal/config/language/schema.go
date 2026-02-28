@@ -18,6 +18,7 @@ func Schema() *jsonschema.Schema {
 	opts := &jsonschema.ForOptions{
 		TypeSchemas: map[reflect.Type]*jsonschema.Schema{
 			reflect.TypeFor[Linter](): Linter{}.JSONSchema(),
+			reflect.TypeFor[Regex]():  Regex{}.JSONSchema(),
 		},
 	}
 	schema, err := jsonschema.For[Languages](opts)
