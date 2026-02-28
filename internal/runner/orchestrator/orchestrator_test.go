@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tyhal/crie/pkg/linter"
-	"github.com/tyhal/crie/pkg/linter/noop"
+	"github.com/tyhal/crie/pkg/noop"
 )
 
 type reportCounter struct {

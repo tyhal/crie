@@ -12,7 +12,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/tyhal/crie/pkg/linter/noop"
+	"github.com/tyhal/crie/pkg/noop"
 )
 
 // disableLogging changes the logger output and returns a restore function.

@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
+	"github.com/tyhal/x/fmap"
 )
 
 // NoStandards runs all fmt exec commands in matchers and in always fmt
@@ -28,15 +29,15 @@ func cellStyle(_, _ int) lipgloss.Style {
 }
 
 func printCoverageStats(w io.Writer, counts map[string]int) error {
-	fm := flatten(counts)
-	slices.SortFunc(fm, fm.cmpV(true))
+	fm := fmap.New(counts)
+	slices.SortFunc(fm, fm.CmpV(true))
 
 	// Print the top 10
 	t := table.New()
 	t.StyleFunc(cellStyle)
 	t.Headers("ext", "#")
 	for _, kv := range fm[:min(len(fm), 10)] {
-		t.Row(kv.k, fmt.Sprintf("%d", kv.v))
+		t.Row(kv.K, fmt.Sprintf("%d", kv.V))
 	}
 
 	_, err := fmt.Fprintln(w, t.Render())

@@ -4,10 +4,10 @@ import (
 	"reflect"
 
 	"github.com/google/jsonschema-go/jsonschema"
-	"github.com/tyhal/crie/pkg/linter/cli"
-	"github.com/tyhal/crie/pkg/linter/dockfmt"
-	"github.com/tyhal/crie/pkg/linter/noop"
-	"github.com/tyhal/crie/pkg/linter/shfmt"
+	"github.com/tyhal/crie/pkg/cli"
+	"github.com/tyhal/crie/pkg/dockfmt"
+	"github.com/tyhal/crie/pkg/noop"
+	"github.com/tyhal/crie/pkg/shfmt"
 )
 
 // these references are used by Linter to give hints to configuring linter implementations when its only an interface
