@@ -6,11 +6,11 @@ import (
 
 // Options are the core flags and settings to change execution
 type Options struct {
-	Continue      bool   `json:"continue,omitempty" yaml:"continue"`
-	Passes        bool   `json:"passes,omitempty" yaml:"passes"`
-	GitTarget     string `json:"gitTarget,omitempty" yaml:"gitTarget"`
-	GitDiff       bool   `json:"gitDiff,omitempty" yaml:"gitDiff"`
-	Only          string `json:"only,omitempty" yaml:"only"`
+	Continue      bool   `json:"continue,omitzero" yaml:"continue"`
+	Passes        bool   `json:"passes,omitzero" yaml:"passes"`
+	GitTarget     string `json:"gitTarget,omitzero" yaml:"gitTarget"`
+	GitDiff       bool   `json:"gitDiff,omitzero" yaml:"gitDiff"`
+	Only          string `json:"only,omitzero" yaml:"only"`
 	StrictLogging bool   `json:"-" yaml:"-"`
 }
 

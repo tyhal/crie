@@ -13,7 +13,7 @@ import (
 
 // Languages is the schema for a projects' project file
 type Languages struct {
-	Languages map[string]Language `json:"languages" yaml:"languages" jsonschema_description:"a map of languages that crie should be able to run"`
+	Languages map[string]Language `json:"languages" yaml:"languages" jsonschema:"a map of languages that crie should be able to run"`
 }
 
 // ToRunFormat converts the yaml friendly version to an internal representation used by crie

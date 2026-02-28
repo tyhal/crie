@@ -1,9 +1,9 @@
 package language
 
 import (
-	"maps"
+	"reflect"
 
-	"github.com/invopop/jsonschema"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/tyhal/crie/pkg/linter/cli"
 	"github.com/tyhal/crie/pkg/linter/dockfmt"
 	"github.com/tyhal/crie/pkg/linter/noop"
@@ -15,18 +15,38 @@ var linterRefs = []string{"LintCli", "LintShfmt", "LintDockFmt", "LintNoop"}
 
 // Schema is used to generate a complete jsonschema for the Languages struct
 func Schema() *jsonschema.Schema {
-	schema := jsonschema.Reflect(&Languages{})
+	opts := &jsonschema.ForOptions{
+		TypeSchemas: map[reflect.Type]*jsonschema.Schema{
+			reflect.TypeFor[Linter](): Linter{}.JSONSchema(),
+		},
+	}
+	schema, err := jsonschema.For[Languages](opts)
+	if err != nil {
+		panic(err)
+	}
+
+	if schema == nil {
+		panic("jsonschema.For[Languages] returned nil schema")
+	}
+
+	if schema.Defs == nil {
+		schema.Defs = make(map[string]*jsonschema.Schema)
+	}
 
 	// Add the definitions for each implementation of a crie Linter
 
 	// LintCli
-	maps.Copy(schema.Definitions, jsonschema.Reflect(&cli.LintCli{}).Definitions)
+	cliSchema, _ := jsonschema.For[cli.LintCli](nil)
+	schema.Defs["LintCli"] = cliSchema
 	// LintShfmt
-	maps.Copy(schema.Definitions, jsonschema.Reflect(&shfmt.LintShfmt{}).Definitions)
+	shfmtSchema, _ := jsonschema.For[shfmt.LintShfmt](nil)
+	schema.Defs["LintShfmt"] = shfmtSchema
 	// LintDockFmt
-	maps.Copy(schema.Definitions, jsonschema.Reflect(&dockfmt.LintDockFmt{}).Definitions)
+	dockfmtSchema, _ := jsonschema.For[dockfmt.LintDockFmt](nil)
+	schema.Defs["LintDockFmt"] = dockfmtSchema
 	// LintNoop
-	maps.Copy(schema.Definitions, jsonschema.Reflect(&noop.LintNoop{}).Definitions)
+	noopSchema, _ := jsonschema.For[noop.LintNoop](nil)
+	schema.Defs["LintNoop"] = noopSchema
 
 	return schema
 }

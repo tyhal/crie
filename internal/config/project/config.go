@@ -10,18 +10,18 @@ import (
 
 // LoggingConfig is a grouping of log settings
 type LoggingConfig struct {
-	Quiet   bool `json:"quiet,omitempty" yaml:"quiet" jsonschema_description:"disable all output except for errors"`
-	Verbose bool `json:"verbose,omitempty" yaml:"verbose" jsonschema_description:"enable debug logging"`
-	Trace   bool `json:"trace,omitempty" yaml:"trace" jsonschema_description:"(hidden opt) enable all logging (very very verbose)"`
-	JSON    bool `json:"json,omitempty" yaml:"json" jsonschema_description:"change format to json structured logging"`
+	Quiet   bool `json:"quiet,omitzero" yaml:"quiet" jsonschema:"disable all output except for errors"`
+	Verbose bool `json:"verbose,omitzero" yaml:"verbose" jsonschema:"enable debug logging"`
+	Trace   bool `json:"trace,omitzero" yaml:"trace" jsonschema:"(hidden opt) enable all logging (very very verbose)"`
+	JSON    bool `json:"json,omitzero" yaml:"json" jsonschema:"change format to json structured logging"`
 }
 
 // Config are all the things for crie cli
 type Config struct {
-	Log    LoggingConfig  `json:"log,omitempty" yaml:"log" jsonschema_description:"logging options"`
-	Dir    string         `json:"dir,omitempty" yaml:"dir" jsonschema_description:"the directory to run crie in"`
-	Lint   runner.Options `json:"lint,omitempty" yaml:"lint" jsonschema_description:"options for commands that lint"`
-	Ignore []string       `json:"ignore,omitempty" yaml:"ignore" jsonschema_description:"list of regexes matched against the file list to ignore them (exact paths also work)"`
+	Log    LoggingConfig  `json:"log,omitzero" yaml:"log" jsonschema:"logging options"`
+	Dir    string         `json:"dir,omitzero" yaml:"dir" jsonschema:"the directory to run crie in"`
+	Lint   runner.Options `json:"lint,omitzero" yaml:"lint" jsonschema:"options for commands that lint"`
+	Ignore []string       `json:"ignore,omitzero" yaml:"ignore" jsonschema:"list of regexes matched against the file list to ignore them (exact paths also work)"`
 }
 
 // NewProjectConfigFile Creates the project file locally

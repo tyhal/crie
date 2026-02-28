@@ -14,7 +14,7 @@ var ErrMissedSetup = errors.New("setup was not called first")
 
 // LintNoop performs no operations, as a template implementation of cries' linter.Linter
 type LintNoop struct {
-	Type          string `json:"type" yaml:"type" jsonschema:"enum=noop" jsonschema_description:"a linter type to do nothing"`
+	Type          string `json:"type" yaml:"type" jsonschema:"a linter type to do nothing"`
 	setupErr      error
 	runErr        error
 	lintDuration  time.Duration

@@ -3,7 +3,7 @@ package language
 import (
 	"fmt"
 
-	"github.com/invopop/jsonschema"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/tyhal/crie/pkg/linter"
 	"github.com/tyhal/crie/pkg/linter/cli"
 	"github.com/tyhal/crie/pkg/linter/dockfmt"
@@ -19,7 +19,6 @@ type Linter struct {
 
 // JSONSchema is used to parse a valid jsonschema just for a Linter
 func (l Linter) JSONSchema() *jsonschema.Schema {
-
 	var schema jsonschema.Schema
 
 	schema.OneOf = make([]*jsonschema.Schema, len(linterRefs))

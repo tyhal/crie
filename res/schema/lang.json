@@ -1,94 +1,112 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tyhal/crie/internal/config/language/languages",
-  "$ref": "#/$defs/Languages",
-  "$defs": {
-    "Instance": {
-      "properties": {
-        "bin": {
-          "type": "string",
-          "description": "the binary or command to use"
-        },
-        "start": {
-          "$ref": "#/$defs/Par",
-          "description": "parameters that will be put in front of the file path"
-        },
-        "end": {
-          "$ref": "#/$defs/Par",
-          "description": "parameters that will be put behind the file path"
-        },
-        "chdir": {
-          "type": "boolean",
-          "description": "if true the tool will change directory to where the target file is located"
-        },
-        "will_write": {
-          "type": "boolean",
-          "description": "whether the tool will write to the file system, if unset for container execution will mount with read-only privileges"
-        }
-      },
-      "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "languages": {
       "type": "object",
-      "required": [
-        "bin"
-      ]
-    },
-    "Language": {
-      "properties": {
-        "match": {
-          "$ref": "#/$defs/Regex",
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "array"
-            }
-          ],
-          "description": "a regex to match files against to know they are the target of this language"
-        },
-        "fmt": {
-          "$ref": "#/$defs/Linter",
-          "description": "used for the given language when formatting"
-        },
-        "chk": {
-          "$ref": "#/$defs/Linter",
-          "description": "used for the given language when linting/checking"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "match"
-      ]
-    },
-    "Languages": {
-      "properties": {
-        "languages": {
-          "additionalProperties": {
-            "$ref": "#/$defs/Language"
+      "description": "a map of languages that crie should be able to run",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "match": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "properties": {},
+            "description": "a regex to match files against to know they are the target of this language",
+            "additionalProperties": false
           },
-          "type": "object",
-          "description": "a map of languages that crie should be able to run"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "languages"
-      ]
-    },
+          "fmt": {
+            "description": "used for the given language when formatting",
+            "oneOf": [
+              {
+                "$ref": "#/$defs/LintCli"
+              },
+              {
+                "$ref": "#/$defs/LintShfmt"
+              },
+              {
+                "$ref": "#/$defs/LintDockFmt"
+              },
+              {
+                "$ref": "#/$defs/LintNoop"
+              }
+            ]
+          },
+          "chk": {
+            "description": "used for the given language when linting/checking",
+            "oneOf": [
+              {
+                "$ref": "#/$defs/LintCli"
+              },
+              {
+                "$ref": "#/$defs/LintShfmt"
+              },
+              {
+                "$ref": "#/$defs/LintDockFmt"
+              },
+              {
+                "$ref": "#/$defs/LintNoop"
+              }
+            ]
+          }
+        },
+        "required": [
+          "match"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
     "LintCli": {
+      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "cli"
-          ],
           "description": "the most common linter type, a cli tool"
         },
         "exec": {
-          "$ref": "#/$defs/Instance",
-          "description": "settings for the command to run"
+          "type": "object",
+          "properties": {
+            "bin": {
+              "type": "string",
+              "description": "the binary or command to use"
+            },
+            "start": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              },
+              "description": "parameters that will be put in front of the file path"
+            },
+            "end": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              },
+              "description": "parameters that will be put behind the file path"
+            },
+            "chdir": {
+              "type": "boolean",
+              "description": "if true the tool will change directory to where the target file is located"
+            },
+            "will_write": {
+              "type": "boolean",
+              "description": "whether the tool will write to the file system, if unset for container execution will mount with read-only privileges"
+            }
+          },
+          "description": "settings for the command to run",
+          "required": [
+            "bin"
+          ],
+          "additionalProperties": false
         },
         "img": {
           "type": "string",
@@ -99,25 +117,23 @@
           "description": "if an image tag should be appended with cries current version"
         }
       },
-      "additionalProperties": false,
-      "type": "object",
       "required": [
         "type",
         "exec"
-      ]
+      ],
+      "additionalProperties": false
     },
     "LintDockFmt": {
+      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "dockfmt"
-          ],
           "description": "a built in Docker formatter thanks to reteps (Pete Stenger)"
         },
         "indent_size": {
           "type": "integer",
-          "description": "Number of spaces to use for indentation"
+          "description": "Number of spaces to use for indentation",
+          "minimum": 0
         },
         "trailing_newline": {
           "type": "boolean",
@@ -128,83 +144,47 @@
           "description": "Redirect operators will be followed by a space"
         }
       },
-      "additionalProperties": false,
-      "type": "object",
       "required": [
         "type",
         "indent_size",
         "trailing_newline",
         "space_redirects"
-      ]
+      ],
+      "additionalProperties": false
     },
     "LintNoop": {
+      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "noop"
-          ],
           "description": "a linter type to do nothing"
         }
       },
-      "additionalProperties": false,
-      "type": "object",
       "required": [
         "type"
-      ]
+      ],
+      "additionalProperties": false
     },
     "LintShfmt": {
+      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "shfmt"
-          ],
           "description": "a built in shell formatter thanks to mvdan (Daniel Martí)"
         },
         "language": {
-          "type": "string",
-          "enum": [
-            "bash",
-            "posix",
-            "sh",
-            "mksh"
-          ]
+          "type": "string"
         }
       },
-      "additionalProperties": false,
-      "type": "object",
       "required": [
         "type",
         "language"
-      ]
-    },
-    "Linter": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/LintCli"
-        },
-        {
-          "$ref": "#/$defs/LintShfmt"
-        },
-        {
-          "$ref": "#/$defs/LintDockFmt"
-        },
-        {
-          "$ref": "#/$defs/LintNoop"
-        }
-      ]
-    },
-    "Par": {
-      "items": {
-        "type": "string"
-      },
-      "type": "array"
-    },
-    "Regex": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
+      ],
+      "additionalProperties": false
     }
-  }
+  },
+  "required": [
+    "languages"
+  ],
+  "additionalProperties": false
 }

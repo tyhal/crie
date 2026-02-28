@@ -10,10 +10,10 @@ const defaultIndent = 4
 
 // LintDockFmt is a linter that uses the reteps/dockerfmt library to format dockerfiles
 type LintDockFmt struct {
-	Type            string `json:"type" yaml:"type" jsonschema:"enum=dockfmt" jsonschema_description:"a built in Docker formatter thanks to reteps (Pete Stenger)"`
-	IndentSize      uint   `json:"indent_size" yaml:"indent_size" jsonschema_description:"Number of spaces to use for indentation"`
-	TrailingNewline bool   `json:"trailing_newline" yaml:"trailing_newline" jsonschema_description:"End the file with a trailing newline"`
-	SpaceRedirects  bool   `json:"space_redirects" yaml:"space_redirects" jsonschema_description:"Redirect operators will be followed by a space"`
+	Type            string `json:"type" yaml:"type" jsonschema:"a built in Docker formatter thanks to reteps (Pete Stenger)"`
+	IndentSize      uint   `json:"indent_size" yaml:"indent_size" jsonschema:"Number of spaces to use for indentation"`
+	TrailingNewline bool   `json:"trailing_newline" yaml:"trailing_newline" jsonschema:"End the file with a trailing newline"`
+	SpaceRedirects  bool   `json:"space_redirects" yaml:"space_redirects" jsonschema:"Redirect operators will be followed by a space"`
 }
 
 var _ linter.Linter = (*LintDockFmt)(nil)
