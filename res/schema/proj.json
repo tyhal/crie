@@ -26,12 +26,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "log",
-        "dir",
-        "lint"
-      ]
+      "type": "object"
     },
     "LoggingConfig": {
       "properties": {
@@ -74,14 +69,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "continue",
-        "passes",
-        "gitTarget",
-        "gitDiff",
-        "only"
-      ]
+      "type": "object"
     }
   }
 }
