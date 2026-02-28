@@ -14,10 +14,10 @@ type Par []string
 // and whether execution should change to the file's directory first.
 type Instance struct {
 	Bin       string `json:"bin" yaml:"bin" jsonschema_required:"true" jsonschema_description:"the binary or command to use"`
-	Start     Par    `json:"start,flow,omitempty" yaml:"start,flow,omitempty" jsonschema_description:"parameters that will be put in front of the file path"`
-	End       Par    `json:"end,flow,omitempty" yaml:"end,flow,omitempty" jsonschema_description:"parameters that will be put behind the file path"`
-	ChDir     bool   `json:"chdir,omitempty" yaml:"chdir,omitempty" jsonschema_description:"if true the tool will change directory to where the target file is located"`
-	WillWrite bool   `json:"will_write,omitempty" yaml:"will_write,omitempty" jsonschema_description:"whether the tool will write to the file system, if unset for container execution will mount with read-only privileges"`
+	Start     Par    `json:"start,flow,omitempty" yaml:"start,flow" jsonschema_description:"parameters that will be put in front of the file path"`
+	End       Par    `json:"end,flow,omitempty" yaml:"end,flow" jsonschema_description:"parameters that will be put behind the file path"`
+	ChDir     bool   `json:"chdir,omitempty" yaml:"chdir" jsonschema_description:"if true the tool will change directory to where the target file is located"`
+	WillWrite bool   `json:"will_write,omitempty" yaml:"will_write" jsonschema_description:"whether the tool will write to the file system, if unset for container execution will mount with read-only privileges"`
 }
 
 // Executor abstracts how a CLI tool is executed (host, Docker, Podman, etc.).

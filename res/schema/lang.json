@@ -58,9 +58,7 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "match",
-        "fmt",
-        "chk"
+        "match"
       ]
     },
     "Languages": {

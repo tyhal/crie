@@ -20,8 +20,8 @@ var Version = "latest"
 type LintCli struct {
 	Type           string            `json:"type" yaml:"type" jsonschema:"enum=cli" jsonschema_description:"the most common linter type, a cli tool"`
 	Exec           executor.Instance `json:"exec" yaml:"exec" jsonschema_required:"true" jsonschema_description:"settings for the command to run" `
-	Img            string            `json:"img,omitempty" yaml:"img,omitempty" jsonschema_description:"the container image to pull and use"`
-	TagCrieVersion bool              `json:"tag_crie_version,omitempty" yaml:"tag_crie_version,omitempty" jsonschema_description:"if an image tag should be appended with cries current version"`
+	Img            string            `json:"img,omitempty" yaml:"img" jsonschema_description:"the container image to pull and use"`
+	TagCrieVersion bool              `json:"tag_crie_version,omitempty" yaml:"tag_crie_version" jsonschema_description:"if an image tag should be appended with cries current version"`
 	executor       executor.Executor
 }
 
