@@ -1,39 +1,8 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tyhal/crie/internal/config/project/config",
-  "$ref": "#/$defs/Config",
-  "$defs": {
-    "Config": {
-      "properties": {
-        "log": {
-          "$ref": "#/$defs/LoggingConfig",
-          "description": "logging options"
-        },
-        "dir": {
-          "type": "string",
-          "description": "the directory to run crie in"
-        },
-        "lint": {
-          "$ref": "#/$defs/Options",
-          "description": "options for commands that lint"
-        },
-        "ignore": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "description": "list of regexes matched against the file list to ignore them (exact paths also work)"
-        }
-      },
-      "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "log": {
       "type": "object",
-      "required": [
-        "log",
-        "dir",
-        "lint"
-      ]
-    },
-    "LoggingConfig": {
       "properties": {
         "quiet": {
           "type": "boolean",
@@ -52,10 +21,15 @@
           "description": "change format to json structured logging"
         }
       },
-      "additionalProperties": false,
-      "type": "object"
+      "description": "logging options",
+      "additionalProperties": false
     },
-    "Options": {
+    "dir": {
+      "type": "string",
+      "description": "the directory to run crie in"
+    },
+    "lint": {
+      "type": "object",
       "properties": {
         "continue": {
           "type": "boolean"
@@ -73,15 +47,19 @@
           "type": "string"
         }
       },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "continue",
-        "passes",
-        "gitTarget",
-        "gitDiff",
-        "only"
-      ]
+      "description": "options for commands that lint",
+      "additionalProperties": false
+    },
+    "ignore": {
+      "type": [
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "description": "list of regexes matched against the file list to ignore them (exact paths also work)"
     }
-  }
+  },
+  "additionalProperties": false
 }
