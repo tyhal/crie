@@ -24,10 +24,11 @@ format all python files
 
 ```
   -c, --conf string        project configuration file (default "crie.yml")
+  -d, --dir string         the directory to run crie in
   -h, --help               help for crie
   -j, --json               turn on json output
   -l, --lang-conf string   language configuration file (default "crie.lang.yml")
-  -q, --quiet              only prints critical errors (suppresses verbose)
+  -q, --quiet              only prints critical errors
   -v, --verbose            turn on verbose printing for reports
 ```
 

@@ -23,7 +23,7 @@
         },
         "will_write": {
           "type": "boolean",
-          "description": "whether the tool will write to the file system, if unset for container execution it will mount with read-only privileges"
+          "description": "whether the tool will write to the file system, if unset for container execution will mount with read-only privileges"
         }
       },
       "additionalProperties": false,
@@ -58,7 +58,9 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "match"
+        "match",
+        "fmt",
+        "chk"
       ]
     },
     "Languages": {

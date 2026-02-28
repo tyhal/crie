@@ -19,6 +19,7 @@ type LoggingConfig struct {
 // Config are all the things for crie cli
 type Config struct {
 	Log    LoggingConfig  `json:"log" yaml:"log,omitempty" jsonschema_description:"logging options"`
+	Dir    string         `json:"dir" yaml:"dir,omitempty" jsonschema_description:"the directory to run crie in"`
 	Lint   runner.Options `json:"lint" yaml:"lint,omitempty" jsonschema_description:"options for commands that lint"`
 	Ignore []string       `json:"ignore,omitempty" yaml:"ignore,omitempty" jsonschema_description:"list of regexes matched against the file list to ignore them (exact paths also work)"`
 }
