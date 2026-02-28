@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tyhal/crie/pkg/linter/cli/executor"
+	"github.com/tyhal/crie/pkg/cli/executor"
 )
 
 func TestLintCli_isContainer(t *testing.T) {

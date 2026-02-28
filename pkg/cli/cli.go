@@ -9,8 +9,8 @@ import (
 	"runtime/trace"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/tyhal/crie/pkg/cli/executor"
 	"github.com/tyhal/crie/pkg/linter"
-	"github.com/tyhal/crie/pkg/linter/cli/executor"
 )
 
 // Version used to match img tags with crie versions

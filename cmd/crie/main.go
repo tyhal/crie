@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/tyhal/crie/internal/cli"
-	lintercli "github.com/tyhal/crie/pkg/linter/cli"
+	lintercli "github.com/tyhal/crie/pkg/cli"
 )
 
 var version = "latest"

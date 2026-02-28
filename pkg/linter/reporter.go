@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tyhal/crie/pkg/folding"
+	"github.com/tyhal/x/fold"
 )
 
 // Reporter is used to report results to the user
@@ -72,7 +72,7 @@ type StandardReporter struct {
 	SrcOut   logFormat
 	SrcErr   logFormat
 	SrcInt   logFormat
-	Folder   folding.Folder
+	fold.Folder
 }
 
 // NewStandardReporter creates a new StandardReporter
@@ -82,7 +82,7 @@ func NewStandardReporter(showPass bool) Reporter {
 		SrcOut:   logFormat{log.WithFields(log.Fields{"src": "stdout"})},
 		SrcErr:   logFormat{log.WithFields(log.Fields{"src": "stderr"})},
 		SrcInt:   logFormat{log.WithFields(log.Fields{"src": "internal"})},
-		Folder:   folding.New(),
+		Folder:   fold.New(),
 	}
 }
 
@@ -94,7 +94,7 @@ func (r *StandardReporter) Log(rep *Report) error {
 			r.SrcOut.Log(log.DebugLevel, rep.StdOut)
 		}
 	} else {
-		id, _ := r.Folder.Start(rep.Target, "\u2716", false)
+		id, _ := r.Start(rep.Target, "\u2716", false)
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
 			r.SrcErr.Log(log.ErrorLevel, rep.StdErr)
@@ -103,7 +103,7 @@ func (r *StandardReporter) Log(rep *Report) error {
 		} else {
 			r.SrcInt.Log(log.ErrorLevel, rep.Err)
 		}
-		_ = r.Folder.Stop(id)
+		_ = r.Stop(id)
 	}
 
 	return rep.Err

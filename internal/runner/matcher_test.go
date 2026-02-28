@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tyhal/crie/pkg/linter/noop"
+	"github.com/tyhal/crie/pkg/noop"
 )
 
 func TestLanguages_Show(t *testing.T) {
