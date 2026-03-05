@@ -5,7 +5,7 @@ go 1.25.4
 toolchain go1.26.0
 
 require (
-	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/charmbracelet/lipgloss/v2 v2.0.0
 	github.com/containerd/platforms v1.0.0-rc.2
 	github.com/containers/podman/v5 v5.8.0
 	github.com/docker/docker v28.5.2+incompatible
