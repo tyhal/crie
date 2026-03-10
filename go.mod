@@ -2,7 +2,7 @@ module github.com/tyhal/crie
 
 go 1.25.4
 
-toolchain go1.26.0
+toolchain go1.26.1
 
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
