@@ -13,7 +13,7 @@ require (
 	github.com/google/jsonschema-go v0.4.2
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v1.1.3
-	github.com/opencontainers/runtime-spec v1.2.1
+	github.com/opencontainers/runtime-spec v1.3.0
 	github.com/reteps/dockerfmt v0.3.9
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
