@@ -9,7 +9,7 @@ require (
 	github.com/containerd/platforms v1.0.0-rc.2
 	github.com/containers/podman/v5 v5.8.0
 	github.com/docker/docker v28.5.2+incompatible
-	github.com/go-git/go-git/v5 v5.17.0
+	github.com/go-git/go-git/v5 v5.17.2
 	github.com/google/jsonschema-go v0.4.2
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v1.1.3
