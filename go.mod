@@ -9,7 +9,7 @@ require (
 	github.com/containerd/platforms v1.0.0-rc.2
 	github.com/containers/podman/v5 v5.8.0
 	github.com/docker/docker v28.5.2+incompatible
-	github.com/go-git/go-git/v5 v5.17.0
+	github.com/go-git/go-git/v5 v5.17.1
 	github.com/google/jsonschema-go v0.4.2
 	github.com/google/renameio v1.0.1
 	github.com/olekukonko/tablewriter v1.1.3
@@ -20,7 +20,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tyhal/x v0.0.0-20260228233014-acc9ff3f2823
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 	gopkg.in/yaml.v3 v3.0.1
 	mvdan.cc/sh/v3 v3.13.0
 )

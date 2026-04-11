@@ -1,5 +1,8 @@
+merge_queue:
+  max_parallel_checks: 1
 queue_rules:
   - name: default
+    batch_size: 1
     queue_conditions:
       - status-success=crie-test
       - status-success=SonarCloud Code Analysis
