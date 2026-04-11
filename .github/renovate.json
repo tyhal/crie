@@ -4,11 +4,13 @@
   ],
   "regexManagers": [
     {
-      "fileMatch": ["^internal/config/language/defaults\\.yml$"],
+      "datasourceTemplate": "docker",
+      "fileMatch": [
+        "^internal/config/language/defaults\\.yml$"
+      ],
       "matchStrings": [
         "img:\\s*[\"'](?<depName>[^:\"']+):(?<currentValue>[^\"']+)[\"']"
-      ],
-      "datasourceTemplate": "docker"
+      ]
     }
   ]
 }
