@@ -1,5 +1,16 @@
 {
   "extends": [
     "config:recommended"
+  ],
+  "regexManagers": [
+    {
+      "datasourceTemplate": "docker",
+      "fileMatch": [
+        "^internal/config/language/defaults\\.yml$"
+      ],
+      "matchStrings": [
+        "img:\\s*[\"'](?<depName>[^:\"']+):(?<currentValue>[^\"']+)[\"']"
+      ]
+    }
   ]
 }
