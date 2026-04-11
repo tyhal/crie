@@ -7,7 +7,7 @@ toolchain go1.26.1
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/containerd/platforms v1.0.0-rc.4
-	github.com/containers/podman/v5 v5.8.0
+	github.com/containers/podman/v5 v5.8.1
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/go-git/go-git/v5 v5.17.1
 	github.com/google/jsonschema-go v0.4.2
