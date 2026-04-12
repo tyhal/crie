@@ -335,6 +335,8 @@ github.com/prometheus/procfs v0.16.1 h1:hZ15bTNuirocR6u0JZ6BAHHmwS1p8B4P6MRqxtzM
 github.com/prometheus/procfs v0.16.1/go.mod h1:teAbpZRB1iIAJYREa1LsoWUXykVXA1KlTmWl8x/U+Is=
 github.com/reteps/dockerfmt v0.3.9 h1:GzcXv51BOCW/vx+HCqfilgG15zrdDmHWM4gzm83vaTk=
 github.com/reteps/dockerfmt v0.3.9/go.mod h1:5lpbp1KzLWaRhL7qB6IEutHoQK3ZcT2Lb5MWPmFts74=
+github.com/reteps/dockerfmt v0.5.2 h1:kqZb5PvSL0bJ7NLjiHmZjQ6Yt2zcX+PKo/Km04ccWBw=
+github.com/reteps/dockerfmt v0.5.2/go.mod h1:bOVGyTkONLGqOZ9ZGNZqs9Q/OXOJi9b1OzHs1cpXWO8=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
 github.com/rivo/uniseg v0.4.7/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
