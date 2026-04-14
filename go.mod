@@ -7,7 +7,7 @@ toolchain go1.26.2
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/containerd/platforms v1.0.0-rc.4
-	github.com/containers/podman/v5 v5.8.1
+	github.com/containers/podman/v5 v5.8.2
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/go-git/go-git/v5 v5.17.2
 	github.com/google/jsonschema-go v0.4.2
@@ -49,7 +49,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.18.1 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
-	github.com/containers/buildah v1.43.0 // indirect
+	github.com/containers/buildah v1.43.1 // indirect
 	github.com/containers/common v0.64.2 // indirect
 	github.com/containers/gvisor-tap-vsock v0.8.8 // indirect
 	github.com/containers/libhvee v0.10.1-0.20250829163521-178d10e67860 // indirect
@@ -173,8 +173,8 @@ require (
 	go.opentelemetry.io/otel v1.39.0 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
-	go.podman.io/common v0.67.0 // indirect
-	go.podman.io/image/v5 v5.39.1 // indirect
+	go.podman.io/common v0.67.1 // indirect
+	go.podman.io/image/v5 v5.39.2 // indirect
 	go.podman.io/storage v1.62.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
