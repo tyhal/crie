@@ -1,2 +1,2 @@
 
-FROM julia:1.12.5
+FROM julia:1.12.6
