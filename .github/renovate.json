@@ -2,15 +2,15 @@
   "extends": [
     "config:recommended"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "datasourceTemplate": "docker",
-      "fileMatch": [
-        "^internal/config/language/defaults\\.yml$"
-      ],
+      "managerFilePatterns": ["/^internal/config/language/defaults\\.yml$/"],
       "matchStrings": [
         "img:\\s*[\"'](?<depName>[^:\"']+):(?<currentValue>[^\"']+)[\"']"
-      ]
+      ],
+      "versioningTemplate": "docker"
     }
   ]
 }
