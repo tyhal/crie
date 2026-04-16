@@ -1,8 +1,8 @@
-FROM alpine:3.23.3 AS clang_layer
+FROM alpine:3.23.4 AS clang_layer
 RUN apk --no-cache add clang21-extra-tools
 # RUN ldd /usr/bin/clang-format && exit 1
 
-FROM alpine:3.23.3
+FROM alpine:3.23.4
 
 # hadolint ignore=DL3059
 RUN adduser -D standards
