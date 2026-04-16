@@ -1,16 +1,18 @@
 {
-  "extends": [
-    "config:recommended"
-  ],
   "customManagers": [
     {
       "customType": "regex",
       "datasourceTemplate": "docker",
-      "managerFilePatterns": ["/^internal/config/language/defaults\\.yml$/"],
+      "managerFilePatterns": [
+        "/^internal/config/language/defaults\\.yml$/"
+      ],
       "matchStrings": [
         "img:\\s*[\"'](?<depName>[^:\"']+):(?<currentValue>[^\"']+)[\"']"
       ],
       "versioningTemplate": "docker"
     }
+  ],
+  "extends": [
+    "config:recommended"
   ]
 }
