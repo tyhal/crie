@@ -90,7 +90,7 @@ languages:
         bin: tflint
         start: ["--filter"]
         chdir: true
-      img: "ghcr.io/terraform-linters/tflint:v0.61.0"
+      img: "ghcr.io/terraform-linters/tflint:v0.62.0"
   javascript:
     match: ['\.js$', '\.jsx$']
     fmt:
