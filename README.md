@@ -10,7 +10,7 @@
 
 ## Features
 
-#### This tool enables teams of developers to use static-analysis where they wouldn't:
+`crie` is for teams that want one reproducible command to format, lint, and find coverage gaps across every language in a repository, without installing every tool locally.
 
 * No more config chaos - one simple setup for all your tools
 * Quality checks that just work, right out of the box
