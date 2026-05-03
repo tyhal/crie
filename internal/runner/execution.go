@@ -61,14 +61,16 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 // Run is the generic way to run everything based on the package configuration
 func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) error {
 	defer trace.StartRegion(ctx, "Crie Run").End()
+	l := log.With("type", lintType)
 	fileList, err := s.getFileList()
 	if err != nil {
 		return fmt.Errorf("getting files: %w", err)
 	}
+	l.With("files", len(fileList)).Printf("running")
 	err = s.runLinters(ctx, lintType, fileList)
 	if err != nil {
 		return fmt.Errorf("failed %s: %w", lintType, err)
 	}
-	log.Printf("⛅  passed %s \n", lintType)
+	l.Printf("passed")
 	return nil
 }
