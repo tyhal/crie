@@ -98,7 +98,6 @@ var FmtCmd = &cobra.Command{
 }
 
 func stage(ctx context.Context, lintType runner.LintType) error {
-	log.Infof("❨ %s ❩", lintType.String())
 	err := crieRun.Run(ctx, lintType)
 	if err != nil {
 		return fmt.Errorf("crie %s: %w", lintType.String(), err)
