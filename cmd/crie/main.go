@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/fang"
+
 	"github.com/tyhal/crie/internal/cli"
 	lintercli "github.com/tyhal/crie/pkg/cli"
 )

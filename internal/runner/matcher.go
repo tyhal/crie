@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/olekukonko/tablewriter"
+
 	"github.com/tyhal/crie/pkg/linter"
 )
 

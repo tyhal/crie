@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/tyhal/crie/internal/runner"
 	"gopkg.in/yaml.v3"
+
+	"github.com/tyhal/crie/internal/runner"
 )
 
 // LoggingConfig is a grouping of log settings

@@ -4,10 +4,10 @@ package cli
 
 import (
 	"bytes"
-
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/tyhal/crie/pkg/cli/executor"
 )
 

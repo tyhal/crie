@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/google/jsonschema-go/jsonschema"
+
 	"github.com/tyhal/crie/pkg/cli"
 	"github.com/tyhal/crie/pkg/dockfmt"
 	"github.com/tyhal/crie/pkg/noop"

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	log "charm.land/log/v2"
+
 	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/runner"
 )

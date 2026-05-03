@@ -5,9 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
+
 	"github.com/tyhal/crie/internal/config/language"
 	"github.com/tyhal/crie/internal/config/project"
-	"gopkg.in/yaml.v3"
 )
 
 // ConfCmd is used to show configuration settings after flags, env, configs are parsed
