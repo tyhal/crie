@@ -2,8 +2,10 @@
 package main
 
 import (
+	"context"
 	"os"
 
+	"github.com/charmbracelet/fang"
 	"github.com/tyhal/crie/internal/cli"
 	lintercli "github.com/tyhal/crie/pkg/cli"
 )
@@ -11,12 +13,11 @@ import (
 var version = "latest"
 
 func main() {
-	if err := cli.RootCmd.Execute(); err != nil {
+	if err := fang.Execute(context.Background(), cli.RootCmd, fang.WithVersion(version)); err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	cli.RootCmd.Version = version
 	lintercli.Version = version
 }

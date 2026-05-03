@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"runtime/trace"
 
-	log "github.com/sirupsen/logrus"
+	log "charm.land/log/v2"
 	"github.com/tyhal/crie/pkg/cli/executor"
 	"github.com/tyhal/crie/pkg/linter"
 )

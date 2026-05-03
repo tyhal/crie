@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	log "charm.land/log/v2"
 	"github.com/spf13/cobra"
 )
 

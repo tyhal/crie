@@ -11,13 +11,13 @@ import (
 	"os"
 	"path/filepath"
 
+	log "charm.land/log/v2"
 	"github.com/containerd/platforms"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
-	log "github.com/sirupsen/logrus"
 	"github.com/tyhal/crie/pkg/linter"
 )
 
@@ -148,16 +148,13 @@ func (e *dockerExecutor) pull(ctx context.Context) error {
 	// Ensure we have the image downloaded
 	pullstat, err := e.client.ImagePull(ctx, e.image, image.PullOptions{})
 	if err != nil {
-		log.WithFields(log.Fields{
-			"stage": "docker pull",
-			"image": e.image,
-		}).Fatal(err)
+		log.With("stage", "docker pull", "image", e.image).Fatal(err)
 		return err
 	}
 
 	var pullOut bytes.Buffer
 	_, err = io.Copy(&pullOut, pullstat)
-	if log.IsLevelEnabled(log.TraceLevel) {
+	if log.DebugLevel >= log.GetLevel() {
 		fmt.Print(pullOut.String())
 	}
 	return err
@@ -185,7 +182,7 @@ func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	cmd = append(cmd, targetFile)
 	cmd = append(cmd, e.End...)
 
-	log.Trace(cmd)
+	log.Debug(cmd)
 	config := container.ExecOptions{
 		Cmd:          cmd,
 		User:         fmt.Sprintf("%d", os.Getuid()),
@@ -237,7 +234,7 @@ func (e *dockerExecutor) Cleanup(ctx context.Context) error {
 	if e.id != "" {
 		timeoutSeconds := 1
 
-		d := log.WithFields(log.Fields{"dockerId": e.id})
+		d := log.With("dockerId", e.id)
 
 		d.Debug("stopping container")
 		if err := e.client.ContainerStop(ctx, e.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {

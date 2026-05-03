@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"runtime/trace"
 
-	log "github.com/sirupsen/logrus"
+	log "charm.land/log/v2"
 	"github.com/tyhal/crie/internal/runner/orchestrator"
 
 	"github.com/tyhal/crie/pkg/linter"
@@ -69,6 +69,6 @@ func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) error {
 	if err != nil {
 		return fmt.Errorf("failed %s: %w", lintType, err)
 	}
-	log.Printf("\u26c5  passed %s \n", lintType)
+	log.Printf("⛅  passed %s \n", lintType)
 	return nil
 }

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/table"
+	"charm.land/lipgloss/v2"
+	"charm.land/lipgloss/v2/table"
 	"github.com/tyhal/x/fmap"
 )
 
@@ -35,6 +35,7 @@ func printCoverageStats(w io.Writer, counts map[string]int) error {
 	// Print the top 10
 	t := table.New()
 	t.StyleFunc(cellStyle)
+	t.Border(lipgloss.RoundedBorder())
 	t.Headers("ext", "#")
 	for _, kv := range fm[:min(len(fm), 10)] {
 		t.Row(kv.K, fmt.Sprintf("%d", kv.V))
