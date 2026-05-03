@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"time"
 
+	log "charm.land/log/v2"
 	"github.com/containerd/platforms"
 	"github.com/containers/podman/v5/pkg/api/handlers"
 	"github.com/containers/podman/v5/pkg/bindings"
@@ -31,7 +32,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/tyhal/crie/pkg/linter"
 )
@@ -189,7 +189,7 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	mountPerms := "ro" // should be used for static-only
 	if e.WillWrite {
 		mountPerms = "rw" // should be used for formatters
-		log.Debugln("allowing writes to host filesystem")
+		log.Debug("allowing writes to host filesystem")
 	}
 
 	s.Mounts = []spec.Mount{
@@ -323,7 +323,7 @@ func (e *podmanExecutor) Cleanup(_ context.Context) error {
 		var timeoutSeconds uint = 1
 		var ignore = false
 
-		d := log.WithFields(log.Fields{"podmanId": e.id})
+		d := log.With("podmanId", e.id)
 
 		d.Debug("stopping container")
 		stopOptions := containers.StopOptions{

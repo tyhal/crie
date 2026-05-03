@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	log "charm.land/log/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tyhal/crie/internal/config/language"

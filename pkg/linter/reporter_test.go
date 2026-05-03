@@ -3,19 +3,19 @@ package linter
 import (
 	"fmt"
 	"io"
+	"os"
 	"testing"
 
-	"github.com/sirupsen/logrus"
+	log "charm.land/log/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 // disableLogging changes the logger output and returns a restore function.
 // The caller is expected to defer the returned function.
 func disableLogging() func() {
-	originalOutput := logrus.StandardLogger().Out
-	logrus.SetOutput(io.Discard)
+	log.SetOutput(io.Discard)
 	return func() {
-		logrus.SetOutput(originalOutput)
+		log.SetOutput(os.Stderr)
 	}
 }
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	log "charm.land/log/v2"
 	"github.com/tyhal/x/fold"
 )
 
@@ -17,18 +17,18 @@ type Reporter interface {
 // StructuredReporter is a Reporter that uses structured logging
 type StructuredReporter struct {
 	ShowPass bool
-	SrcOut   *log.Entry
-	SrcErr   *log.Entry
-	SrcInt   *log.Entry
+	SrcOut   *log.Logger
+	SrcErr   *log.Logger
+	SrcInt   *log.Logger
 }
 
 // NewStructuredReporter creates a new StructuredReporter
 func NewStructuredReporter(showPass bool) Reporter {
 	return &StructuredReporter{
 		ShowPass: showPass,
-		SrcOut:   log.WithField("src", "stdout"),
-		SrcErr:   log.WithField("src", "stderr"),
-		SrcInt:   log.WithField("src", "internal"),
+		SrcOut:   log.With("src", "stdout"),
+		SrcErr:   log.With("src", "stderr"),
+		SrcInt:   log.With("src", "internal"),
 	}
 }
 
@@ -36,18 +36,18 @@ func NewStructuredReporter(showPass bool) Reporter {
 func (r *StructuredReporter) Log(rep *Report) error {
 	if rep.Err == nil {
 		if r.ShowPass {
-			log.WithField("target", rep.Target).Printf("pass")
+			log.With("target", rep.Target).Print("pass")
 			r.SrcOut.Debug(rep.StdOut)
 		}
 	} else {
 		var failedResultErr *FailedResultError
 		if errors.As(rep.Err, &failedResultErr) {
 			// TODO do this better
-			r.SrcErr.WithField("target", rep.Target).Error(rep.StdErr)
-			r.SrcOut.WithField("target", rep.Target).Info(rep.StdOut)
-			r.SrcInt.WithField("target", rep.Target).Debug(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
+			r.SrcErr.With("target", rep.Target).Error(rep.StdErr)
+			r.SrcOut.With("target", rep.Target).Info(rep.StdOut)
+			r.SrcInt.With("target", rep.Target).Debug(strings.NewReader(rep.Err.Error()), "toolerr", log.DebugLevel)
 		} else {
-			r.SrcInt.WithField("target", rep.Target).Error(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
+			r.SrcInt.With("target", rep.Target).Error(strings.NewReader(rep.Err.Error()), "toolerr", log.ErrorLevel)
 		}
 	}
 
@@ -55,13 +55,13 @@ func (r *StructuredReporter) Log(rep *Report) error {
 }
 
 type logFormat struct {
-	Entry *log.Entry
+	Entry *log.Logger
 }
 
 // Log prints the log message to stdout
 func (l *logFormat) Log(level log.Level, args ...any) {
-	if log.IsLevelEnabled(level) {
-		l.Entry.Log(level)
+	if level >= log.GetLevel() {
+		l.Entry.Log(level, "")
 		fmt.Println(args...)
 	}
 }
@@ -79,9 +79,9 @@ type StandardReporter struct {
 func NewStandardReporter(showPass bool) Reporter {
 	return &StandardReporter{
 		ShowPass: showPass,
-		SrcOut:   logFormat{log.WithFields(log.Fields{"src": "stdout"})},
-		SrcErr:   logFormat{log.WithFields(log.Fields{"src": "stderr"})},
-		SrcInt:   logFormat{log.WithFields(log.Fields{"src": "internal"})},
+		SrcOut:   logFormat{log.With("src", "stdout")},
+		SrcErr:   logFormat{log.With("src", "stderr")},
+		SrcInt:   logFormat{log.With("src", "internal")},
 		Folder:   fold.New(),
 	}
 }
