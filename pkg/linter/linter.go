@@ -1,3 +1,4 @@
+// Package linter provides a simple interface for linting, allowing for custom implementations
 package linter
 
 import (

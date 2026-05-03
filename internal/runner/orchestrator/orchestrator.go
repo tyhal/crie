@@ -160,7 +160,7 @@ func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *
 				active = true
 				err := l.Setup(ctx)
 				if err != nil {
-					return fmt.Errorf("failed to setup %s linter: %w", l.Name(), err)
+					return fmt.Errorf("failed to setup '%s': %w", l.Name(), err)
 				}
 			}
 			matched = append(matched, file)

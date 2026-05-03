@@ -4,11 +4,11 @@ package cli
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"runtime/trace"
 
-	log "charm.land/log/v2"
+	"charm.land/log/v2"
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/tyhal/crie/pkg/cli/executor"
 	"github.com/tyhal/crie/pkg/linter"
@@ -50,15 +50,26 @@ func (e *LintCli) Setup(ctx context.Context) error {
 
 	img := e.imgTagged()
 
+	podmanErr := executor.WillPodman(ctx)
+	dockerErr := executor.WillDocker()
+	hostErr := executor.WillHost(e.Exec.Bin)
+
 	switch {
-	case e.isContainer() && executor.WillPodman(ctx) == nil:
+	case e.isContainer() && podmanErr == nil:
 		e.executor = executor.NewPodman(img)
-	case e.isContainer() && executor.WillDocker() == nil:
+	case e.isContainer() && dockerErr == nil:
 		e.executor = executor.NewDocker(img)
-	case executor.WillHost(e.Exec.Bin) == nil:
+	case hostErr == nil:
 		e.executor = executor.NewHost()
 	default:
-		return errors.New("could not determine execution mode [podman, docker, local]")
+		var errs *multierror.Error
+		errs = multierror.Append(errs, fmt.Errorf("podman: %w", podmanErr))
+		errs = multierror.Append(errs, fmt.Errorf("docker: %w", dockerErr))
+		errs = multierror.Append(errs, fmt.Errorf("local: %w", hostErr))
+		return fmt.Errorf(
+			"could not determine execution mode [podman, docker, local]: %w",
+			errs.ErrorOrNil(),
+		)
 	}
 
 	if err := e.executor.Setup(ctx, e.Exec); err != nil {

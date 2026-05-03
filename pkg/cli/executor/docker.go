@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 
 	log "charm.land/log/v2"
 	"github.com/containerd/platforms"
@@ -40,6 +41,7 @@ func NewDocker(image string) Executor {
 }
 
 var dockerInstalled = false
+var dockerImagePullLocks sync.Map
 
 // WillDocker checks whether Docker is available on the host (via the socket).
 func WillDocker() error {
@@ -67,11 +69,8 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 		e.client = c
 	}
 
-	_, err := e.client.ImageHistory(ctx, e.image)
-	if err != nil {
-		if err := e.pull(ctx); err != nil {
-			return err
-		}
+	if err := e.pull(ctx); err != nil {
+		return err
 	}
 
 	// TODO do these both in some common container helpers
@@ -143,22 +142,30 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 }
 
 func (e *dockerExecutor) pull(ctx context.Context) error {
+	lock, _ := dockerImagePullLocks.LoadOrStore(e.image, &sync.Mutex{})
+	mu := lock.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
 
-	// TODO lock on image pull
+	_, err := e.client.ImageHistory(ctx, e.image)
+	// exit early if the image is already present
+	if err == nil {
+		return nil
+	}
 
-	// Ensure we have the image downloaded
-	pullstat, err := e.client.ImagePull(ctx, e.image, image.PullOptions{})
+	pullStat, err := e.client.ImagePull(ctx, e.image, image.PullOptions{})
 	if err != nil {
 		log.With("stage", "docker pull", "image", e.image).Fatal(err)
 		return err
 	}
 
 	var pullOut bytes.Buffer
-	_, err = io.Copy(&pullOut, pullstat)
+	_, err = io.Copy(&pullOut, pullStat)
 	if log.DebugLevel >= log.GetLevel() {
 		fmt.Print(pullOut.String())
 	}
-	return err
+
+	return nil
 }
 
 // Exec runs the configured command inside the prepared Docker container.

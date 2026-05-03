@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"runtime/trace"
 	"strconv"
+	"sync"
 	"time"
 
 	log "charm.land/log/v2"
@@ -53,6 +54,7 @@ func NewPodman(image string) Executor {
 }
 
 var podmanInstalled = false
+var podmanImagePullLocks sync.Map
 
 // WillPodman checks whether Podman is available and responsive on the host.
 func WillPodman(ctx context.Context) error {
@@ -133,14 +135,8 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 		e.client = c
 	}
 
-	exists, err := images.Exists(e.client, e.image, &images.ExistsOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to check if image exists: %v", err)
-	}
-	if !exists {
-		if err := e.pull(); err != nil {
-			return fmt.Errorf("failed to pull image: %w", err)
-		}
+	if err := e.pull(); err != nil {
+		return fmt.Errorf("failed to pull image: %w", err)
 	}
 
 	b := make([]byte, 4)
@@ -179,32 +175,46 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 		"XDG_CACHE_HOME": cacheContaineer,
 	}
 	s.WorkDir = wdContainer
-	//s.UserNS = specgen.Namespace{
-	//	NSMode: "keep-id",
-	//}
-	s.User = fmt.Sprintf("%d", os.Getuid())
+
+	// disabled on rootless/linux
+	//s.User = fmt.Sprintf("%d", os.Getuid())
+
 	s.NetNS = specgen.Namespace{
 		NSMode: specgen.NoNetwork,
 	}
+
 	mountPerms := "ro" // should be used for static-only
 	if e.WillWrite {
 		mountPerms = "rw" // should be used for formatters
 		log.Debug("allowing writes to host filesystem")
 	}
 
+	// U changes ownership, breaks on Linux but might have been used previously as a workaround on Mac
 	s.Mounts = []spec.Mount{
 		{
 			Type:        "bind",
 			Source:      wdHost,
 			Destination: wdContainer,
-			// we are using "z" instead of "Z" because we run multiple containers in parallel
-			Options: []string{"rbind", mountPerms, "z", "U"},
+			Options: []string{
+				"rbind",
+				mountPerms,
+				// "z" instead of "Z" because we run multiple containers in parallel
+				"z",
+				// disabled on rootless/linux
+				// "U",
+			},
 		},
 		{
 			Type:        "bind",
 			Source:      cacheHost,
 			Destination: cacheContaineer,
-			Options:     []string{"rbind", "rw", "z", "U"},
+			Options: []string{
+				"rbind",
+				"rw",
+				"z",
+				// disabled on rootless/linux
+				// "U",
+			},
 		},
 	}
 
@@ -223,11 +233,21 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 }
 
 func (e *podmanExecutor) pull() error {
-	// need to lock on image pull
-	_, err := images.Pull(e.client, e.image, nil)
+	lock, _ := podmanImagePullLocks.LoadOrStore(e.image, &sync.Mutex{})
+	mu := lock.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
+
+	exists, err := images.Exists(e.client, e.image, &images.ExistsOptions{})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to check if image exists: %v", err)
 	}
+	if !exists {
+		if _, err = images.Pull(e.client, e.image, nil); err != nil {
+			return fmt.Errorf("failed to pull image: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -252,14 +272,16 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	cmd = append(cmd, e.End...)
 
 	log.Debug(cmd)
-	currentUser, err := user.Current()
-	if err != nil {
-		return fmt.Errorf("getting current user: %w", err)
-	}
+
+	// disabled on rootless/linux
+	//currentUser, err := user.Current()
+	//if err != nil {
+	//	return fmt.Errorf("getting current user: %w", err)
+	//}
 
 	execCreateConfig := handlers.ExecCreateConfig{
 		ExecOptions: container.ExecOptions{
-			User:         currentUser.Uid,
+			//User:         currentUser.Uid,
 			Cmd:          cmd,
 			WorkingDir:   wdContainer,
 			Privileged:   false,

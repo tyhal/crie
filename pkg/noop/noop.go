@@ -1,3 +1,4 @@
+// Package noop provides a linter that does nothing, useful for testing and as a template implementation of linter.Linter
 package noop
 
 import (

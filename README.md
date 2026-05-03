@@ -28,9 +28,8 @@
 or from source:
 
 ```shell
-    export GOFLAGS='-tags="exclude_graphdriver_btrfs containers_image_openpgp"'
-    export CGO=0
-    
+    GOFLAGS='-tags=exclude_graphdriver_btrfs,containers_image_openpgp' \
+    CGO=0 \
     go install github.com/tyhal/crie/cmd/crie@latest
 ```
 
@@ -55,5 +54,8 @@ See the **[documentation](doc/README.md)** for installation, configuration, and 
 <div align="center">
     <a href="https://codecov.io/gh/tyhal/crie"> 
         <img alt="coverage" src="https://codecov.io/gh/tyhal/crie/graph/badge.svg?token=SSAG0W1TZB"/> 
+    </a>
+    <a href="https://pkg.go.dev/pkg.go.dev/github.com/tyhal/crie">
+        <img src="https://pkg.go.dev/badge/pkg.go.dev/github.com/tyhal/crie.svg" alt="Go Reference">
     </a>
 </div>
