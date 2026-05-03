@@ -7,8 +7,8 @@ import (
 	"runtime/trace"
 
 	log "charm.land/log/v2"
-	"github.com/tyhal/crie/internal/runner/orchestrator"
 
+	"github.com/tyhal/crie/internal/runner/orchestrator"
 	"github.com/tyhal/crie/pkg/linter"
 )
 

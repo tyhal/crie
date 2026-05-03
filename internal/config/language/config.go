@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tyhal/crie/internal/runner"
-
 	"gopkg.in/yaml.v3"
+
+	"github.com/tyhal/crie/internal/runner"
 )
 
 // Languages is the schema for a projects' project file

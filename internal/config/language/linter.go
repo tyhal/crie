@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/google/jsonschema-go/jsonschema"
+	"gopkg.in/yaml.v3"
+
 	"github.com/tyhal/crie/pkg/cli"
 	"github.com/tyhal/crie/pkg/dockfmt"
 	"github.com/tyhal/crie/pkg/linter"
 	"github.com/tyhal/crie/pkg/noop"
 	"github.com/tyhal/crie/pkg/shfmt"
-	"gopkg.in/yaml.v3"
 )
 
 // Linter attaches a type discriminator field to make a Crie Linter implementation yaml parsable

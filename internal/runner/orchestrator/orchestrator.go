@@ -9,8 +9,9 @@ import (
 	"runtime/trace"
 	"sync"
 
-	"github.com/tyhal/crie/pkg/linter"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 // ErrBadDispatch is returned when a dispatcher is created with bad parameters

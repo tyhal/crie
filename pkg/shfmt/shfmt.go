@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tyhal/crie/pkg/linter"
 	"mvdan.cc/sh/v3/syntax"
+
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 // LintShfmt contains all the information needed to configure shfmt
