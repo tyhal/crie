@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	log "charm.land/log/v2"
+	"charm.land/log/v2"
 	"github.com/containerd/platforms"
 	"github.com/containers/podman/v5/pkg/api/handlers"
 	"github.com/containers/podman/v5/pkg/bindings"
