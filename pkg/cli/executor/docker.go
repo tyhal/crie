@@ -82,16 +82,7 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 	if err != nil {
 		return err
 	}
-	cacheHost, err := os.UserCacheDir()
-	if err != nil {
-		return fmt.Errorf("getting cache dir: %w", err)
-	}
-	cacheHost = filepath.Join(cacheHost, "crie")
-	err = os.MkdirAll(cacheHost, 0755)
-	if err != nil {
-		return err
-	}
-	cacheContaineer := "/tmp/crie_cache"
+	cacheContainer := "/tmp/crie_cache"
 
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
@@ -105,7 +96,7 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 			Entrypoint: []string{},
 			Cmd:        []string{"/bin/sh", "-c", "tail -f /dev/null"},
 			Env: []string{
-				"XDG_CACHE_HOME=" + cacheContaineer,
+				"XDG_CACHE_HOME=" + cacheContainer,
 			},
 			Image:           e.image,
 			WorkingDir:      wdContainer,
@@ -121,10 +112,9 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 					ReadOnly: !e.WillWrite,
 				},
 				{
-					Type:     "bind",
-					Source:   cacheHost,
-					Target:   cacheContaineer,
-					ReadOnly: false,
+					Type:   mount.TypeVolume,
+					Source: "crie-cache",
+					Target: cacheContainer,
 				},
 			},
 		},

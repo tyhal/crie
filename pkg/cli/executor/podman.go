@@ -151,16 +151,7 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	if err != nil {
 		return fmt.Errorf("getting workdir as a linux path: %w", err)
 	}
-	cacheHost, err := os.UserCacheDir()
-	if err != nil {
-		return fmt.Errorf("getting cache dir: %w", err)
-	}
-	cacheHost = filepath.Join(cacheHost, "crie")
-	err = os.MkdirAll(cacheHost, 0755)
-	if err != nil {
-		return err
-	}
-	cacheContaineer := "/tmp/crie_cache"
+	cacheContainer := "/tmp/crie_cache"
 
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
@@ -172,7 +163,7 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	s.Entrypoint = []string{"/bin/sh", "-c"}
 	s.Command = []string{"tail -f /dev/null"}
 	s.Env = map[string]string{
-		"XDG_CACHE_HOME": cacheContaineer,
+		"XDG_CACHE_HOME": cacheContainer,
 	}
 	s.WorkDir = wdContainer
 
@@ -204,17 +195,11 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 				// "U",
 			},
 		},
+	}
+	s.Volumes = []*specgen.NamedVolume{
 		{
-			Type:        "bind",
-			Source:      cacheHost,
-			Destination: cacheContaineer,
-			Options: []string{
-				"rbind",
-				"rw",
-				"z",
-				// disabled on rootless/linux
-				// "U",
-			},
+			Name: "crie-cache",
+			Dest: cacheContainer,
 		},
 	}
 
