@@ -200,6 +200,9 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 		{
 			Name: "crie-cache",
 			Dest: cacheContainer,
+			Options: []string{
+				"z",
+			},
 		},
 	}
 
