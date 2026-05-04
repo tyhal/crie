@@ -91,6 +91,10 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 	_, _ = rand.Read(b)
 	shortid := hex.EncodeToString(b)
 
+	labels := map[string]string{
+		"owner": "crie",
+	}
+
 	resp, err := e.client.ContainerCreate(ctx,
 		&container.Config{
 			Entrypoint: []string{},
@@ -98,6 +102,7 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 			Env: []string{
 				"XDG_CACHE_HOME=" + cacheContainer,
 			},
+			Labels:          labels,
 			Image:           e.image,
 			WorkingDir:      wdContainer,
 			NetworkDisabled: true,
@@ -115,6 +120,17 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 					Type:   mount.TypeVolume,
 					Source: "crie-cache",
 					Target: cacheContainer,
+					VolumeOptions: &mount.VolumeOptions{
+						Labels: labels,
+						DriverConfig: &mount.Driver{
+							Name: "local",
+							Options: map[string]string{
+								"type":   "tmpfs",
+								"device": "tmpfs",
+								"o":      fmt.Sprintf("uid=%d", os.Getuid()),
+							},
+						},
+					},
 				},
 			},
 		},
