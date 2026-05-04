@@ -40,6 +40,7 @@ languages:
       type: cli
       exec:
         bin: shellcheck
+        chdir: true
         start: ["-x", "--shell=bash", "-Calways"]
       img: "docker.io/koalaman/shellcheck-alpine:stable"
   sh:
@@ -51,6 +52,7 @@ languages:
       type: cli
       exec:
         bin: shellcheck
+        chdir: true
         start: ["-x", "--shell=sh", "-Calways"]
       img: "docker.io/koalaman/shellcheck-alpine:stable"
   docker:
