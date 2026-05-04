@@ -246,12 +246,10 @@ func (e *dockerExecutor) Cleanup(ctx context.Context) error {
 	}
 
 	if e.id != "" {
-		timeoutSeconds := 1
-
 		d := log.With("dockerId", e.id)
 
 		d.Debug("stopping container")
-		if err := e.client.ContainerStop(ctx, e.id, container.StopOptions{Timeout: &timeoutSeconds}); err != nil {
+		if err := e.client.ContainerStop(ctx, e.id, container.StopOptions{Timeout: new(1)}); err != nil {
 			return err
 		}
 		d.Debug("removing container")
