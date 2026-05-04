@@ -23,7 +23,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: podman info
-        run: podman info
+        run: podman info --format '{{.Host.RemoteSocket.Path}}'
       - name: Run tests
         run: go test -coverprofile=coverage.out -v ./...
       - name: Upload coverage reports to Codecov
