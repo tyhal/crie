@@ -1,4 +1,4 @@
-// Package exec allows for a CLI tool to be executed in different contexts
+// Package executor allows for a CLI tool to be executed in different contexts
 package executor
 
 import (

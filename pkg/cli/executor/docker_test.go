@@ -11,3 +11,11 @@ func TestWillDocker(t *testing.T) {
 		_ = WillDocker()
 	}, "WillDocker should not panic")
 }
+
+func TestDockerExecutor_Integration(t *testing.T) {
+	if err := WillDocker(); err != nil {
+		t.Skipf("Docker not available: %v", err)
+	}
+
+	testContainerExecutor(t, NewDocker)
+}

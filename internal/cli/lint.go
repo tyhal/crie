@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	log "charm.land/log/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -100,7 +99,7 @@ var FmtCmd = &cobra.Command{
 func stage(ctx context.Context, lintType runner.LintType) error {
 	err := crieRun.Run(ctx, lintType)
 	if err != nil {
-		return fmt.Errorf("crie %s: %w", lintType.String(), err)
+		return err
 	}
 	return nil
 }
@@ -128,11 +127,9 @@ var LntCmd = &cobra.Command{
 			}
 		}
 
-		var err error
 		if len(failedStages) > 0 {
-			err = fmt.Errorf("crie stages failed: %s", strings.Join(failedStages, ", "))
-			log.Error(err)
+			return fmt.Errorf("crie stages failed: %s", strings.Join(failedStages, ", "))
 		}
-		return err
+		return nil
 	},
 }

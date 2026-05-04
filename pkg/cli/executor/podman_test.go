@@ -21,3 +21,12 @@ func TestPodman_SocketGet(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, socket)
 }
+
+func TestPodmanExecutor_Integration(t *testing.T) {
+	ctx := t.Context()
+	if err := WillPodman(ctx); err != nil {
+		t.Skipf("Podman not available: %v", err)
+	}
+
+	testContainerExecutor(t, NewPodman)
+}

@@ -1,3 +1,4 @@
+// Package dockfmt provides a linter that uses the github.com/reteps/dockerfmt library to format dockerfiles
 package dockfmt
 
 import (

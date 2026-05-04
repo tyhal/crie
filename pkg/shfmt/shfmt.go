@@ -1,3 +1,4 @@
+// Package shfmt is a linter for shell scripts using mvdan.cc/sh
 package shfmt
 
 import (

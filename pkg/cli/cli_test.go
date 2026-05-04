@@ -4,6 +4,7 @@ package cli
 
 import (
 	"bytes"
+	"os/exec"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,16 @@ func TestLintCli_isContainer(t *testing.T) {
 func TestLint_Name(t *testing.T) {
 	l := &LintCli{Exec: executor.Instance{Bin: "test"}}
 	assert.Equal(t, "test", l.Name())
+}
+
+func TestLint_Setup(t *testing.T) {
+	l := &LintCli{
+		Exec: executor.Instance{Bin: ":notarealcommand:"},
+	}
+	assert.NotPanics(t, func() {
+		err := l.Setup(t.Context())
+		assert.ErrorIs(t, err, exec.ErrNotFound)
+	})
 }
 
 func TestLint_imgTagged(t *testing.T) {
