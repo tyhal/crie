@@ -7,7 +7,7 @@ toolchain go1.26.2
 require (
 	charm.land/lipgloss/v2 v2.0.3
 	charm.land/log/v2 v2.0.0
-	github.com/charmbracelet/fang v1.0.0
+	github.com/charmbracelet/fang/v2 v2.0.1
 	github.com/containerd/platforms v1.0.0-rc.4
 	github.com/containers/podman/v5 v5.8.2
 	github.com/docker/docker v28.5.2+incompatible
