@@ -5,7 +5,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/charmbracelet/fang"
+	"charm.land/fang/v2"
 
 	"github.com/tyhal/crie/internal/cli"
 	lintercli "github.com/tyhal/crie/pkg/cli"

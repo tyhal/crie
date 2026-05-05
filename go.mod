@@ -5,9 +5,9 @@ go 1.25.8
 toolchain go1.26.2
 
 require (
+	charm.land/fang/v2 v2.0.1
 	charm.land/lipgloss/v2 v2.0.3
 	charm.land/log/v2 v2.0.0
-	github.com/charmbracelet/fang v1.0.0
 	github.com/containerd/platforms v1.0.0-rc.4
 	github.com/containers/podman/v5 v5.8.2
 	github.com/docker/docker v28.5.2+incompatible
@@ -38,7 +38,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
-	github.com/charmbracelet/ultraviolet v0.0.0-20251205161215-1948445e3318 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260205113103-524a6607adb8 // indirect
 	github.com/charmbracelet/x/ansi v0.11.7 // indirect
 	github.com/charmbracelet/x/exp/charmtone v0.0.0-20250603201427-c31516f43444 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
