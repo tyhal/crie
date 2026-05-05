@@ -41,8 +41,7 @@ func (r *StructuredReporter) Log(rep *Report) error {
 			r.SrcOut.Debug(rep.StdOut)
 		}
 	} else {
-		var failedResultErr *FailedResultError
-		if errors.As(rep.Err, &failedResultErr) {
+		if _, ok := errors.AsType[*FailedResultError](rep.Err); ok {
 			// TODO do this better
 			r.SrcErr.With("target", rep.Target).Error(rep.StdErr)
 			r.SrcOut.With("target", rep.Target).Info(rep.StdOut)
@@ -96,8 +95,7 @@ func (r *StandardReporter) Log(rep *Report) error {
 		}
 	} else {
 		id, _ := r.Start(rep.Target, "\u2716", false)
-		var failedResultErr *FailedResultError
-		if errors.As(rep.Err, &failedResultErr) {
+		if _, ok := errors.AsType[*FailedResultError](rep.Err); ok {
 			r.SrcErr.Log(log.ErrorLevel, rep.StdErr)
 			r.SrcOut.Log(log.InfoLevel, rep.StdOut)
 			r.SrcInt.Log(log.DebugLevel, rep.Err)

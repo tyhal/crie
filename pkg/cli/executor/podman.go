@@ -20,19 +20,19 @@ import (
 
 	"charm.land/log/v2"
 	"github.com/containerd/platforms"
-	"github.com/containers/podman/v5/pkg/api/handlers"
-	"github.com/containers/podman/v5/pkg/bindings"
-	"github.com/containers/podman/v5/pkg/bindings/containers"
-	"github.com/containers/podman/v5/pkg/bindings/images"
-	"github.com/containers/podman/v5/pkg/bindings/system"
-	"github.com/containers/podman/v5/pkg/machine/define"
-	"github.com/containers/podman/v5/pkg/machine/env"
-	"github.com/containers/podman/v5/pkg/machine/provider"
-	"github.com/containers/podman/v5/pkg/machine/vmconfigs"
-	"github.com/containers/podman/v5/pkg/specgen"
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/moby/moby/api/types/container"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
+	"go.podman.io/podman/v6/pkg/api/handlers"
+	"go.podman.io/podman/v6/pkg/bindings"
+	"go.podman.io/podman/v6/pkg/bindings/containers"
+	"go.podman.io/podman/v6/pkg/bindings/images"
+	"go.podman.io/podman/v6/pkg/bindings/system"
+	"go.podman.io/podman/v6/pkg/machine/define"
+	"go.podman.io/podman/v6/pkg/machine/env"
+	"go.podman.io/podman/v6/pkg/machine/provider"
+	"go.podman.io/podman/v6/pkg/machine/vmconfigs"
+	"go.podman.io/podman/v6/pkg/specgen"
 
 	"github.com/tyhal/crie/pkg/linter"
 )
@@ -268,15 +268,15 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	//}
 
 	execCreateConfig := handlers.ExecCreateConfig{
-		ExecOptions: container.ExecOptions{
-			//User:         currentUser.Uid,
-			Cmd:          cmd,
-			WorkingDir:   wdContainer,
+		ExecCreateRequest: container.ExecCreateRequest{
 			Privileged:   false,
+			Tty:          false,
+			ConsoleSize:  nil,
 			AttachStdin:  false,
 			AttachStderr: true,
 			AttachStdout: true,
-			Tty:          false,
+			WorkingDir:   wdContainer,
+			Cmd:          cmd,
 		},
 	}
 
@@ -331,14 +331,13 @@ func (e *podmanExecutor) Cleanup(_ context.Context) error {
 
 	if e.id != "" {
 		var timeoutSeconds uint = 1
-		var ignore = false
 
 		d := log.With("podmanId", e.id)
 
 		d.Debug("stopping container")
 		stopOptions := containers.StopOptions{
 			Timeout: &timeoutSeconds,
-			Ignore:  &ignore,
+			Ignore:  new(false),
 		}
 		err := containers.Stop(e.client, e.id, &stopOptions)
 		if err != nil {
