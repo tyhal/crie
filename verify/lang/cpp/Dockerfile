@@ -1,5 +1,5 @@
 
-FROM gcc:15.2.0
+FROM gcc:16.1.0
 RUN apt-get update -y \
     && apt-get install -y \
         --no-install-recommends \
