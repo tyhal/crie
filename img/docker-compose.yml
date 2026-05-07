@@ -15,3 +15,7 @@ services:
   pip:
     image: ghcr.io/tyhal/crie-dep-pip
     build: pip
+  # rust tools
+  rust:
+    image: ghcr.io/tyhal/crie-dep-rust
+    build: rust

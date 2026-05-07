@@ -7,7 +7,7 @@ RUN go install github.com/mgechev/revive@v1.14.0
 FROM go_layer AS protolint_layer
 RUN go install github.com/yoheimuta/protolint/cmd/protolint@v0.56.4
 
-FROM go_layer AS run_layer
+FROM alpine:3.23.4
 
 RUN adduser -D standards
 
