@@ -3,8 +3,6 @@
 Adding new languages is easy, just add a new entry to:
 [main language configuration file](internal/config/language/defaults.yml)
 
-You should add to the verify folder for the new language.
-
 ## Building and testing
 
 ```bash

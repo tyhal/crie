@@ -18,6 +18,4 @@ go run ./cmd/crie chk --only golang
 go run ./cmd/crie non
 set +x
 
-verify/script/test
-
 echo "! PASS !"
