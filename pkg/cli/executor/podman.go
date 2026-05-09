@@ -156,8 +156,6 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	currPlatform := platforms.DefaultSpec()
 	currPlatform.OS = "linux"
 
-	log.Debugf("using image %s", e.image)
-
 	s := specgen.NewSpecGenerator(e.image, false)
 	s.Name = fmt.Sprintf("crie-%s-%s", filepath.Base(e.Bin), shortid)
 	s.Entrypoint = []string{"/bin/sh", "-c"}
@@ -166,18 +164,26 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 		"XDG_CACHE_HOME": cacheContainer,
 	}
 	s.WorkDir = wdContainer
-
-	// disabled on rootless/linux
-	//s.User = fmt.Sprintf("%d", os.Getuid())
-
 	s.NetNS = specgen.Namespace{
 		NSMode: specgen.NoNetwork,
+	}
+
+	// when rootless
+	rootless, err := isPodmanRootless(e.client)
+	if err != nil {
+		return fmt.Errorf("checking podman rootless mode: %w", err)
+	}
+	if rootless {
+		// root in container should map to the host user in rootless mode
+		s.User = "0"
+	} else {
+		// avoid using root on a rootfull podman
+		s.User = strconv.Itoa(os.Getuid())
 	}
 
 	mountPerms := "ro" // should be used for static-only
 	if e.WillWrite {
 		mountPerms = "rw" // should be used for formatters
-		log.Debug("allowing writes to host filesystem")
 	}
 
 	// U changes ownership, breaks on Linux but might have been used previously as a workaround on Mac
@@ -191,8 +197,6 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 				mountPerms,
 				// "z" instead of "Z" because we run multiple containers in parallel
 				"z",
-				// disabled on rootless/linux
-				// "U",
 			},
 		},
 	}
@@ -205,6 +209,13 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 			},
 		},
 	}
+
+	log.With(
+		"image", e.image,
+		"workdirHost", wdHost,
+		"workdirContainer", wdContainer,
+		"cacheContainer", cacheContainer,
+		"canWrite", e.WillWrite).Debug("starting container")
 
 	createResponse, err := containers.CreateWithSpec(e.client, s, nil)
 	if err != nil {
@@ -386,4 +397,12 @@ func attachedExecStart(ctx context.Context, sessionID string, options *container
 	}
 
 	return resp.Body, err
+}
+
+func isPodmanRootless(ctx context.Context) (bool, error) {
+	info, err := system.Info(ctx, &system.InfoOptions{})
+	if err != nil {
+		return false, fmt.Errorf("getting podman info: %w", err)
+	}
+	return info.Host.Security.Rootless, nil
 }
