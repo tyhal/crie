@@ -93,6 +93,15 @@ languages:
         start: ["--filter"]
         chdir: true
       img: "ghcr.io/terraform-linters/tflint:v0.62.0"
+  typescript:
+    match: [".tsx$", ".ts$"]
+    fmt:
+      type: cli
+      exec:
+        bin: npx
+        start: ["prettier", "--write"]
+      img: "ghcr.io/tyhal/crie-dep-npm"
+      tag_crie_version: true
   javascript:
     match: ['\.js$', '\.jsx$']
     fmt:
