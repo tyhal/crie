@@ -1,4 +1,0 @@
-service:
-  example:
-    - yes: false
-    - anotherone: "hmm"
