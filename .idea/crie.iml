@@ -13,6 +13,8 @@
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$/../crie-fail" />
+    <content url="file://$MODULE_DIR$/../game-of-life" />
     <content url="file://$MODULE_DIR$/../x" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
