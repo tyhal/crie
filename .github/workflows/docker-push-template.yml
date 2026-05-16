@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   docker-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     if: github.event_name == 'push'
     permissions:
       contents: read
