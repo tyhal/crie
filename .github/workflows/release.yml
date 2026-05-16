@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   release:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     steps:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@8eb7f2efa6ab636da09aef605b497fd5b8a7587d # main
