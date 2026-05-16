@@ -14,6 +14,7 @@ import (
 // LinterMatch is used to associate a file pattern with the relevant tools to check and format
 type LinterMatch struct {
 	FileMatch *regexp.Regexp
+	GroupBy   string // if set, matched files are grouped by nearest ancestor dir containing this filename (e.g. "go.mod")
 	Fmt       linter.Linter
 	Chk       linter.Linter
 }

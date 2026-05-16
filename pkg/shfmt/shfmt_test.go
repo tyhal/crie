@@ -89,6 +89,7 @@ echo "hello world"
 			}
 
 			actual, err := os.ReadFile(testFilePath)
+			require.NoError(t, err)
 			require.Equal(t, tt.expected, string(actual))
 
 		})

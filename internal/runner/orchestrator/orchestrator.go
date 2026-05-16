@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"runtime"
 	"runtime/trace"
+	"sort"
 	"sync"
 
 	"golang.org/x/sync/errgroup"
@@ -19,9 +20,10 @@ var ErrBadDispatch = errors.New("ctx, linter and regexp must be provided")
 
 // Job is a single job to be run by the orchestrator
 type Job struct {
-	lint     linter.Linter
-	file     string
-	lintJobs *sync.WaitGroup
+	lint      linter.Linter
+	file      string
+	lockFiles []string // individual files to lock; when set, used instead of file (for grouped runs)
+	lintJobs  *sync.WaitGroup
 }
 
 // fileLocker is used to lock files to prevent concurrent writes from formatters
@@ -87,19 +89,43 @@ func (d *JobOrchestrator) lockExecutor() {
 	for job := range d.jobQ {
 		if job.lint == nil {
 			d.repQ <- linter.Report{Err: errors.New("no linter found"), Target: job.file}
-		} else {
-			mu, ok := d.locker.locks[job.file]
+			continue
+		}
+
+		filesToLock := job.lockFiles
+		if len(filesToLock) == 0 {
+			filesToLock = []string{job.file}
+		}
+		// sort to acquire locks in a consistent order and avoid deadlocks
+		sort.Strings(filesToLock)
+
+		var mutexes []*sync.Mutex
+		valid := true
+		for _, f := range filesToLock {
+			mu, ok := d.locker.locks[f]
 			if !ok {
 				d.repQ <- linter.Report{Err: errors.New("no lock found"), Target: job.file}
-				continue
+				valid = false
+				break
 			}
-			func() {
-				mu.Lock()
-				defer mu.Unlock()
-				d.repQ <- job.lint.Run(job.file)
-				job.lintJobs.Done()
-			}()
+			mutexes = append(mutexes, mu)
 		}
+		if !valid {
+			continue
+		}
+
+		func() {
+			for _, mu := range mutexes {
+				mu.Lock()
+			}
+			defer func() {
+				for _, mu := range mutexes {
+					mu.Unlock()
+				}
+			}()
+			d.repQ <- job.lint.Run(job.file)
+			job.lintJobs.Done()
+		}()
 	}
 }
 
@@ -135,13 +161,15 @@ func (d *JobOrchestrator) Start(ctx context.Context) func() error {
 	return d.wait
 }
 
-// CreateDispatcher submits jobQ to the dispatchers
-func (d *JobOrchestrator) CreateDispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) error {
+// CreateDispatcher submits jobQ to the dispatchers.
+// If groupBy is non-empty, matched files are grouped by nearest ancestor directory
+// containing the named marker file (e.g. "go.mod"), and the linter runs once per group.
+func (d *JobOrchestrator) CreateDispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp, groupBy string) error {
 	if l == nil || reg == nil || ctx == nil {
 		return ErrBadDispatch
 	}
 	d.dispatchers.Go(func() {
-		err := d.dispatcher(ctx, l, reg)
+		err := d.dispatcher(ctx, l, reg, groupBy)
 		if err != nil {
 			d.repQ <- linter.Report{Err: err, Target: l.Name()}
 		}
@@ -149,38 +177,44 @@ func (d *JobOrchestrator) CreateDispatcher(ctx context.Context, l linter.Linter,
 	return nil
 }
 
-func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp) error {
+func (d *JobOrchestrator) dispatcher(ctx context.Context, l linter.Linter, reg *regexp.Regexp, groupBy string) error {
 	defer trace.StartRegion(ctx, "A CreateDispatcher "+reg.String()).End()
 
-	var active bool
 	var matched []string
 	for _, file := range d.files {
 		if reg.MatchString(file) {
-			if !active {
-				active = true
-				err := l.Setup(ctx)
-				if err != nil {
-					return fmt.Errorf("failed to setup '%s': %w", l.Name(), err)
-				}
-			}
 			matched = append(matched, file)
 		}
 	}
-	if !active {
+	if len(matched) == 0 {
 		return nil
+	}
+
+	if err := l.Setup(ctx); err != nil {
+		return fmt.Errorf("failed to setup '%s': %w", l.Name(), err)
 	}
 
 	var lintJobs sync.WaitGroup
 
-	for _, file := range matched {
-		lintJobs.Add(1)
-		d.jobQ <- Job{lint: l, file: file, lintJobs: &lintJobs}
+	if groupBy != "" {
+		groups := groupByModule(matched, groupBy)
+		if len(groups) == 0 {
+			return fmt.Errorf("no %s found above any matched files for %s", groupBy, l.Name())
+		}
+		for root, files := range groups {
+			lintJobs.Add(1)
+			d.jobQ <- Job{lint: l, file: root, lockFiles: files, lintJobs: &lintJobs}
+		}
+	} else {
+		for _, file := range matched {
+			lintJobs.Add(1)
+			d.jobQ <- Job{lint: l, file: file, lintJobs: &lintJobs}
+		}
 	}
 
 	lintJobs.Wait()
 
-	err := l.Cleanup(ctx)
-	if err != nil {
+	if err := l.Cleanup(ctx); err != nil {
 		return fmt.Errorf("failed to cleanup linter: %w", err)
 	}
 

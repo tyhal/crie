@@ -51,7 +51,7 @@ language: bash`,
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectName, cl.Linter.Name())
+				assert.Equal(t, tt.expectName, cl.Name())
 			}
 		})
 	}

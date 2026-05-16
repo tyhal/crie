@@ -12,6 +12,7 @@ import (
 
 	log "charm.land/log/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/tyhal/crie/pkg/noop"
 )
@@ -257,6 +258,7 @@ func TestRunConfiguration_Run(t *testing.T) {
 			assert.NoError(t, err)
 
 			file, err := os.Create(path.Join(dir, "test.go"))
+			require.NoError(t, err)
 			defer func() {
 				_ = file.Close()
 			}()

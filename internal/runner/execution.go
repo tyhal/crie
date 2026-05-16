@@ -3,6 +3,7 @@ package runner
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"runtime/trace"
 
@@ -45,14 +46,17 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 
 	orch := orchestrator.New(fileList, r, locking, !s.Options.Continue)
 	waitForCompletion := orch.Start(ctx)
-	defer func() { err = waitForCompletion() }()
+	defer func() { err = errors.Join(err, waitForCompletion()) }()
 
 	for _, lang := range currentLangs {
 		l := lang.GetLinter(lintType)
 		if l == nil {
 			continue
 		}
-		orch.CreateDispatcher(ctx, l, lang.FileMatch)
+		if e := orch.CreateDispatcher(ctx, l, lang.FileMatch, lang.GroupBy); e != nil {
+			err = e
+			return
+		}
 	}
 
 	return

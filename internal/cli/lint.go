@@ -29,7 +29,7 @@ func setCrie(_ *cobra.Command, _ []string) error {
 	}
 
 	var ignore *regexp.Regexp
-	if projectConfig.Ignore != nil && len(projectConfig.Ignore) > 0 {
+	if len(projectConfig.Ignore) > 0 {
 		ignore = regexp.MustCompile(strings.Join(projectConfig.Ignore, "|"))
 	}
 

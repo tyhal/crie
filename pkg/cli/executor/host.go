@@ -7,6 +7,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/creack/pty"
+	"golang.org/x/term"
+
 	"github.com/tyhal/crie/pkg/linter"
 )
 
@@ -37,28 +40,33 @@ func (e *hostExecutor) Setup(ctx context.Context, i Instance) error {
 
 // Exec runs the configured CLI tool on the host against the provided file.
 func (e *hostExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer) error {
-	targetFilePath := filePath
-	if e.ChDir {
-		targetFilePath = filepath.Base(filePath)
-	}
-
-	params := make([]string, 0, len(e.Start)+1+len(e.End))
-	params = append(e.Start, targetFilePath)
-	params = append(params, e.End...)
-
-	c := exec.CommandContext(e.execCtx, e.Bin, params...)
-	if e.ChDir {
-		c.Dir = filepath.Dir(filePath)
-	} else {
-		cwd, err := os.Getwd()
-		if err != nil {
+	dir := filepath.Dir(filePath)
+	if !e.ChDir {
+		var err error
+		if dir, err = os.Getwd(); err != nil {
 			return err
 		}
-		c.Dir = cwd
+	} else if e.NoFileArg {
+		dir = filePath
 	}
+
+	// When running interactively, open a PTY so the subprocess detects a real
+	// terminal and emits colour, while we still capture its output for reporting.
+	// PTY merges stdout+stderr; captured into stderr so the reporter shows it.
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		c := exec.CommandContext(e.execCtx, e.Bin, e.buildParams(filePath)...)
+		c.Dir = dir
+		if ptm, err := pty.Start(c); err == nil {
+			defer func() { _ = ptm.Close() }()
+			_, _ = io.Copy(stderr, ptm)
+			return linter.Result(c.Wait())
+		}
+	}
+
+	c := exec.CommandContext(e.execCtx, e.Bin, e.buildParams(filePath)...)
+	c.Dir = dir
 	c.Stdout = stdout
 	c.Stderr = stderr
-
 	return linter.Result(c.Run())
 }
 

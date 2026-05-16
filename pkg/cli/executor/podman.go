@@ -261,14 +261,14 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	}
 
 	if e.ChDir {
-		wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
-		targetFile = filepath.Base(targetFile)
+		if e.NoFileArg {
+			wdContainer = filepath.Join(wdContainer, targetFile)
+		} else {
+			wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
+		}
 	}
 
-	cmd := make([]string, 0, 1+len(e.Start)+1+len(e.End))
-	cmd = append([]string{e.Bin}, e.Start...)
-	cmd = append(cmd, targetFile)
-	cmd = append(cmd, e.End...)
+	cmd := append([]string{e.Bin}, e.buildParams(targetFile)...)
 
 	log.Debug(cmd)
 

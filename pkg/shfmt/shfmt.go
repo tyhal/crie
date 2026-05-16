@@ -63,7 +63,6 @@ func (l *LintShfmt) Run(filepath string) linter.Report {
 	syntax.BinaryNextLine(false)(currFmt.printer)
 	syntax.SwitchCaseIndent(false)(currFmt.printer)
 	syntax.SpaceRedirects(false)(currFmt.printer)
-	syntax.KeepPadding(false)(currFmt.printer)
 	syntax.FunctionNextLine(false)(currFmt.printer)
 
 	err := currFmt.formatPath(filepath, true)

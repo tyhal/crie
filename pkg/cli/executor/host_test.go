@@ -65,7 +65,7 @@ func TestHostExecutor_Run(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			out.Reset()
-			e.Instance.ChDir = tc.chdir
+			e.ChDir = tc.chdir
 			err = e.Exec(filePath, &out, &out)
 			assert.NoError(t, err, "exec with %s should succeed", tc.name)
 			stdout := out.String()

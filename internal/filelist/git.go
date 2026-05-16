@@ -56,6 +56,9 @@ func FromGitRepo(dir string, repo *git.Repository, diff bool, target string) ([]
 	}
 
 	prefix, err := getPrefixInRepo(dir, repo)
+	if err != nil {
+		return nil, fmt.Errorf("getting repo prefix: %w", err)
+	}
 	return prefixFilter(prefix, files...), nil
 }
 
