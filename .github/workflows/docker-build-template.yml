@@ -10,7 +10,7 @@ on:
         type: string
 jobs:
   docker-build:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
