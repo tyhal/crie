@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/tyhal/crie/internal/runner"
+	"github.com/tyhal/crie/pkg/cli"
 )
 
 // Language is used to map customer yaml decoders for implementations of Crie linters
@@ -18,6 +19,11 @@ type Language struct {
 func (l Language) ToRunFormat() (runner.LinterMatch, error) {
 	if l.FileMatch == nil {
 		return runner.LinterMatch{}, errors.New("field match is required")
+	}
+	if l.Fmt.Linter != nil {
+		if cliFmt, ok := l.Fmt.Linter.(*cli.LintCli); ok {
+			cliFmt.Exec.WillWrite = true
+		}
 	}
 	return runner.LinterMatch{
 		FileMatch: l.FileMatch.Regexp,
