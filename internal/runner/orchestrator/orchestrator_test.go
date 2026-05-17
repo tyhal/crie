@@ -108,7 +108,7 @@ func TestNew(t *testing.T) {
 				for _, regex := range tt.dispatchers {
 					r, err := regexp.Compile(regex)
 					assert.NoError(t, err)
-					err = orch.CreateDispatcher(t.Context(), tt.linter, r)
+					err = orch.CreateDispatcher(t.Context(), tt.linter, r, "")
 					assert.ErrorIs(t, err, tt.expDispatchErr)
 				}
 				err := end()

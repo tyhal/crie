@@ -7,3 +7,34 @@ languages:
       indent_size: 4
       trailing_newline: false
       space_redirects: false
+  gofix:
+    match: ['\.go$']
+    group_by: go.mod
+    fmt:
+      type: cli
+      exec:
+        bin: go
+        start: [fix]
+        end: ["./..."]
+        no_file_arg: true
+        chdir: true
+# Functionally works but the container wants network - don't want to CI install 
+#  golangci:
+#    match: ['\.go$']
+#    group_by: go.mod
+#    fmt:
+#      type: cli
+#      exec:
+#        bin: golangci-lint
+#        start: [run]
+#        end: ["--fix", "./..."]
+#        no_file_arg: true
+#        chdir: true
+#    chk:
+#      type: cli
+#      exec:
+#        bin: golangci-lint
+#        start: [run]
+#        end: ["./..."]
+#        no_file_arg: true
+#        chdir: true

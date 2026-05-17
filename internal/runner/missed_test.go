@@ -27,7 +27,7 @@ func Test_noCoverageStats(t *testing.T) {
 	l := RunConfiguration{
 		NamedMatches: NamedMatches{
 			"shell": LinterMatch{
-				FileMatch: regexp.MustCompile("\\.sh$"),
+				FileMatch: regexp.MustCompile(`\.sh$`),
 			},
 		},
 	}

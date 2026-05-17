@@ -94,10 +94,9 @@ func (e *LintCli) Cleanup(ctx context.Context) error {
 
 // Run does the work required to lint the given filepath
 func (e *LintCli) Run(filePath string) linter.Report {
-	// Format any file received as an input.
 	var outB, errB bytes.Buffer
 
 	err := e.executor.Exec(filePath, &outB, &errB)
 
-	return linter.Report{Target: filePath, Err: err, StdOut: &outB, StdErr: &errB}
+	return linter.Report{Target: e.Name() + " " + filePath, Err: err, StdOut: &outB, StdErr: &errB}
 }

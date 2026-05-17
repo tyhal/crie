@@ -27,7 +27,7 @@ func testContainerExecutor(t *testing.T, newExecutor func(image string) Executor
 		origDir, err := os.Getwd()
 		require.NoError(t, err)
 		require.NoError(t, os.Chdir(tmpDir))
-		defer os.Chdir(origDir)
+		defer func() { _ = os.Chdir(origDir) }()
 
 		e := newExecutor("alpine:latest")
 
@@ -37,7 +37,7 @@ func testContainerExecutor(t *testing.T, newExecutor func(image string) Executor
 			Start: []string{"-c", "echo PWD=$(pwd); echo ARG=$1; cat $1", "_"},
 		})
 		require.NoError(t, err)
-		defer e.Cleanup(ctx)
+		defer func() { _ = e.Cleanup(ctx) }()
 
 		var stdout, stderr bytes.Buffer
 		err = e.Exec("test.txt", &stdout, &stderr)
@@ -60,7 +60,7 @@ func testContainerExecutor(t *testing.T, newExecutor func(image string) Executor
 		origDir, err := os.Getwd()
 		require.NoError(t, err)
 		require.NoError(t, os.Chdir(tmpDir))
-		defer os.Chdir(origDir)
+		defer func() { _ = os.Chdir(origDir) }()
 
 		e := newExecutor("alpine:latest")
 
@@ -71,7 +71,7 @@ func testContainerExecutor(t *testing.T, newExecutor func(image string) Executor
 			ChDir: true,
 		})
 		require.NoError(t, err)
-		defer e.Cleanup(ctx)
+		defer func() { _ = e.Cleanup(ctx) }()
 
 		var stdout bytes.Buffer
 		err = e.Exec(filepath.Join("subdir", "test.txt"), &stdout, &bytes.Buffer{})

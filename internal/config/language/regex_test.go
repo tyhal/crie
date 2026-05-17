@@ -47,7 +47,7 @@ func TestConfigRegex_UnmarshalYAML(t *testing.T) {
 
 			assert.NoError(t, err)
 			if tt.expected != "" {
-				assert.Equal(t, tt.expected, cr.Regexp.String())
+				assert.Equal(t, tt.expected, cr.String())
 			} else {
 				assert.Nil(t, cr.Regexp)
 			}

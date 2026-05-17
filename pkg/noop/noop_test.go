@@ -39,19 +39,19 @@ func TestLint_Run(t *testing.T) {
 
 func TestLint_WithSleep(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
-		l := WithSleep(200, 100)
+		l := WithSleep(200*time.Nanosecond, 100*time.Nanosecond)
 
-		go l.Setup(t.Context())
+		go func() { _ = l.Setup(t.Context()) }()
 		synctest.Wait()
-		time.Sleep(100)
+		time.Sleep(100 * time.Nanosecond)
 
 		go l.Run("test.txt")
 		synctest.Wait()
-		time.Sleep(200)
+		time.Sleep(200 * time.Nanosecond)
 
-		go l.Cleanup(t.Context())
+		go func() { _ = l.Cleanup(t.Context()) }()
 		synctest.Wait()
-		time.Sleep(100)
+		time.Sleep(100 * time.Nanosecond)
 	})
 }
 

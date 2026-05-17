@@ -96,6 +96,7 @@ its a test to see what happens when you run dockfmt on a file that isn't a docke
 			}
 
 			actual, err := os.ReadFile(testFilePath)
+			require.NoError(t, err)
 			require.Equal(t, tt.expected, string(actual))
 
 		})

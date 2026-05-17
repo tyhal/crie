@@ -23,12 +23,12 @@ func (s *shfmt) formatPath(path string, _ bool) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	readBuf.Reset()
 	if _, err := io.CopyBuffer(&readBuf, f, copyBuf); err != nil {
 		return err
 	}
-	f.Close()
+	_ = f.Close()
 	return s.formatBytes(readBuf.Bytes(), path)
 }
 
@@ -40,7 +40,9 @@ func (s *shfmt) formatBytes(src []byte, path string) error {
 		return err
 	}
 	writeBuf.Reset()
-	s.printer.Print(&writeBuf, prog)
+	if err := s.printer.Print(&writeBuf, prog); err != nil {
+		return err
+	}
 	res := writeBuf.Bytes()
 	if !bytes.Equal(src, res) {
 		info, err := os.Lstat(path)
