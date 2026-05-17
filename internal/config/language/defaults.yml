@@ -7,7 +7,6 @@ languages:
       exec:
         bin: black
         start: ["--quiet"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true
     chk:
@@ -21,7 +20,6 @@ languages:
     fmt:
       exec:
         bin: protolint
-        will_write: true
       type: cli
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
@@ -75,7 +73,6 @@ languages:
       type: cli
       exec:
         bin: yamlfmt
-        will_write: true
       img: "ghcr.io/google/yamlfmt:latest"
   terraform:
     match: ['\.tf$']
@@ -84,7 +81,6 @@ languages:
       exec:
         bin: terraform
         start: ["fmt"]
-        will_write: true
       img: "docker.io/hashicorp/terraform:1.15.3"
     chk:
       type: cli
@@ -109,7 +105,6 @@ languages:
       exec:
         bin: standard
         start: ["--fix"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
@@ -125,7 +120,6 @@ languages:
       exec:
         bin: gofmt
         start: ["-l", "-w"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
     chk:
@@ -143,7 +137,6 @@ languages:
         bin: remark
         start: ["--use", "remark-preset-lint-recommended"]
         end: ["-o"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
@@ -167,7 +160,6 @@ languages:
       exec:
         bin: jsonlint
         start: ["-i", "-s", "-c", "-q"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
@@ -184,7 +176,6 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
     chk:
@@ -201,7 +192,6 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   c:
@@ -211,7 +201,6 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
-        will_write: true
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
     chk:
