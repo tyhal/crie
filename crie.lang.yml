@@ -7,7 +7,7 @@ languages:
       indent_size: 4
       trailing_newline: false
       space_redirects: false
-  gofix:
+  goplus:
     match: ['\.go$']
     group_by: go.mod
     fmt:
@@ -15,6 +15,14 @@ languages:
       exec:
         bin: go
         start: [fix]
+        end: ["./..."]
+        no_file_arg: true
+        chdir: true
+    chk:
+      type: cli
+      exec:
+        bin: go
+        start: [vet]
         end: ["./..."]
         no_file_arg: true
         chdir: true
