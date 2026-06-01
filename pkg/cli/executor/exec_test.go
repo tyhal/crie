@@ -22,9 +22,10 @@ func testHelperExecutor(t *testing.T, newExec func() Executor) {
 	tmpDir := t.TempDir()
 	t.Chdir(tmpDir)
 
-	subdir := filepath.Join(tmpDir, "sub")
-	err := os.Mkdir(subdir, 0o755)
+	subdir := "sub"
+	err := os.Mkdir(filepath.Join(tmpDir, "sub"), 0o755)
 	require.NoError(t, err)
+
 	filePath := filepath.Join(subdir, "hello.txt")
 	require.NoError(t, os.WriteFile(filePath, []byte("hello"), 0o644))
 
@@ -39,7 +40,7 @@ func testHelperExecutor(t *testing.T, newExec func() Executor) {
 		expARG string
 	}{
 		{"chdir=false", false, tmpDir, filePath},
-		{"chdir=true", true, subdir, filepath.Base(filePath)},
+		{"chdir=true", true, filepath.Join(tmpDir, "sub"), filepath.Base(filePath)},
 	}
 
 	for _, tc := range tests {

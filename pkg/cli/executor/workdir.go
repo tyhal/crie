@@ -13,20 +13,11 @@ func containerWorkdir(filePath string, chdir, noFileArg bool) (string, error) {
 	}
 
 	if chdir {
-		wdHost, err := os.Getwd()
-		if err != nil {
-			return "", fmt.Errorf("getting working directory: %w", err)
-		}
-		relPath, err := filepath.Rel(wdHost, filePath)
-		if err != nil {
-			return "", fmt.Errorf("getting relative path: %w", err)
-		}
-		relPath = ToLinuxPath(relPath)
-
+		targetPath := ToLinuxPath(filePath)
 		if noFileArg {
-			wdContainer = filepath.Join(wdContainer, relPath)
+			wdContainer = filepath.Join(wdContainer, targetPath)
 		} else {
-			wdContainer = filepath.Join(wdContainer, filepath.Dir(relPath))
+			wdContainer = filepath.Join(wdContainer, filepath.Dir(targetPath))
 		}
 	}
 
