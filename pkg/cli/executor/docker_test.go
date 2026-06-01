@@ -16,6 +16,7 @@ func TestDockerExecutor_Integration(t *testing.T) {
 	if err := WillDocker(); err != nil {
 		t.Skipf("Docker not available: %v", err)
 	}
-
-	testContainerExecutor(t, NewDocker)
+	testHelperExecutor(t, func() Executor {
+		return NewDocker("alpine:latest")
+	})
 }

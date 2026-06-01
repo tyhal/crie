@@ -23,10 +23,11 @@ func TestPodman_SocketGet(t *testing.T) {
 }
 
 func TestPodmanExecutor_Integration(t *testing.T) {
-	ctx := t.Context()
-	if err := WillPodman(ctx); err != nil {
+	if err := WillPodman(t.Context()); err != nil {
 		t.Skipf("Podman not available: %v", err)
 	}
 
-	testContainerExecutor(t, NewPodman)
+	testHelperExecutor(t, func() Executor {
+		return NewPodman("alpine:latest")
+	})
 }
