@@ -149,7 +149,7 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	}
 	wdContainer, err := GetWorkdirAsLinuxPath()
 	if err != nil {
-		return fmt.Errorf("getting workdir as a linux path: %w", err)
+		return fmt.Errorf("getting containerWorkdir as a linux path: %w", err)
 	}
 	cacheContainer := "/tmp/crie_cache"
 
@@ -255,17 +255,9 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	defer trace.StartRegion(e.client, "Exec "+e.Bin).End()
 
 	targetFile := ToLinuxPath(filePath)
-	wdContainer, err := GetWorkdirAsLinuxPath()
+	wdContainer, err := containerWorkdir(filePath, e.ChDir, e.NoFileArg)
 	if err != nil {
-		return fmt.Errorf("getting workdir: %w", err)
-	}
-
-	if e.ChDir {
-		if e.NoFileArg {
-			wdContainer = filepath.Join(wdContainer, targetFile)
-		} else {
-			wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
-		}
+		return err
 	}
 
 	cmd := append([]string{e.Bin}, e.buildParams(targetFile)...)

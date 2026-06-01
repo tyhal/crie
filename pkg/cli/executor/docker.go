@@ -176,22 +176,10 @@ func (e *dockerExecutor) pull(ctx context.Context) error {
 
 // Exec runs the configured command inside the prepared Docker container.
 func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer) error {
-
-	// working solution posted to https://stackoverflow.com/questions/52145231/cannot-get-logs-from-docker-container-using-golang-docker-sdk
-
-	// Ensure we can mount our filesystem to the same path inside the container
 	targetFile := ToLinuxPath(filePath)
-	wdContainer, err := GetWorkdirAsLinuxPath()
+	wdContainer, err := containerWorkdir(filePath, e.ChDir, e.NoFileArg)
 	if err != nil {
 		return err
-	}
-
-	if e.ChDir {
-		if e.NoFileArg {
-			wdContainer = filepath.Join(wdContainer, targetFile)
-		} else {
-			wdContainer = filepath.Join(wdContainer, filepath.Dir(targetFile))
-		}
 	}
 
 	cmd := append([]string{e.Bin}, e.buildParams(targetFile)...)
