@@ -20,15 +20,17 @@ func testHelperExecutor(t *testing.T, newExec func() Executor) {
 	}
 
 	tmpDir := t.TempDir()
-	filePath := filepath.Join(tmpDir, "hello.txt")
-	assert.NoError(t, os.WriteFile(filePath, []byte("hello"), 0o644))
+	t.Chdir(tmpDir)
+
+	subdir := filepath.Join(tmpDir, "sub")
+	err := os.Mkdir(subdir, 0o755)
+	require.NoError(t, err)
+	filePath := filepath.Join(subdir, "hello.txt")
+	require.NoError(t, os.WriteFile(filePath, []byte("hello"), 0o644))
 
 	// Note: with 'sh -c', the first argument after the script becomes $0; add a dummy so filePath maps to $1
 	front := []string{"-c", `echo "PWD=$(pwd)"; echo "ARG=$1"; test -f "$1"`, "_"}
 	var out bytes.Buffer
-
-	cwd, err := os.Getwd()
-	assert.NoError(t, err)
 
 	tests := []struct {
 		name   string
@@ -36,8 +38,8 @@ func testHelperExecutor(t *testing.T, newExec func() Executor) {
 		expPWD string
 		expARG string
 	}{
-		{"chdir=false", false, cwd, filePath},
-		{"chdir=true", true, tmpDir, filepath.Base(filePath)},
+		{"chdir=false", false, tmpDir, filePath},
+		{"chdir=true", true, subdir, filepath.Base(filePath)},
 	}
 
 	for _, tc := range tests {
@@ -45,7 +47,7 @@ func testHelperExecutor(t *testing.T, newExec func() Executor) {
 			t.Helper()
 			out.Reset()
 			e := newExec()
-			err = e.Setup(t.Context(), Instance{
+			err := e.Setup(t.Context(), Instance{
 				Bin:   "sh",
 				Start: front,
 				End:   nil,
