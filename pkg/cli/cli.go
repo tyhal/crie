@@ -83,7 +83,7 @@ func (e *LintCli) Setup(ctx context.Context) error {
 		xctr, err := fn()
 		if err != nil {
 			errs = multierror.Append(errs, err)
-		} else {
+		} else if xctr != nil {
 			e.executor = xctr
 			break
 		}
