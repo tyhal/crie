@@ -50,24 +50,48 @@ func (e *LintCli) Setup(ctx context.Context) error {
 
 	img := e.imgTagged()
 
-	podmanErr := executor.WillPodman(ctx)
-	dockerErr := executor.WillDocker()
-	hostErr := executor.WillHost(e.Exec.Bin)
+	var errs *multierror.Error
+	// TODO align these more
+	picker := []func() (executor.Executor, error){
+		func() (executor.Executor, error) {
+			if !e.isContainer() {
+				return nil, nil
+			}
+			if err := executor.WillPodman(ctx); err != nil {
+				return nil, fmt.Errorf("podman: %w", err)
+			}
+			return executor.NewPodman(img), nil
+		},
+		func() (executor.Executor, error) {
+			if !e.isContainer() {
+				return nil, nil
+			}
+			if err := executor.WillDocker(); err != nil {
+				return nil, fmt.Errorf("docker: %w", err)
+			}
+			return executor.NewDocker(img), nil
+		},
+		func() (executor.Executor, error) {
+			if err := executor.WillHost(e.Exec.Bin); err != nil {
+				return nil, fmt.Errorf("host: %w", err)
+			}
+			return executor.NewHost(), nil
+		},
+	}
 
-	switch {
-	case e.isContainer() && podmanErr == nil:
-		e.executor = executor.NewPodman(img)
-	case e.isContainer() && dockerErr == nil:
-		e.executor = executor.NewDocker(img)
-	case hostErr == nil:
-		e.executor = executor.NewHost()
-	default:
-		var errs *multierror.Error
-		errs = multierror.Append(errs, fmt.Errorf("podman: %w", podmanErr))
-		errs = multierror.Append(errs, fmt.Errorf("docker: %w", dockerErr))
-		errs = multierror.Append(errs, fmt.Errorf("local: %w", hostErr))
+	for _, fn := range picker {
+		xctr, err := fn()
+		if err != nil {
+			errs = multierror.Append(errs, err)
+		} else if xctr != nil {
+			e.executor = xctr
+			break
+		}
+	}
+
+	if e.executor == nil {
 		return fmt.Errorf(
-			"could not determine execution mode [podman, docker, local]: %w",
+			"could not determine execution mode: %w",
 			errs.ErrorOrNil(),
 		)
 	}

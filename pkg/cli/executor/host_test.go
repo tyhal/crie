@@ -1,10 +1,6 @@
 package executor
 
 import (
-	"bytes"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,61 +17,10 @@ func TestHostExecutor_Setup(t *testing.T) {
 }
 
 func TestHostExecutor_Run(t *testing.T) {
-	// Decide which shell to use
-	bin := "sh"
-	if WillHost(bin) != nil {
-		if WillHost("bash") == nil {
-			bin = "bash"
-		} else {
-			t.Skip("neither 'sh' nor 'bash' is available on host; skipping")
-		}
+	if WillHost("sh") != nil {
+		t.Skip("neither 'sh' not available on host; skipping")
 	}
-
-	tmpDir := t.TempDir()
-	filePath := filepath.Join(tmpDir, "hello.txt")
-	assert.NoError(t, os.WriteFile(filePath, []byte("hello"), 0o644))
-
-	// Script echoes PWD and the first arg, and ensures the file exists
-	script := `echo "PWD=$(pwd)"; echo "ARG=$1"; test -f "$1"`
-	// Note: with 'sh -c', the first argument after the script becomes $0; add a dummy so filePath maps to $1
-	front := []string{"-c", script, "_"}
-	var out bytes.Buffer
-
-	e := &hostExecutor{}
-	err := e.Setup(t.Context(), Instance{
-		Bin:   bin,
-		Start: front,
-		End:   nil,
-	})
-	assert.NoError(t, err)
-
-	cwd, err := os.Getwd()
-	assert.NoError(t, err)
-
-	tests := []struct {
-		name   string
-		chdir  bool
-		expPWD string
-		expARG string
-	}{
-		{"chdir=false", false, cwd, filePath},
-		{"chdir=true", true, tmpDir, filepath.Base(filePath)},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			out.Reset()
-			e.ChDir = tc.chdir
-			err = e.Exec(filePath, &out, &out)
-			assert.NoError(t, err, "exec with %s should succeed", tc.name)
-			stdout := out.String()
-			assert.Contains(t, stdout, "PWD="+tc.expPWD)
-			assert.Contains(t, stdout, "ARG="+tc.expARG)
-			// Also ensure outputs have the expected lines at least once
-			assert.GreaterOrEqual(t, strings.Count(stdout, "PWD="), 1)
-			assert.GreaterOrEqual(t, strings.Count(stdout, "ARG="), 1)
-		})
-	}
+	testHelperExecutor(t, NewHost)
 }
 
 func TestHostExecutor_Cleanup(t *testing.T) {
