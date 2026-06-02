@@ -2,7 +2,7 @@ module github.com/tyhal/crie
 
 go 1.25.8
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 require (
 	charm.land/fang/v2 v2.0.1
@@ -10,6 +10,7 @@ require (
 	charm.land/log/v2 v2.0.0
 	github.com/containerd/platforms v1.0.0-rc.4
 	github.com/containers/podman/v5 v5.8.2
+	github.com/creack/pty v1.1.24
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/go-git/go-git/v5 v5.18.0
 	github.com/google/jsonschema-go v0.4.3
@@ -23,6 +24,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/tyhal/x v0.0.0-20260505200016-f5d2950278dc
 	golang.org/x/sync v0.20.0
+	golang.org/x/term v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
 	mvdan.cc/sh/v3 v3.13.1
 )
@@ -64,7 +66,6 @@ require (
 	github.com/coreos/go-systemd/v22 v22.6.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/crc-org/vfkit v0.6.1 // indirect
-	github.com/creack/pty v1.1.24 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467 // indirect
 	github.com/cyphar/filepath-securejoin v0.5.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -192,7 +193,6 @@ require (
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/term v0.41.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b // indirect
