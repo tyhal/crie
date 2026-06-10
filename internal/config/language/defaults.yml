@@ -81,7 +81,7 @@ languages:
       exec:
         bin: terraform
         start: ["fmt"]
-      img: "docker.io/hashicorp/terraform:1.15.5"
+      img: "docker.io/hashicorp/terraform:1.15.6"
     chk:
       type: cli
       exec:
