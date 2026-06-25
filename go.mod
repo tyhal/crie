@@ -9,7 +9,7 @@ require (
 	charm.land/lipgloss/v2 v2.0.4
 	charm.land/log/v2 v2.0.0
 	github.com/containerd/platforms v1.0.0-rc.4
-	github.com/containers/podman/v5 v5.8.3
+	github.com/containers/podman/v6 v6.0.0
 	github.com/creack/pty v1.1.24
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/go-git/go-git/v5 v5.18.0
