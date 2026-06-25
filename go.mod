@@ -13,7 +13,7 @@ require (
 	github.com/google/jsonschema-go v0.4.3
 	github.com/google/renameio v1.0.1
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/moby/moby/api v1.54.2
+	github.com/moby/moby/api v1.55.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/opencontainers/runtime-spec v1.3.0
 	github.com/reteps/dockerfmt v0.5.2
