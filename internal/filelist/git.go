@@ -65,7 +65,7 @@ func FromGitRepo(dir string, repo *git.Repository, diff bool, target string) ([]
 func getRepoPath(repo *git.Repository) (string, error) {
 	wt, err := repo.Worktree()
 	if err == nil {
-		return wt.Filesystem.Root(), nil
+		return wt.Filesystem().Root(), nil
 	}
 	return "", fmt.Errorf("cannot determine repo path")
 }
