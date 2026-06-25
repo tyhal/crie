@@ -13,7 +13,7 @@ env:
   CGO: 0
 jobs:
   crie-test:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Fetch base ref for PR
@@ -23,7 +23,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: Start podman socket is running
-        run: systemctl --user start podman.socket
+        run: |
+          mkdir -p ~/.config/containers
+          echo 'unqualified-search-registries = ["docker.io", "ghcr.io"]' > ~/.config/containers/registries.conf
+          systemctl --user start podman.socket
       - name: Run tests
         run: go test -coverprofile=coverage.out -v ./...
       - name: Upload coverage reports to Codecov

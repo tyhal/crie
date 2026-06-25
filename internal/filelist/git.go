@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v6"
+	"github.com/go-git/go-git/v6/plumbing"
+	"github.com/go-git/go-git/v6/plumbing/object"
 )
 
 // GetGitRepo opens a git repository rooted at dir (or its parents when .git is detected)
@@ -65,7 +65,7 @@ func FromGitRepo(dir string, repo *git.Repository, diff bool, target string) ([]
 func getRepoPath(repo *git.Repository) (string, error) {
 	wt, err := repo.Worktree()
 	if err == nil {
-		return wt.Filesystem.Root(), nil
+		return wt.Filesystem().Root(), nil
 	}
 	return "", fmt.Errorf("cannot determine repo path")
 }
