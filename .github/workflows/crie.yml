@@ -23,7 +23,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: Start podman socket is running
-        run: systemctl --user start podman.socket
+        run: |
+          mkdir -p ~/.config/containers
+          echo 'unqualified-search-registries = ["docker.io", "ghcr.io"]' > ~/.config/containers/registries.conf
+          systemctl --user start podman.socket
       - name: Run tests
         run: go test -coverprofile=coverage.out -v ./...
       - name: Upload coverage reports to Codecov
