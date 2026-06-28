@@ -16,7 +16,7 @@ require (
 	github.com/moby/moby/api v1.55.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/opencontainers/runtime-spec v1.3.0
-	github.com/reteps/dockerfmt v0.5.3
+	github.com/reteps/dockerfmt v0.5.4
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
