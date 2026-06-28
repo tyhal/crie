@@ -351,6 +351,8 @@ github.com/reteps/dockerfmt v0.5.2 h1:kqZb5PvSL0bJ7NLjiHmZjQ6Yt2zcX+PKo/Km04ccWB
 github.com/reteps/dockerfmt v0.5.2/go.mod h1:bOVGyTkONLGqOZ9ZGNZqs9Q/OXOJi9b1OzHs1cpXWO8=
 github.com/reteps/dockerfmt v0.5.3 h1:iXIVz1s139Dd9dhc1YIp5S/39/5DNU0OFTjPOcVoVaA=
 github.com/reteps/dockerfmt v0.5.3/go.mod h1:bOVGyTkONLGqOZ9ZGNZqs9Q/OXOJi9b1OzHs1cpXWO8=
+github.com/reteps/dockerfmt v0.5.4 h1:BJe2cYqu3nGOwHLQsHkDaHjTwNksIvUGXEGxAhSRWs4=
+github.com/reteps/dockerfmt v0.5.4/go.mod h1:bOVGyTkONLGqOZ9ZGNZqs9Q/OXOJi9b1OzHs1cpXWO8=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
 github.com/rivo/uniseg v0.4.7/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
