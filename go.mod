@@ -21,7 +21,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tyhal/x v0.0.0-20260505200016-f5d2950278dc
-	go.podman.io/podman/v6 v6.0.0
+	go.podman.io/podman/v6 v6.0.1
 	golang.org/x/sync v0.22.0
 	golang.org/x/term v0.45.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -188,7 +188,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.podman.io/buildah v1.44.0 // indirect
-	go.podman.io/common v0.68.0 // indirect
+	go.podman.io/common v0.68.1 // indirect
 	go.podman.io/image/v5 v5.40.0 // indirect
 	go.podman.io/storage v1.63.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
