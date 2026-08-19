@@ -19,7 +19,7 @@ require (
 	github.com/reteps/dockerfmt v0.5.4
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
-	github.com/stretchr/testify v1.12.0
+	github.com/stretchr/testify v1.12.1
 	github.com/tyhal/x v0.0.0-20260505200016-f5d2950278dc
 	go.podman.io/podman/v6 v6.1.0
 	golang.org/x/sync v0.22.0
