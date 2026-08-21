@@ -1,0 +1,24 @@
+name: img-rust
+permissions:
+  contents: read
+  packages: read
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+    paths: ['img/rust/*', '.github/workflows/docker-build-template.yml', 'img-rust.yml']
+jobs:
+  img-rust-test:
+    uses: ./.github/workflows/docker-build-template.yml
+    with:
+      img: 'rust'
+  img-rust-push:
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker-push-template.yml
+    with:
+      img: 'rust'
