@@ -26,7 +26,16 @@ languages:
         end: ["./..."]
         no_file_arg: true
         chdir: true
-# Functionally works but the container wants network - don't want to CI install 
+  rust:
+    match: ['\.rs$']
+    fmt:
+      type: cli
+      exec:
+        bin: rustfmt
+        start: ["--edition", "2024"]
+      img: ghcr.io/tyhal/crie-dep-rust
+      tag_crie_version: true
+# Functionally works but the container wants network - don't want to CI install
 #  golangci:
 #    match: ['\.go$']
 #    group_by: go.mod
