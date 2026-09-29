@@ -21,7 +21,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/tyhal/x v0.0.0-20260505200016-f5d2950278dc
-	go.podman.io/podman/v6 v6.1.2
+	go.podman.io/podman/v6 v6.1.3
 	golang.org/x/sync v0.23.0
 	golang.org/x/term v0.46.0
 	gopkg.in/yaml.v3 v3.0.1
