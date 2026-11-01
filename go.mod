@@ -20,7 +20,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
-	github.com/tyhal/x v0.0.0-20260505200016-f5d2950278dc
+	github.com/tyhal/x v0.0.0-20261101164518-c7bb19a759dd
 	go.podman.io/podman/v6 v6.1.4
 	golang.org/x/sync v0.24.0
 	golang.org/x/term v0.47.0
