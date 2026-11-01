@@ -5,7 +5,7 @@ RUN apk --no-cache add clang21-extra-tools
 FROM alpine:3.23.4
 
 # hadolint ignore=DL3059
-RUN adduser -D standards
+RUN adduser -D -u 1000 standards
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -23,4 +23,4 @@ ENV VALE_CONFIG_PATH=$VALE_CONFIG_DIR/.vale.ini
 COPY conf/markdown/.vale.ini $VALE_CONFIG_PATH
 RUN vale sync && chmod -R 755 $VALE_CONFIG_DIR
 
-USER standards
+USER 1000

@@ -20,5 +20,5 @@ COPY conf/cmake/.cmakelintrc $CMAKELINT_CONFIG_FILE
 RUN chmod -R 755 $XDG_CONFIG_DIR
 
 # hadolint ignore=DL3059
-RUN adduser -D standards
-USER standards
+RUN adduser -D -u 1000 standards
+USER 1000
