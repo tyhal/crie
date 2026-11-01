@@ -1,4 +1,4 @@
 crie ls
-cd verify
+cd ../game-of-life
 crie chk --passes
 crie fmt --only python
