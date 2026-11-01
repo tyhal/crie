@@ -5,13 +5,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime/trace"
+	"strings"
 
 	log "charm.land/log/v2"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/tyhal/crie/internal/runner/orchestrator"
 	"github.com/tyhal/crie/pkg/linter"
 )
+
+var tracer = otel.Tracer("github.com/tyhal/crie/internal/runner")
 
 func (s *RunConfiguration) getRunningLanguages() (NamedMatches, error) {
 	currentLangs := s.NamedMatches
@@ -40,12 +48,16 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 	} else {
 		r = linter.NewStandardReporter(s.Options.Passes)
 	}
+	// GitHub Actions sets this for every step, its workflow commands annotate findings on pull requests
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		r = linter.NewGitHubReporter(r, os.Stdout, githubDir())
+	}
 
 	// NOTE an (obvious) assumption is made that formatters need file locking while linters do not
 	locking := lintType == LintTypeFmt
 
 	orch := orchestrator.New(fileList, r, locking, !s.Options.Continue)
-	waitForCompletion := orch.Start(ctx)
+	ctx, waitForCompletion := orch.Start(ctx)
 	defer func() { err = errors.Join(err, waitForCompletion()) }()
 
 	for _, lang := range currentLangs {
@@ -62,11 +74,35 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 	return
 }
 
+// githubDir is the working directory relative to the GitHub workspace, which annotated paths are relative to
+func githubDir() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	rel, err := filepath.Rel(os.Getenv("GITHUB_WORKSPACE"), wd)
+	if err != nil || rel == "." || strings.HasPrefix(rel, "..") {
+		return ""
+	}
+	return filepath.ToSlash(rel)
+}
+
 // Run is the generic way to run everything based on the package configuration
-func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) error {
+func (s *RunConfiguration) Run(ctx context.Context, lintType LintType) (err error) {
 	defer trace.StartRegion(ctx, "Crie Run").End()
+	ctx, span := tracer.Start(ctx, lintType.String())
+	if s.Options.Only != "" {
+		span.SetAttributes(attribute.String("crie.only", s.Options.Only))
+	}
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+	}()
 	l := log.With("type", lintType)
 	fileList, err := s.getFileList()
+	span.SetAttributes(attribute.Int("crie.files", len(fileList)))
 	if err != nil {
 		return fmt.Errorf("getting files: %w", err)
 	}

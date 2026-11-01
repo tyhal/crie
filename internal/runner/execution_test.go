@@ -275,3 +275,17 @@ func TestRunConfiguration_Run(t *testing.T) {
 		})
 	}
 }
+
+func TestGithubDir(t *testing.T) {
+	ws := t.TempDir()
+	sub := path.Join(ws, "sub", "dir")
+	require.NoError(t, os.MkdirAll(sub, 0o755))
+
+	t.Setenv("GITHUB_WORKSPACE", ws)
+	t.Chdir(ws)
+	assert.Empty(t, githubDir(), "at the workspace root paths are already relative to it")
+	t.Chdir(sub)
+	assert.Equal(t, "sub/dir", githubDir())
+	t.Setenv("GITHUB_WORKSPACE", sub+"/elsewhere")
+	assert.Empty(t, githubDir(), "outside the workspace there's nothing sensible to prefix")
+}

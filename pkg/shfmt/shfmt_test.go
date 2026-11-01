@@ -79,7 +79,7 @@ echo "hello world"
 				Language: tt.lang,
 			}
 
-			report := l.Run(testFilePath)
+			report := l.Run(t.Context(), testFilePath)
 
 			assert.Equal(t, testFilePath, report.Target)
 			if tt.error {

@@ -23,6 +23,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/moby/moby/api/types/container"
 	spec "github.com/opencontainers/runtime-spec/specs-go"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.podman.io/podman/v6/pkg/api/handlers"
 	"go.podman.io/podman/v6/pkg/bindings"
 	"go.podman.io/podman/v6/pkg/bindings/containers"
@@ -40,10 +41,28 @@ import (
 // podmanExecutor runs CLI tools inside a Podman container.
 type podmanExecutor struct {
 	Instance
-	image      string
-	client     context.Context
-	execCancel context.CancelFunc
-	id         string
+	image string
+	// conn is only used for its values, the bindings keep the connection under unexported context keys
+	conn context.Context
+	id   string
+}
+
+// podmanCtx layers the connection's values beneath a call's ctx, so the call keeps ctx's cancellation and span
+type podmanCtx struct {
+	context.Context
+	conn context.Context
+}
+
+func (c podmanCtx) Value(key any) any {
+	if v := c.Context.Value(key); v != nil {
+		return v
+	}
+	return c.conn.Value(key)
+}
+
+// with returns ctx able to make podman binding calls on this executor's connection
+func (e *podmanExecutor) with(ctx context.Context) context.Context {
+	return podmanCtx{ctx, e.conn}
 }
 
 // NewPodman creates an executor using containers managed by the podman client.
@@ -53,89 +72,121 @@ func NewPodman(image string) Executor {
 	}
 }
 
-var podmanInstalled = false
 var podmanImagePullLocks sync.Map
 
-// WillPodman checks whether Podman is available and responsive on the host.
-func WillPodman(ctx context.Context) error {
-	if podmanInstalled {
-		return nil
-	}
+// podmanHost is what probing podman learns, it can't change during a run
+type podmanHost struct {
+	uri      string
+	rootless bool
+}
 
+// cachedPodman probes podman once for every linter's WillPodman and Setup,
+// without a caller's context so one aborted caller can't cache a failure for everyone
+var cachedPodman = sync.OnceValues(func() (podmanHost, error) {
+	return probePodman(context.Background())
+})
+
+// WillPodman checks whether Podman is available and responsive on the host.
+// If Podman is configured (a machine or CONTAINER_HOST exists) but doesn't respond, the error wraps ErrRuntimeUnavailable.
+func WillPodman(_ context.Context) error {
+	_, err := cachedPodman()
+	return err
+}
+
+func probePodman(ctx context.Context) (podmanHost, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	uri, err := getPodmanMachineSocket()
+	sock, err := getPodmanMachineSocket()
 	if err != nil {
+		return podmanHost{}, err
+	}
+
+	unavailable := func(err error) error {
+		if sock.configured {
+			return fmt.Errorf("%w: podman is configured but not responding (is the machine running?): %w", ErrRuntimeUnavailable, err)
+		}
 		return err
 	}
 
-	c, err := bindings.NewConnection(ctx, uri)
+	c, err := bindings.NewConnection(ctx, sock.uri)
 	if err != nil {
-		return err
+		return podmanHost{}, unavailable(err)
 	}
 
-	_, err = system.Info(c, &system.InfoOptions{})
+	info, err := system.Info(c, &system.InfoOptions{})
 	if err != nil {
-		return err
+		return podmanHost{}, unavailable(err)
 	}
 
-	podmanInstalled = true
-	return nil
+	return podmanHost{uri: sock.uri, rootless: info.Host.Security.Rootless}, nil
 }
 
-func getPodmanMachineSocket() (socketPath string, err error) {
+// podmanSocket is where to reach podman
+type podmanSocket struct {
+	uri string
+	// configured is set when the user has set podman up, rather than uri being a guessed default
+	configured bool
+}
+
+// getPodmanMachineSocket finds the podman socket, looking for the default machine under every provider
+// as it may have been created with one other than the current default (e.g. applehv rather than libkrun)
+func getPodmanMachineSocket() (podmanSocket, error) {
 	if _, found := os.LookupEnv("CONTAINER_HOST"); found {
-		socketPath = ""
-		return
+		return podmanSocket{configured: true}, nil
 	}
 
-	currProvider, err := provider.Get()
-	if err != nil {
-		return
+	providers := provider.GetAll()
+	if p, err := provider.Get(); err == nil {
+		providers = append([]vmconfigs.VMProvider{p}, providers...)
 	}
-	dirs, err := env.GetMachineDirs(currProvider.VMType())
-	if err != nil {
-		return
-	}
-	mc, vmErr := vmconfigs.LoadMachineByName(define.DefaultMachineName, dirs)
-	if vmErr != nil {
-		currentUser, userErr := user.Current()
-		if userErr != nil {
-			return socketPath, userErr
+	for _, p := range providers {
+		dirs, err := env.GetMachineDirs(p.VMType())
+		if err != nil {
+			continue
 		}
-		socketPath = fmt.Sprintf("unix:///run/user/%s/podman/podman.sock", currentUser.Uid)
-		return
+		mc, err := vmconfigs.LoadMachineByName(define.DefaultMachineName, dirs)
+		if err != nil {
+			continue
+		}
+		sock, _, err := mc.ConnectionInfo(p.VMType())
+		if err != nil {
+			return podmanSocket{}, err
+		}
+		return podmanSocket{uri: "unix://" + sock.Path, configured: true}, nil
 	}
-	podmanSocket, _, err := mc.ConnectionInfo(currProvider.VMType())
+
+	// no machine, so expect a native rootless podman
+	currentUser, err := user.Current()
 	if err != nil {
-		return
+		return podmanSocket{}, err
 	}
-	socketPath = fmt.Sprintf("unix://%s", podmanSocket.Path)
-	return
+	sock := fmt.Sprintf("/run/user/%s/podman/podman.sock", currentUser.Uid)
+	_, statErr := os.Stat(sock)
+	return podmanSocket{uri: "unix://" + sock, configured: statErr == nil}, nil
 }
 
 // Setup creates and starts a disposable Podman container for executing commands.
 func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 	e.Instance = i
 
-	ctx, cancel := context.WithCancel(ctx)
-	e.execCancel = cancel
-
-	{
-		uri, err := getPodmanMachineSocket()
-		if err != nil {
-			return fmt.Errorf("getting podman machine socket: %w", err)
-		}
-
-		c, err := bindings.NewConnection(ctx, uri)
-		if err != nil {
-			return fmt.Errorf("creating podman client: %w", err)
-		}
-		e.client = c
+	host, err := cachedPodman()
+	if err != nil {
+		return fmt.Errorf("probing podman: %w", err)
 	}
 
-	if err := e.pull(); err != nil {
+	c, err := bindings.NewConnection(ctx, host.uri)
+	if err != nil {
+		return fmt.Errorf("creating podman client: %w", err)
+	}
+	// trace API calls the way the docker client does
+	if conn, err := bindings.GetClient(c); err == nil {
+		conn.Client.Transport = otelhttp.NewTransport(conn.Client.Transport, otelhttp.WithSpanNameFormatter(apiSpanName))
+	}
+	e.conn = c
+	ctx = e.with(ctx)
+
+	if err := e.pull(ctx); err != nil {
 		return fmt.Errorf("failed to pull image: %w", err)
 	}
 
@@ -168,12 +219,7 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 		NSMode: specgen.NoNetwork,
 	}
 
-	// when rootless
-	rootless, err := isPodmanRootless(e.client)
-	if err != nil {
-		return fmt.Errorf("checking podman rootless mode: %w", err)
-	}
-	if rootless {
+	if host.rootless {
 		// root in container should map to the host user in rootless mode
 		s.User = "0"
 	} else {
@@ -217,32 +263,32 @@ func (e *podmanExecutor) Setup(ctx context.Context, i Instance) error {
 		"cacheContainer", cacheContainer,
 		"canWrite", e.WillWrite).Debug("starting container")
 
-	createResponse, err := containers.CreateWithSpec(e.client, s, nil)
+	createResponse, err := containers.CreateWithSpec(ctx, s, nil)
 	if err != nil {
 		return fmt.Errorf("creating container: %w", err)
 	}
 	e.id = createResponse.ID
 
 	startOptions := containers.StartOptions{}
-	if err := containers.Start(e.client, e.id, &startOptions); err != nil {
+	if err := containers.Start(ctx, e.id, &startOptions); err != nil {
 		return fmt.Errorf("starting container: %w", err)
 	}
 
 	return nil
 }
 
-func (e *podmanExecutor) pull() error {
+func (e *podmanExecutor) pull(ctx context.Context) error {
 	lock, _ := podmanImagePullLocks.LoadOrStore(e.image, &sync.Mutex{})
 	mu := lock.(*sync.Mutex)
 	mu.Lock()
 	defer mu.Unlock()
 
-	exists, err := images.Exists(e.client, e.image, &images.ExistsOptions{})
+	exists, err := images.Exists(ctx, e.image, &images.ExistsOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to check if image exists: %v", err)
 	}
 	if !exists {
-		if _, err = images.Pull(e.client, e.image, nil); err != nil {
+		if _, err = images.Pull(ctx, e.image, nil); err != nil {
 			return fmt.Errorf("failed to pull image: %w", err)
 		}
 	}
@@ -251,16 +297,23 @@ func (e *podmanExecutor) pull() error {
 }
 
 // Exec runs the configured command inside the prepared Podman container.
-func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer) error {
-	defer trace.StartRegion(e.client, "Exec "+e.Bin).End()
+func (e *podmanExecutor) Exec(ctx context.Context, stdout io.Writer, stderr io.Writer, targets ...string) error {
+	ctx = e.with(ctx)
+	defer trace.StartRegion(ctx, "Exec "+e.Bin).End()
 
-	targetFile := ToLinuxPath(filePath)
-	wdContainer, err := containerWorkdir(filePath, e.ChDir, e.NoFileArg)
+	if len(targets) == 0 {
+		return ErrNoTargets
+	}
+	targetFiles := make([]string, len(targets))
+	for i, target := range targets {
+		targetFiles[i] = ToLinuxPath(target)
+	}
+	wdContainer, err := containerWorkdir(targets[0], e.ChDir, e.NoFileArg)
 	if err != nil {
 		return err
 	}
 
-	cmd := append([]string{e.Bin}, e.buildParams(targetFile)...)
+	cmd := append([]string{e.Bin}, e.buildParams(targetFiles...)...)
 
 	log.Debug(cmd)
 
@@ -279,22 +332,24 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 			AttachStderr: true,
 			AttachStdout: true,
 			WorkingDir:   wdContainer,
+			Env:          traceEnv(ctx),
 			Cmd:          cmd,
 		},
 	}
 
-	execID, err := containers.ExecCreate(e.client, e.id, &execCreateConfig)
+	execID, err := containers.ExecCreate(ctx, e.id, &execCreateConfig)
 	if err != nil {
 		return fmt.Errorf("creating exec: %w", err)
 	}
 	defer func() {
-		err = containers.ExecRemove(e.client, execID, &containers.ExecRemoveOptions{})
-		if err != nil {
+		// removed even if this run was cancelled
+		err = containers.ExecRemove(context.WithoutCancel(ctx), execID, &containers.ExecRemoveOptions{})
+		if err != nil && ctx.Err() == nil {
 			log.Error(fmt.Errorf("closing exec: %w", err))
 		}
 	}()
 
-	logs, err := attachedExecStart(e.client, execID, &containers.ExecStartOptions{})
+	logs, err := attachedExecStart(ctx, execID, &containers.ExecStartOptions{})
 	if err != nil {
 		return fmt.Errorf("attaching to created exec: %w", err)
 	}
@@ -307,10 +362,14 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 
 	_, err = stdcopy.StdCopy(stdout, stderr, logs)
 	if err != nil {
+		// an aborted run cuts the stream, which isn't worth reporting
+		if ctx.Err() != nil {
+			return context.Cause(ctx)
+		}
 		log.Errorf("Error demultiplexing logs: %v", err)
 	}
 
-	inspect, err := containers.ExecInspect(e.client, execID, &containers.ExecInspectOptions{})
+	inspect, err := containers.ExecInspect(ctx, execID, &containers.ExecInspectOptions{})
 	if err != nil {
 		return fmt.Errorf("inspecting exec: %w", err)
 	}
@@ -323,36 +382,20 @@ func (e *podmanExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	return nil
 }
 
-// Cleanup stops and removes the temporary Podman container created during Setup.
-func (e *podmanExecutor) Cleanup(_ context.Context) error {
+// Cleanup kills and removes the temporary Podman container created during Setup.
+// It's killed rather than stopped as it's only idling once the tools exec'd into it have finished,
+// and a graceful stop waits out its timeout for any image whose PID 1 ignores SIGTERM, like our /bin/sh.
+func (e *podmanExecutor) Cleanup(ctx context.Context) error {
 
 	// TODO cleanup based on labels (project, language)
 
-	if e.execCancel != nil {
-		defer e.execCancel()
-	}
-
 	if e.id != "" {
-		var timeoutSeconds uint = 1
-
-		d := log.With("podmanId", e.id)
-
-		d.Debug("stopping container")
-		stopOptions := containers.StopOptions{
-			Timeout: &timeoutSeconds,
-			Ignore:  new(false),
-		}
-		err := containers.Stop(e.client, e.id, &stopOptions)
-		if err != nil {
-			return err
-		}
-
-		d.Debug("removing container")
+		log.With("podmanId", e.id).Debug("removing container")
 		removeOptions := containers.RemoveOptions{
-			Timeout: &timeoutSeconds,
+			Force:   new(true),
+			Timeout: new(uint(0)),
 		}
-		_, err = containers.Remove(e.client, e.id, &removeOptions)
-		if err != nil {
+		if _, err := containers.Remove(e.with(ctx), e.id, &removeOptions); err != nil {
 			return err
 		}
 		e.id = ""
@@ -388,12 +431,4 @@ func attachedExecStart(ctx context.Context, sessionID string, options *container
 	}
 
 	return resp.Body, err
-}
-
-func isPodmanRootless(ctx context.Context) (bool, error) {
-	info, err := system.Info(ctx, &system.InfoOptions{})
-	if err != nil {
-		return false, fmt.Errorf("getting podman info: %w", err)
-	}
-	return info.Host.Security.Rootless, nil
 }

@@ -69,7 +69,7 @@ func TestLint_Cleanup(t *testing.T) {
 func TestLint_Run(t *testing.T) {
 	l := &LintCli{Exec: executor.Instance{Bin: "testtool"}, executor: executor.NewNoop()} // TODO test with no executor setup
 
-	report := l.Run("test.txt")
+	report := l.Run(t.Context(), "test.txt")
 	assert.Equal(t, "testtool test.txt", report.Target)
 	assert.NoError(t, report.Err)
 	assert.Equal(t, "stdout", report.StdOut.(*bytes.Buffer).String())

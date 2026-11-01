@@ -19,7 +19,7 @@ func (ne *noopExecutor) Setup(_ context.Context, _ Instance) error {
 }
 
 // Exec writes sample output to stdout and stderr and returns nil.
-func (ne *noopExecutor) Exec(_ string, stdout io.Writer, stderr io.Writer) error {
+func (ne *noopExecutor) Exec(_ context.Context, stdout io.Writer, stderr io.Writer, _ ...string) error {
 	_, err := stdout.Write([]byte("stdout"))
 	if err != nil {
 		return err

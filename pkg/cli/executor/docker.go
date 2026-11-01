@@ -19,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/tyhal/crie/pkg/linter"
 )
@@ -26,11 +27,9 @@ import (
 // dockerExecutor runs CLI tools inside a Docker container.
 type dockerExecutor struct {
 	Instance
-	image      string
-	client     *client.Client
-	execCtx    context.Context
-	execCancel context.CancelFunc
-	id         string
+	image  string
+	client *client.Client
+	id     string
 }
 
 // NewDocker creates an executor using containers managed by the docker client.
@@ -40,20 +39,17 @@ func NewDocker(image string) Executor {
 	}
 }
 
-var dockerInstalled = false
 var dockerImagePullLocks sync.Map
+
+// dockerSocket caches the socket check, it's called by every linter's setup
+var dockerSocket = sync.OnceValue(func() error {
+	_, err := os.Stat("/var/run/docker.sock")
+	return err
+})
 
 // WillDocker checks whether Docker is available on the host (via the socket).
 func WillDocker() error {
-	if dockerInstalled {
-		return nil
-	}
-	_, err := os.Stat("/var/run/docker.sock")
-	if err != nil {
-		return err
-	}
-	dockerInstalled = true
-	return nil
+	return dockerSocket()
 }
 
 // Setup creates and starts a disposable Docker container for executing commands.
@@ -62,7 +58,8 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 
 	// Add our clientDocker
 	{
-		c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+		c, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation(),
+			client.WithTraceOptions(otelhttp.WithSpanNameFormatter(apiSpanName)))
 		if err != nil {
 			return fmt.Errorf("failed to create docker client: %w", err)
 		}
@@ -143,7 +140,6 @@ func (e *dockerExecutor) Setup(ctx context.Context, i Instance) error {
 	}
 	e.id = resp.ID
 
-	e.execCtx, e.execCancel = context.WithCancel(ctx)
 	return e.client.ContainerStart(ctx, resp.ID, container.StartOptions{})
 }
 
@@ -175,25 +171,32 @@ func (e *dockerExecutor) pull(ctx context.Context) error {
 }
 
 // Exec runs the configured command inside the prepared Docker container.
-func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer) error {
-	targetFile := ToLinuxPath(filePath)
-	wdContainer, err := containerWorkdir(filePath, e.ChDir, e.NoFileArg)
+func (e *dockerExecutor) Exec(ctx context.Context, stdout io.Writer, stderr io.Writer, targets ...string) error {
+	if len(targets) == 0 {
+		return ErrNoTargets
+	}
+	targetFiles := make([]string, len(targets))
+	for i, target := range targets {
+		targetFiles[i] = ToLinuxPath(target)
+	}
+	wdContainer, err := containerWorkdir(targets[0], e.ChDir, e.NoFileArg)
 	if err != nil {
 		return err
 	}
 
-	cmd := append([]string{e.Bin}, e.buildParams(targetFile)...)
+	cmd := append([]string{e.Bin}, e.buildParams(targetFiles...)...)
 
 	log.Debug(cmd)
 	config := container.ExecOptions{
 		Cmd:          cmd,
 		User:         fmt.Sprintf("%d", os.Getuid()),
 		WorkingDir:   wdContainer,
+		Env:          traceEnv(ctx),
 		AttachStderr: true,
 		AttachStdout: true,
 		Tty:          false,
 	}
-	execResp, err := e.client.ContainerExecCreate(e.execCtx, e.id, config)
+	execResp, err := e.client.ContainerExecCreate(ctx, e.id, config)
 	if err != nil {
 		return err
 	}
@@ -202,7 +205,7 @@ func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 		Detach: false,
 		Tty:    false,
 	}
-	attach, err := e.client.ContainerExecAttach(e.execCtx, execResp.ID, startConfig)
+	attach, err := e.client.ContainerExecAttach(ctx, execResp.ID, startConfig)
 	if err != nil {
 		return err
 	}
@@ -210,10 +213,14 @@ func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 
 	_, err = stdcopy.StdCopy(stdout, stderr, attach.Reader)
 	if err != nil {
+		// an aborted run cuts the stream, which isn't worth reporting
+		if ctx.Err() != nil {
+			return context.Cause(ctx)
+		}
 		log.Errorf("Error demultiplexing logs: %v", err)
 	}
 
-	inspect, err := e.client.ContainerExecInspect(e.execCtx, execResp.ID)
+	inspect, err := e.client.ContainerExecInspect(ctx, execResp.ID)
 	if err != nil {
 		return err
 	}
@@ -226,22 +233,14 @@ func (e *dockerExecutor) Exec(filePath string, stdout io.Writer, stderr io.Write
 	return nil
 }
 
-// Cleanup stops and removes the temporary Docker container created during Setup.
+// Cleanup kills and removes the temporary Docker container created during Setup.
+// It's killed rather than stopped as it's only idling once the tools exec'd into it have finished,
+// and a graceful stop waits out its timeout for any image whose PID 1 ignores SIGTERM, like our /bin/sh.
 func (e *dockerExecutor) Cleanup(ctx context.Context) error {
 
-	if e.execCancel != nil {
-		defer e.execCancel()
-	}
-
 	if e.id != "" {
-		d := log.With("dockerId", e.id)
-
-		d.Debug("stopping container")
-		if err := e.client.ContainerStop(ctx, e.id, container.StopOptions{Timeout: new(1)}); err != nil {
-			return err
-		}
-		d.Debug("removing container")
-		if err := e.client.ContainerRemove(ctx, e.id, container.RemoveOptions{}); err != nil {
+		log.With("dockerId", e.id).Debug("removing container")
+		if err := e.client.ContainerRemove(ctx, e.id, container.RemoveOptions{Force: true}); err != nil {
 			return err
 		}
 		e.id = ""

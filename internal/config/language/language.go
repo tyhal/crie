@@ -2,9 +2,11 @@ package language
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/tyhal/crie/internal/runner"
 	"github.com/tyhal/crie/pkg/cli"
+	"github.com/tyhal/crie/pkg/linter"
 )
 
 // Language is used to map customer yaml decoders for implementations of Crie linters
@@ -23,6 +25,16 @@ func (l Language) ToRunFormat() (runner.LinterMatch, error) {
 	if l.Fmt.Linter != nil {
 		if cliFmt, ok := l.Fmt.Linter.(*cli.LintCli); ok {
 			cliFmt.Exec.WillWrite = true
+		}
+	}
+	for _, lint := range []linter.Linter{l.Fmt.Linter, l.Chk.Linter} {
+		if cliLint, ok := lint.(*cli.LintCli); ok {
+			if err := cliLint.Exec.Validate(); err != nil {
+				return runner.LinterMatch{}, fmt.Errorf("%s: %w", cliLint.Name(), err)
+			}
+		}
+		if batch, ok := lint.(linter.BatchLinter); ok && batch.Batched() && l.GroupBy != "" {
+			return runner.LinterMatch{}, fmt.Errorf("%s: batch can't be combined with group_by", batch.Name())
 		}
 	}
 	return runner.LinterMatch{
