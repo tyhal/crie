@@ -23,7 +23,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/tyhal/x v0.0.0-20261101164518-c7bb19a759dd
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
 	go.opentelemetry.io/contrib/propagators/autoprop v0.72.0
 	go.opentelemetry.io/contrib/propagators/envcar v0.72.0
 	go.opentelemetry.io/otel v1.47.0

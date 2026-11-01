@@ -399,8 +399,6 @@ github.com/tklauser/numcpus v0.11.0 h1:nSTwhKH5e1dMNsCdVBukSZrURJRoHbSEQjdEbY+9R
 github.com/tklauser/numcpus v0.11.0/go.mod h1:z+LwcLq54uWZTX0u/bGobaV34u6V7KNlTZejzM6/3MQ=
 github.com/tyhal/x v0.0.0-20261101164518-c7bb19a759dd h1:oWzwut6vdjFFkAM8++5HhJPHSfy9Nua/oogntLKML4s=
 github.com/tyhal/x v0.0.0-20261101164518-c7bb19a759dd/go.mod h1:Q485we+O0CU4/hyxarkecXU9bugAb9KgbsNRk27e1mk=
-github.com/tyhal/x v0.0.0-20261101164518-c7bb19a759dd h1:oWzwut6vdjFFkAM8++5HhJPHSfy9Nua/oogntLKML4s=
-github.com/tyhal/x v0.0.0-20261101164518-c7bb19a759dd/go.mod h1:Q485we+O0CU4/hyxarkecXU9bugAb9KgbsNRk27e1mk=
 github.com/ulikunitz/xz v0.5.16 h1:ld6NyySjx5lowVKwJvMRLnW5nxKX/xnpSiFYZ/Lxur0=
 github.com/ulikunitz/xz v0.5.16/go.mod h1:H9Rt/W6/Qj27PGauhQc6nfCDy7vHpzsOThBSaYDoEhw=
 github.com/vbatts/tar-split v0.12.3 h1:Cd46rkGXI3Td4yrVNwU8ripbxFaQbmesqhjBUUYAJSw=
@@ -431,6 +429,8 @@ go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 h1:3g7B90UzBltIDKq1/5mrTGxTnOFDV0ICOhLoxiZ8jlg=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0/go.mod h1:Ef8SuTh59BT7+ofpDxN9z+yOlc4t2GjLmKDgYNJL/NU=
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 h1:LxwW/9ctSCv+QkE/cLR7M91ZIkXNMqJtEMi1vCw9U8s=
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0/go.mod h1:tOsftB4SslBwwErVEPaenU2RpThXWPIU8DoJHEC4dyw=
 go.opentelemetry.io/contrib/propagators/autoprop v0.72.0 h1:/Kv8DucXan87cGRpa3NeZtlk26kFahF2YrL6Sz3GFsI=
 go.opentelemetry.io/contrib/propagators/autoprop v0.72.0/go.mod h1:Qttdialu54uM051nRjcHgqPshuTi2YGZb/rruiNJ8zo=
 go.opentelemetry.io/contrib/propagators/aws v1.47.0 h1:n/2x/vQki1ojD7R2jYHdnNdI74Yx/OFdY4YXFFesm8M=
