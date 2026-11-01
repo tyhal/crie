@@ -27,6 +27,7 @@ jobs:
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
         run: |
+          brew trust --formula tyhal/tap/crie
           brew bump-formula-pr \
             --url="https://github.com/tyhal/crie/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz" \
             --sha256="${SHA256}" \

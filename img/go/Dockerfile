@@ -10,7 +10,7 @@ RUN go install github.com/yoheimuta/protolint/cmd/protolint@v0.56.4
 # uses go layer for go fmt
 FROM go_layer AS run_layer
 
-RUN adduser -D standards
+RUN adduser -D -u 1000 standards
 
 # [ Golang ]
 COPY --from=revive_layer /go/bin/revive /bin/revive
@@ -20,4 +20,4 @@ ENV REVIVE_CONFIG_PATH=/etc/revive/revive.toml
 COPY --chmod=644 conf/revive/revive.toml $REVIVE_CONFIG_PATH
 RUN chmod -R 755 /etc/revive
 
-USER standards
+USER 1000
