@@ -156,14 +156,13 @@ func getPodmanMachineSocket() (podmanSocket, error) {
 		return podmanSocket{uri: "unix://" + sock.Path, configured: true}, nil
 	}
 
-	// no machine, so expect a native rootless podman
+	// no machine, so expect a native rootless podman. It's not counted as configured even if its socket file exists,
+	// as stopping podman.socket leaves the file behind (systemd doesn't remove it), which shouldn't stop a fallback to docker
 	currentUser, err := user.Current()
 	if err != nil {
 		return podmanSocket{}, err
 	}
-	sock := fmt.Sprintf("/run/user/%s/podman/podman.sock", currentUser.Uid)
-	_, statErr := os.Stat(sock)
-	return podmanSocket{uri: "unix://" + sock, configured: statErr == nil}, nil
+	return podmanSocket{uri: fmt.Sprintf("unix:///run/user/%s/podman/podman.sock", currentUser.Uid)}, nil
 }
 
 // Setup creates and starts a disposable Podman container for executing commands.

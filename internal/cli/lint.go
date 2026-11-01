@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -32,6 +33,9 @@ func setCrie(_ *cobra.Command, _ []string) error {
 	if len(projectConfig.Ignore) > 0 {
 		ignore = regexp.MustCompile(strings.Join(projectConfig.Ignore, "|"))
 	}
+
+	// GitHub Actions sets this for every step
+	projectConfig.Lint.GitHubAnnotations = os.Getenv("GITHUB_ACTIONS") == "true"
 
 	crieRun = runner.RunConfiguration{Options: projectConfig.Lint, Ignore: ignore, NamedMatches: crieLanguages}
 

@@ -21,7 +21,6 @@ func TestPodman_SocketGet(t *testing.T) {
 
 	sock, err := getPodmanMachineSocket()
 	assert.NoError(t, err)
-	assert.True(t, sock.configured)
 	if _, found := os.LookupEnv("CONTAINER_HOST"); !found {
 		assert.NotEmpty(t, sock.uri)
 	}

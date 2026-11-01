@@ -48,8 +48,7 @@ func (s *RunConfiguration) runLinters(ctx context.Context, lintType LintType, fi
 	} else {
 		r = linter.NewStandardReporter(s.Options.Passes)
 	}
-	// GitHub Actions sets this for every step, its workflow commands annotate findings on pull requests
-	if os.Getenv("GITHUB_ACTIONS") == "true" {
+	if s.Options.GitHubAnnotations {
 		r = linter.NewGitHubReporter(r, os.Stdout, githubDir())
 	}
 
