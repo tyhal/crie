@@ -12,6 +12,8 @@ type Options struct {
 	GitDiff       bool   `json:"gitDiff,omitzero" yaml:"gitDiff"`
 	Only          string `json:"only,omitzero" yaml:"only"`
 	StrictLogging bool   `json:"-" yaml:"-"`
+	// GitHubAnnotations writes findings as GitHub Actions workflow commands, which annotate them on pull requests
+	GitHubAnnotations bool `json:"-" yaml:"-"`
 }
 
 // RunConfiguration is the entire working set of information to process a project

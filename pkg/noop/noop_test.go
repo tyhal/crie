@@ -30,7 +30,7 @@ func TestLint_Cleanup(t *testing.T) {
 func TestLint_Run(t *testing.T) {
 	l := &LintNoop{}
 	assert.NoError(t, l.Setup(t.Context()))
-	report := l.Run("test.txt")
+	report := l.Run(t.Context(), "test.txt")
 	assert.Equal(t, "test.txt", report.Target)
 	assert.NoError(t, report.Err)
 	assert.Nil(t, report.StdOut)
@@ -45,7 +45,7 @@ func TestLint_WithSleep(t *testing.T) {
 		synctest.Wait()
 		time.Sleep(100 * time.Nanosecond)
 
-		go l.Run("test.txt")
+		go l.Run(t.Context(), "test.txt")
 		synctest.Wait()
 		time.Sleep(200 * time.Nanosecond)
 
@@ -60,7 +60,7 @@ func TestLint_WithErr(t *testing.T) {
 		l := WithErr(errors.New("run error"), errors.New("run error"))
 		err := l.Setup(t.Context())
 		assert.Error(t, err)
-		rep := l.Run("test.txt")
+		rep := l.Run(t.Context(), "test.txt")
 		assert.Error(t, rep.Err)
 	})
 }
@@ -71,6 +71,6 @@ func TestLint_Ordering(t *testing.T) {
 	assert.ErrorIs(t, err, ErrMissedSetup)
 
 	l = &LintNoop{}
-	rep := l.Run("test.txt")
+	rep := l.Run(t.Context(), "test.txt")
 	assert.ErrorIs(t, rep.Err, ErrMissedSetup)
 }

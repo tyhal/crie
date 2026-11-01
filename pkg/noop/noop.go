@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"runtime/trace"
+	"sync/atomic"
 	"time"
 
 	"github.com/tyhal/crie/pkg/linter"
@@ -20,8 +21,7 @@ type LintNoop struct {
 	runErr        error
 	lintDuration  time.Duration
 	setupDuration time.Duration
-	execCtx       context.Context
-	execCancel    context.CancelFunc
+	setup         atomic.Bool
 }
 
 // WithErr creates a new LintNoop with the given errors
@@ -55,16 +55,15 @@ func (l *LintNoop) Setup(ctx context.Context) error {
 		defer trace.StartRegion(ctx, "Setup").End()
 		time.Sleep(l.setupDuration)
 	}
-	l.execCtx, l.execCancel = context.WithCancel(ctx)
+	l.setup.Store(true)
 	return l.setupErr
 }
 
 // Cleanup removes any additional resources created in the process
 func (l *LintNoop) Cleanup(ctx context.Context) error {
-	if l.execCancel == nil {
+	if !l.setup.Load() {
 		return ErrMissedSetup
 	}
-	defer l.execCancel()
 	if l.setupDuration > 0 {
 		defer trace.StartRegion(ctx, "Cleanup").End()
 		time.Sleep(l.setupDuration)
@@ -73,13 +72,13 @@ func (l *LintNoop) Cleanup(ctx context.Context) error {
 }
 
 // Run will just return the configured error as a report
-func (l *LintNoop) Run(filepath string) linter.Report {
-	if l.execCancel == nil {
-		return linter.Report{Target: filepath, Err: ErrMissedSetup, StdOut: nil, StdErr: nil}
+func (l *LintNoop) Run(ctx context.Context, filepath string) linter.Report {
+	if !l.setup.Load() {
+		return linter.Report{Target: filepath, File: filepath, Err: ErrMissedSetup, StdOut: nil, StdErr: nil}
 	}
 	if l.lintDuration > 0 {
-		defer trace.StartRegion(l.execCtx, "Run "+filepath).End()
+		defer trace.StartRegion(ctx, "Run "+filepath).End()
 		time.Sleep(l.lintDuration)
 	}
-	return linter.Report{Target: filepath, Err: l.runErr, StdOut: nil, StdErr: nil}
+	return linter.Report{Target: filepath, File: filepath, Err: l.runErr, StdOut: nil, StdErr: nil}
 }

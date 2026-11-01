@@ -1,6 +1,8 @@
 package executor
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,9 +19,17 @@ func TestPodman_SocketGet(t *testing.T) {
 		t.Skip()
 	}
 
-	socket, err := getPodmanMachineSocket()
+	sock, err := getPodmanMachineSocket()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, socket)
+	if _, found := os.LookupEnv("CONTAINER_HOST"); !found {
+		assert.NotEmpty(t, sock.uri)
+	}
+}
+
+func TestPodman_ConfiguredButUnreachable(t *testing.T) {
+	t.Setenv("CONTAINER_HOST", "unix://"+filepath.Join(t.TempDir(), "missing.sock"))
+	_, err := probePodman(t.Context())
+	assert.ErrorIs(t, err, ErrRuntimeUnavailable)
 }
 
 func TestPodmanExecutor_Integration(t *testing.T) {

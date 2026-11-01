@@ -8,6 +8,7 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	log "charm.land/log/v2"
@@ -272,6 +273,54 @@ func TestRunConfiguration_Run(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+		})
+	}
+}
+
+func TestGithubDir(t *testing.T) {
+	ws := t.TempDir()
+	sub := path.Join(ws, "sub", "dir")
+	require.NoError(t, os.MkdirAll(sub, 0o755))
+
+	t.Setenv("GITHUB_WORKSPACE", ws)
+	t.Chdir(ws)
+	assert.Empty(t, githubDir(), "at the workspace root paths are already relative to it")
+	t.Chdir(sub)
+	assert.Equal(t, "sub/dir", githubDir())
+	t.Setenv("GITHUB_WORKSPACE", sub+"/elsewhere")
+	assert.Empty(t, githubDir(), "outside the workspace there's nothing sensible to prefix")
+}
+
+func TestRunConfiguration_Run_githubAnnotations(t *testing.T) {
+	// set for every step in GitHub Actions, including crie's own tests, so it mustn't switch annotations on by itself
+	t.Setenv("GITHUB_ACTIONS", "true")
+
+	for _, annotate := range []bool{false, true} {
+		t.Run(fmt.Sprintf("annotate=%v", annotate), func(t *testing.T) {
+			dir := t.TempDir()
+			t.Chdir(dir)
+			require.NoError(t, os.WriteFile(path.Join(dir, "test.go"), nil, 0o600))
+
+			config := &RunConfiguration{
+				Options: Options{GitHubAnnotations: annotate, Continue: true},
+				NamedMatches: NamedMatches{
+					"go": {Chk: noop.WithErr(nil, errors.New("run err")), FileMatch: regexp.MustCompile(`\.go$`)},
+				},
+			}
+
+			// workflow commands are read from stdout
+			stdout := os.Stdout
+			r, w, err := os.Pipe()
+			require.NoError(t, err)
+			os.Stdout = w
+			runErr := config.Run(t.Context(), LintTypeChk)
+			os.Stdout = stdout
+			require.NoError(t, w.Close())
+			out, err := io.ReadAll(r)
+			require.NoError(t, err)
+
+			assert.Error(t, runErr)
+			assert.Equal(t, annotate, strings.Contains(string(out), "::error file=test.go::"), string(out))
 		})
 	}
 }

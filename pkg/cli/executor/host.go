@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"slices"
 
 	"github.com/creack/pty"
 	"golang.org/x/term"
@@ -15,8 +17,7 @@ import (
 // hostExecutor runs CLI tools directly on the host operating system.
 type hostExecutor struct {
 	Instance
-	execCtx    context.Context
-	execCancel context.CancelFunc
+	env []string
 }
 
 // NewHost creates an executor that uses direct exec calls
@@ -31,21 +32,40 @@ func WillHost(bin string) error {
 }
 
 // Setup performs any required initialization for host execution.
-func (e *hostExecutor) Setup(ctx context.Context, i Instance) error {
+func (e *hostExecutor) Setup(_ context.Context, i Instance) error {
 	e.Instance = i
-	e.execCtx, e.execCancel = context.WithCancel(ctx)
+	e.env = os.Environ()
 	return nil
 }
 
-// Exec runs the configured CLI tool on the host against the provided file.
-func (e *hostExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer) error {
-	dir, err := hostWorkdir(filePath, e.ChDir, e.NoFileArg)
+// command builds the exec.Cmd for a single run of the tool in dir
+func (e *hostExecutor) command(ctx context.Context, dir string, targets []string) *exec.Cmd {
+	c := exec.CommandContext(ctx, e.Bin, e.buildParams(targets...)...)
+	c.Dir = dir
+	// clipped so concurrent appends never share a backing array
+	c.Env = slices.Clip(e.env)
+	// appended entries win over any inherited TRACEPARENT from crie's own parent
+	c.Env = append(c.Env, traceEnv(ctx)...)
+	// exec only sets PWD implicitly when Env is nil, so mirror that here
+	if pwd, err := filepath.Abs(dir); err == nil {
+		c.Env = append(c.Env, "PWD="+pwd)
+	}
+	return c
+}
+
+// Exec runs the configured CLI tool on the host against the provided files.
+func (e *hostExecutor) Exec(ctx context.Context, stdout io.Writer, stderr io.Writer, targets ...string) error {
+	if len(targets) == 0 {
+		return ErrNoTargets
+	}
+	dir, err := hostWorkdir(targets[0], e.ChDir, e.NoFileArg)
 	if err != nil {
 		return err
 	}
-	if term.IsTerminal(int(os.Stdout.Fd())) {
-		c := exec.CommandContext(e.execCtx, e.Bin, e.buildParams(filePath)...)
-		c.Dir = dir
+	// batch output is split per file by its line prefixes, so it's kept plain rather than coloured by a tty
+	// not for many files, a pty's colour and \r\n would get in the way of attributing their output
+	if len(targets) == 1 && term.IsTerminal(int(os.Stdout.Fd())) {
+		c := e.command(ctx, dir, targets)
 		if ptm, err := pty.Start(c); err == nil {
 			defer func() { _ = ptm.Close() }()
 			_, _ = io.Copy(stderr, ptm)
@@ -53,8 +73,7 @@ func (e *hostExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer)
 		}
 	}
 
-	c := exec.CommandContext(e.execCtx, e.Bin, e.buildParams(filePath)...)
-	c.Dir = dir
+	c := e.command(ctx, dir, targets)
 	c.Stdout = stdout
 	c.Stderr = stderr
 	return linter.Result(c.Run())
@@ -62,8 +81,5 @@ func (e *hostExecutor) Exec(filePath string, stdout io.Writer, stderr io.Writer)
 
 // Cleanup releases any resources allocated during host execution setup.
 func (e *hostExecutor) Cleanup(_ context.Context) error {
-	if e.execCancel != nil {
-		defer e.execCancel()
-	}
 	return nil
 }

@@ -86,7 +86,7 @@ its a test to see what happens when you run dockfmt on a file that isn't a docke
 			err := os.WriteFile(testFilePath, []byte(tt.input), 0644)
 			assert.NoError(t, err)
 
-			report := tt.linter.Run(testFilePath)
+			report := tt.linter.Run(t.Context(), testFilePath)
 
 			assert.Equal(t, testFilePath, report.Target)
 			if tt.error {

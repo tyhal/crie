@@ -7,11 +7,13 @@ languages:
       exec:
         bin: black
         start: ["--quiet"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true
     chk:
       exec:
         bin: pylint
+        batch: true
       type: cli
       img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true
@@ -20,12 +22,14 @@ languages:
     fmt:
       exec:
         bin: protolint
+        batch: true
       type: cli
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
     chk:
       exec:
         bin: protolint
+        batch: true
       type: cli
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
@@ -38,8 +42,10 @@ languages:
       type: cli
       exec:
         bin: shellcheck
-        chdir: true
-        start: ["-x", "--shell=bash", "-Calways"]
+        # SCRIPTDIR follows sources relative to each script, so no chdir is needed to batch
+        start: ["-x", "--source-path=SCRIPTDIR", "--shell=bash", "-Calways"]
+        batch: true
+        batch_start: ["--format=gcc"]
       img: "docker.io/koalaman/shellcheck-alpine:stable"
   sh:
     match: ['\.sh$', '/script/[^.]*$', '^script/[^.]*$']
@@ -50,8 +56,10 @@ languages:
       type: cli
       exec:
         bin: shellcheck
-        chdir: true
-        start: ["-x", "--shell=sh", "-Calways"]
+        # SCRIPTDIR follows sources relative to each script, so no chdir is needed to batch
+        start: ["-x", "--source-path=SCRIPTDIR", "--shell=sh", "-Calways"]
+        batch: true
+        batch_start: ["--format=gcc"]
       img: "docker.io/koalaman/shellcheck-alpine:stable"
   docker:
     match: ['(?i).*(Contain|Docker)file.*']
@@ -60,12 +68,16 @@ languages:
       exec:
         bin: hadolint
         start: ["--ignore", "DL3007", "--ignore", "DL3018", "--ignore", "DL3016", "--ignore", "DL4006"]
+        batch: true
       img: "docker.io/hadolint/hadolint:latest-alpine"
   yml:
     match: ['\.ya?ml$']
     chk:
       exec:
         bin: yamllint
+        batch: true
+        # only findings that fail a file, so a failed batch only names the files to rerun
+        batch_start: ["--format", "parsable", "--no-warnings"]
       type: cli
       img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true
@@ -73,6 +85,7 @@ languages:
       type: cli
       exec:
         bin: yamlfmt
+        batch: true
       img: "ghcr.io/google/yamlfmt:latest"
   terraform:
     match: ['\.tf$']
@@ -96,6 +109,7 @@ languages:
       exec:
         bin: npx
         start: ["prettier", "--write"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
   javascript:
@@ -105,12 +119,14 @@ languages:
       exec:
         bin: standard
         start: ["--fix"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: standard
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
   golang:
@@ -120,6 +136,7 @@ languages:
       exec:
         bin: gofmt
         start: ["-l", "-w"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
     chk:
@@ -127,6 +144,7 @@ languages:
       exec:
         bin: revive
         start: ["-config", "/etc/revive/revive.toml", "-set_exit_status"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-go"
       tag_crie_version: true
   markdown:
@@ -137,12 +155,16 @@ languages:
         bin: remark
         start: ["--use", "remark-preset-lint-recommended"]
         end: ["-o"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-npm"
       tag_crie_version: true
     chk:
       type: cli
       exec:
         bin: vale
+        batch: true
+        # only findings that fail a file, so a failed batch only names the files to rerun
+        batch_start: ["--output=line", "--minAlertLevel=error"]
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   asciidoctor:
@@ -151,6 +173,9 @@ languages:
       type: cli
       exec:
         bin: vale
+        batch: true
+        # only findings that fail a file, so a failed batch only names the files to rerun
+        batch_start: ["--output=line", "--minAlertLevel=error"]
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   json:
@@ -176,6 +201,7 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
     chk:
@@ -183,6 +209,8 @@ languages:
       exec:
         bin: cppcheck
         start: ["--enable=all", "--language=c++", "--suppress=operatorEqRetRefThis", "--suppress=operatorEq", "--suppress=noExplicitConstructor", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=noConstructor", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
+        batch: true
+        batch_start: ["--template=gcc"]
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   cppheaders:
@@ -192,6 +220,7 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   c:
@@ -201,6 +230,7 @@ languages:
       exec:
         bin: clang-format
         start: ["-style=file", "-i"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
     chk:
@@ -208,6 +238,8 @@ languages:
       exec:
         bin: cppcheck
         start: ["--enable=all", "--language=c", "--suppress=unRegexedSuppression", "--suppress=missingInclude", "--suppress=unusedFunction", "--suppress=unmatchedSuppression", "--suppress=missingIncludeSystem", "--inline-suppr", "--error-exitcode=1"]
+        batch: true
+        batch_start: ["--template=gcc"]
       img: "ghcr.io/tyhal/crie-dep-apk"
       tag_crie_version: true
   cmake:
@@ -217,5 +249,6 @@ languages:
       exec:
         bin: cmakelint
         start: ["--config=/etc/.config/cmakelintrc"]
+        batch: true
       img: "ghcr.io/tyhal/crie-dep-pip"
       tag_crie_version: true

@@ -8,6 +8,7 @@ import (
 	log "charm.land/log/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	oteltrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/tyhal/crie/internal/config/project"
 )
@@ -43,6 +44,7 @@ format all python files
 	crie brings together a vast collection of formatters and linters
 	to create a handy tool that can sanity check any codebase.`,
 	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+		oteltrace.SpanFromContext(cmd.Context()).SetName(cmd.CommandPath())
 
 		viper.SetConfigFile(projectConfigPath)
 		viper.SetConfigType("yml")

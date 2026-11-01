@@ -36,7 +36,7 @@ func (l *LintShfmt) Cleanup(_ context.Context) error {
 }
 
 // Run shfmt -w
-func (l *LintShfmt) Run(filepath string) linter.Report {
+func (l *LintShfmt) Run(_ context.Context, filepath string) linter.Report {
 	var outB, errB bytes.Buffer
 
 	currFmt := shfmt{
@@ -55,7 +55,7 @@ func (l *LintShfmt) Run(filepath string) linter.Report {
 		lang = syntax.LangMirBSDKorn
 	default:
 		err := fmt.Errorf("unknown language variant: %s", l.Language)
-		return linter.Report{Target: filepath, Err: err, StdOut: &outB, StdErr: &errB}
+		return linter.Report{Target: filepath, File: filepath, Err: err, StdOut: &outB, StdErr: &errB}
 	}
 
 	syntax.Variant(lang)(currFmt.parser)
@@ -66,5 +66,5 @@ func (l *LintShfmt) Run(filepath string) linter.Report {
 	syntax.FunctionNextLine(false)(currFmt.printer)
 
 	err := currFmt.formatPath(filepath, true)
-	return linter.Report{Target: filepath, Err: linter.Result(err), StdOut: &outB, StdErr: &errB}
+	return linter.Report{Target: filepath, File: filepath, Err: linter.Result(err), StdOut: &outB, StdErr: &errB}
 }

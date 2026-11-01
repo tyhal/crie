@@ -109,6 +109,20 @@
             "no_file_arg": {
               "type": "boolean",
               "description": "if true the target path is not inserted into command arguments; combine with chdir to use the target as the working directory"
+            },
+            "batch": {
+              "type": "boolean",
+              "description": "if true the tool is given many file paths in one run, it must print each finding on a line led by the file path and a colon (e.g. path:line:col: msg) so results can be reported per file; can't be combined with chdir or no_file_arg"
+            },
+            "batch_start": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "string"
+              },
+              "description": "parameters put after start only when a run covers many files, e.g. an output format leading each finding with its file path, so single file runs keep the tool's usual output"
             }
           },
           "description": "settings for the command to run",

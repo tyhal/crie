@@ -4,6 +4,7 @@ package cli
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"runtime/trace"
 
@@ -26,7 +27,7 @@ type LintCli struct {
 	executor       executor.Executor
 }
 
-var _ linter.Linter = (*LintCli)(nil)
+var _ linter.BatchLinter = (*LintCli)(nil)
 
 func (e *LintCli) isContainer() bool {
 	return e.Img != ""
@@ -81,6 +82,9 @@ func (e *LintCli) Setup(ctx context.Context) error {
 
 	for _, fn := range picker {
 		xctr, err := fn()
+		if errors.Is(err, executor.ErrRuntimeUnavailable) {
+			return err
+		}
 		if err != nil {
 			errs = multierror.Append(errs, err)
 		} else if xctr != nil {
@@ -117,10 +121,11 @@ func (e *LintCli) Cleanup(ctx context.Context) error {
 }
 
 // Run does the work required to lint the given filepath
-func (e *LintCli) Run(filePath string) linter.Report {
+func (e *LintCli) Run(ctx context.Context, filePath string) linter.Report {
 	var outB, errB bytes.Buffer
 
-	err := e.executor.Exec(filePath, &outB, &errB)
+	err := e.executor.Exec(ctx, &outB, &errB, filePath)
+	found := e.findings([]string{filePath}, outB.Bytes(), errB.Bytes())
 
-	return linter.Report{Target: e.Name() + " " + filePath, Err: err, StdOut: &outB, StdErr: &errB}
+	return linter.Report{Target: e.Name() + " " + filePath, File: filePath, Err: err, StdOut: &outB, StdErr: &errB, Findings: found[0]}
 }
