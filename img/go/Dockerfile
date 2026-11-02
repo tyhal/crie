@@ -1,9 +1,9 @@
-FROM golang:1.26-alpine3.22 AS go_layer
+FROM golang:1.27-alpine3.23 AS go_layer
 RUN apk --no-cache add git wget
 ENV CGO_ENABLED=0
 
 FROM go_layer AS revive_layer
-RUN go install github.com/mgechev/revive@v1.14.0
+RUN go install github.com/mgechev/revive@v1.17.1
 FROM go_layer AS protolint_layer
 RUN go install github.com/yoheimuta/protolint/cmd/protolint@v0.56.4
 
