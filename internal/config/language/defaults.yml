@@ -101,7 +101,7 @@ languages:
         bin: tflint
         start: ["--filter"]
         chdir: true
-      img: "ghcr.io/terraform-linters/tflint:v0.65.0"
+      img: "ghcr.io/terraform-linters/tflint:v0.66.0"
   typescript:
     match: [".tsx$", ".ts$"]
     fmt:
