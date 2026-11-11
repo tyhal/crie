@@ -2,7 +2,7 @@ module github.com/tyhal/crie
 
 go 1.26.7
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 require (
 	charm.land/fang/v2 v2.0.1
