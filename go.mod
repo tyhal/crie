@@ -6,7 +6,7 @@ toolchain go1.27.4
 
 require (
 	charm.land/fang/v2 v2.0.1
-	charm.land/lipgloss/v2 v2.1.0
+	charm.land/lipgloss/v2 v2.1.1
 	charm.land/log/v2 v2.0.1
 	github.com/containerd/platforms v1.0.0-rc.5
 	github.com/creack/pty v1.1.24
