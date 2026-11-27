@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@9adaf5f919d8bcadd00012733acf8d50319d25e3 # main
+        uses: Homebrew/actions/setup-homebrew@70b5b34b56f36e0f19ef154095b3c0cbb03089a3 # main
       - name: Configure git
         run: |
           git config --global user.name "github-actions[bot]"
